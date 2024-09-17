@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('image_url', 255);
             $table->dateTime('upload_date');
             $table->string('location', 255)->nullable();
+            $table->string('photo_status', 50);
             $table->string('privacy_status', 50);
 
             $table->unsignedBigInteger('user_id');

@@ -43,8 +43,6 @@ class PhotoSeeder extends Seeder
             $locations = ['Mountain Range', 'Downtown', 'Beachside', 'Countryside', 'Riverside', 'National Park', 'Desert', 'Rainforest'];
             return collect($locations)->random();
         }
-
-        // Tạo mảng privacy_status ngẫu nhiên
         $privacyStatus = ['public', 'private'];
 
         $photos = [];
@@ -58,6 +56,7 @@ class PhotoSeeder extends Seeder
                 'location' => generateRandomLocation(),
                 'user_id' => rand(1, 3),  // Random từ 1 đến 3 cho user_id
                 'category_id' => rand(1, 30),  // Random từ 1 đến 30 cho category_id
+                'photo_status' => 'approved',
                 'privacy_status' => collect($privacyStatus)->random(),  // Random Public hoặc Private
             ];
         }

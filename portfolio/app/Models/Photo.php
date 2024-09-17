@@ -16,6 +16,7 @@ class Photo extends Model
         'location',
         'user_id',
         'category_id',
+        'photo_status',
         'privacy_status',
     ];
 
