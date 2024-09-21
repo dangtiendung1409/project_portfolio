@@ -130,3 +130,77 @@
     color: red;
     font-weight: bold; /* Nếu bạn muốn chữ đậm */
 }
+/* CSS for Tag Suggestions */
+#tag-suggestions .tag {
+    display: inline-block;
+    background-color: #e1f5fe;
+    color: #0288d1;
+    padding: 5px 10px;
+    border-radius: 5px;
+    margin-right: 5px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#tag-suggestions .tag:hover {
+    background-color: #b3e5fc;
+}
+
+/* CSS for Tag Input and Button */
+#tag-input {
+    width: calc(100% - 120px);
+    display: inline-block;
+    margin-right: 10px;
+}
+
+button.button {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button.button:hover {
+    background-color: #388e3c;
+}
+
+/* CSS for Selected Tags */
+#selected-tags .tag {
+    display: inline-block;
+    background-color: #81c784;
+    color: white;
+    padding: 5px 10px 5px 10px; /* Tăng padding để chừa chỗ cho icon x */
+    border-radius: 5px;
+    margin-right: 5px;
+    margin-bottom: 5px;
+    position: relative;
+}
+
+.delete-icon {
+    margin-left: 8px; /* Khoảng cách giữa tag và icon */
+    cursor: pointer;
+    font-size: 16px; /* Kích thước icon */
+    vertical-align: middle; /* Căn giữa với text */
+}
+
+#selected-tags .tag .delete {
+    position: absolute;
+    top: 50%;
+    right: 8px; /* Điều chỉnh khoảng cách từ icon đến cạnh tag */
+    transform: translateY(-50%);
+    background-color: transparent;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 12px;
+    padding: 0;
+}
+
+#selected-tags .tag .delete:hover {
+    color: #d32f2f;
+}

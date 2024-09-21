@@ -32,7 +32,7 @@ class Photo extends Model
 
     public function tags()
     {
-        return $this->belongsToMany(Tag::class, 'photo_tags');
+        return $this->belongsToMany(Tag::class, 'photo_tags', 'photo_id', 'tag_id');
     }
 
     public function comments()

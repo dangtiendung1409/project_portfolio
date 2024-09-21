@@ -1,5 +1,6 @@
 @extends("admin/layout")
 @section("content")
+    <link rel="stylesheet" href="{{ asset('Admin/css/add.css') }}">
     <section class="is-title-bar">
         <div class="flex flex-col md:flex-row items-center justify-between space-y-6 md:space-y-0">
             <ul>
@@ -67,7 +68,7 @@
                             <td>{{ $photo->title }}</td>
                             <td>{{ $photo->description }}</td>
                             <td>
-                                <img src="{{ asset('' . $photo->image_url) }}" width="500" height="500">
+                                <img src="{{ asset('' . $photo->image_url) }}" width="450" height="450" style="cursor: pointer;" onclick="showModal(this)">
                             </td>
                             <td>{{ $photo->location }}</td>
                             <td>{{ $photo->user->username }}</td>
@@ -106,4 +107,10 @@
             </div>
         </div>
     </section>
+    <!-- The Modal -->
+    <div id="myModal" class="modal">
+        <span class="close">&times;</span>
+        <img class="modal-content" id="imgModal">
+        <div id="caption"></div>
+    </div>
 @endsection

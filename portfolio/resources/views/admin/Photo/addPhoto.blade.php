@@ -108,7 +108,37 @@
                     </div>
 
                     <hr>
+                    <div class="field">
+                        <label class="label">Tag Suggestions</label>
+                        <div class="control">
+                            <div id="tag-suggestions" class="tags">
+                                <!-- Các tag gợi ý được thêm tự động từ controller -->
+                                @foreach ($tags as $tag)
+                                    <span class="tag" onclick="addTag('{{ $tag->tag_name }}')">{{ $tag->tag_name }}</span>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
 
+                    <!-- Input để nhập thêm tag -->
+                    <div class="field">
+                        <label class="label">Add Custom Tags</label>
+                        <div class="control">
+                            <input id="tag-input" class="input" type="text" placeholder="Enter a custom tag" onkeypress="addTagOnEnter(event)">
+                            <button type="button" class="button" onclick="addCustomTag()">Add Tag</button>
+                        </div>
+                    </div>
+
+                    <!-- Tag List -->
+                    <div class="field">
+                        <label class="label">Selected Tags</label>
+                        <div class="control">
+                            <div id="selected-tags" class="tags">
+                                <!-- Các tag đã chọn sẽ hiển thị ở đây -->
+                            </div>
+                            <input type="hidden" name="tags" id="tags" value="">
+                        </div>
+                    </div>
                     <!-- Submit and Reset buttons -->
                     <div class="field grouped">
                         <div class="control">
@@ -126,5 +156,61 @@
             </div>
         </div>
     </section>
+    <script>
+        let selectedTags = [];
 
+        function addTag(tag) {
+            if (!selectedTags.includes(tag)) {
+                selectedTags.push(tag);
+                updateTagList();
+            }
+        }
+
+        function addTagOnEnter(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                addCustomTag();
+            }
+        }
+
+        function addCustomTag() {
+            let tagInput = document.getElementById('tag-input');
+            let tag = tagInput.value.trim();
+            if (tag !== '' && !selectedTags.includes(tag)) {
+                selectedTags.push(tag);
+                updateTagList();
+                tagInput.value = '';  // Clear input
+            }
+        }
+
+        function updateTagList() {
+            let tagList = document.getElementById('selected-tags');
+            let tagsInput = document.getElementById('tags');
+            tagList.innerHTML = '';  // Clear previous list
+
+            selectedTags.forEach(tag => {
+                let tagElement = document.createElement('span');
+                tagElement.className = 'tag is-primary';
+                tagElement.innerText = tag;
+
+                // Tạo icon xóa
+                let removeButton = document.createElement('span');
+                removeButton.className = 'mdi mdi-close delete-icon'; // Thay đổi class ở đây
+                removeButton.onclick = () => removeTag(tag);
+
+                // Thêm icon vào tag
+                tagElement.appendChild(removeButton);
+                tagList.appendChild(tagElement);
+            });
+
+            // Cập nhật giá trị cho input ẩn
+            tagsInput.value = selectedTags.join(',');
+        }
+        function removeTag(tag) {
+            selectedTags = selectedTags.filter(t => t !== tag);
+            updateTagList();
+        }
+
+    </script>
 @endsection
+

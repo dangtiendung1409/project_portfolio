@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Photo;
+use App\Models\Tag;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 
@@ -21,9 +22,10 @@ class photoController extends Controller
     public function create()
     {
         $categories = Category::all();
+        $tags = Tag::take(15)->get();
         $successMessage = Session::get('successMessage');
         $errorMessage = Session::get('errorMessage');
-        return view('admin/Photo.addPhoto', compact('categories','successMessage', 'errorMessage'));
+        return view('admin/Photo.addPhoto', compact('categories','tags','successMessage', 'errorMessage'));
     }
 
     public function store(Request $request)
@@ -40,7 +42,8 @@ class photoController extends Controller
                 $imageName = time() . '.' . $request->image->extension();
                 $request->image->move(public_path('images/photos'), $imageName);
 
-                Photo::create([
+                // Lưu thông tin ảnh vào bảng Photo
+                $photo = Photo::create([
                     'title' => $request->input('title'),
                     'description' => $request->input('description'),
                     'image_url' => 'images/photos/' . $imageName,
@@ -48,24 +51,43 @@ class photoController extends Controller
                     'location' => $request->input('location'),
                     'photo_status' => 'approved',
                     'privacy_status' => $request->input('privacy_status'),
-                    'user_id' => 3,
+                    'user_id' => 3,  // Thay đổi user_id theo nhu cầu của bạn
                     'category_id' => $request->input('category_id')
                 ]);
+
+                $tags = explode(',', $request->input('tags')); // Lấy danh sách các tag đã chọn
+                foreach ($tags as $tagName) {
+                    $tagName = trim($tagName); // Loại bỏ khoảng trắng
+
+                    // Kiểm tra xem tag đã tồn tại hay chưa
+                    $tag = Tag::where('tag_name', $tagName)->first();
+                    if ($tag) {
+                        // Nếu tag đã tồn tại, lấy ID và attach vào bảng trung gian
+                        $photo->tags()->attach($tag->id);
+                    } else {
+                        // Nếu tag chưa tồn tại, thêm vào bảng tag và attach vào bảng trung gian
+                        $newTag = Tag::create(['tag_name' => $tagName]);
+                        $photo->tags()->attach($newTag->id);
+                    }
+                }
+
                 Session::flash('successMessage', 'Photo added successfully!');
             }
         } catch (\Exception $e) {
-            Session::flash('errorMessage', 'Error adding the photo.');
+            Session::flash('errorMessage', 'Error adding the photo: ' . $e->getMessage());
         }
 
         return redirect('/admin/photo');
     }
+
     public function edit($id)
     {
         $photo = Photo::findOrFail($id);
         $categories = Category::all();
+        $availableTags = Tag::all();
         $successMessage = Session::get('successMessage');
         $errorMessage = Session::get('errorMessage');
-        return view('admin/Photo.editPhoto', compact('photo', 'categories','successMessage', 'errorMessage'));
+        return view('admin/Photo.editPhoto', compact('photo', 'categories','availableTags','successMessage', 'errorMessage'));
     }
     public function update(Request $request, $id)
     {
@@ -84,6 +106,7 @@ class photoController extends Controller
             $photo->privacy_status = $request->input('privacy_status');
             $photo->category_id = $request->input('category_id');
 
+            // Cập nhật ảnh nếu có
             if ($request->hasFile('image')) {
                 if ($photo->image_url && file_exists(public_path($photo->image_url))) {
                     unlink(public_path($photo->image_url));
@@ -93,7 +116,26 @@ class photoController extends Controller
                 $photo->image_url = 'images/photos/' . $imageName;
             }
 
-            $photo->save();
+            // Cập nhật tags
+            $photo->tags()->detach(); // Xóa tất cả các tag hiện tại
+
+            $tags = explode(',', $request->input('tags'));
+            foreach ($tags as $tagName) {
+                $tagName = trim($tagName); // Loại bỏ khoảng trắng
+
+                // Kiểm tra xem tag đã tồn tại hay chưa
+                $tag = Tag::where('tag_name', $tagName)->first();
+                if ($tag) {
+                    // Nếu tag đã tồn tại, lấy ID và attach vào bảng trung gian
+                    $photo->tags()->attach($tag->id);
+                } else {
+                    // Nếu tag chưa tồn tại, thêm vào bảng tag và attach vào bảng trung gian
+                    $newTag = Tag::create(['tag_name' => $tagName]);
+                    $photo->tags()->attach($newTag->id);
+                }
+            }
+
+            $photo->save(); // Lưu các thay đổi vào database
             Session::flash('successMessage', 'Photo updated successfully!');
         } catch (\Exception $e) {
             Session::flash('errorMessage', 'Error updating the photo.');
@@ -118,4 +160,19 @@ class photoController extends Controller
 
         return redirect('/admin/photo');
     }
+
+    // photo pending
+    public function photoPending()
+    {
+        $photoPending = Photo::where('photo_status', 'pending')->paginate(10);
+        return view('admin/Photo.photoPending', compact('photoPending'));
+    }
+
+    // photo rejected
+    public function photoRejected()
+    {
+        $photoRejected = Photo::where('photo_status', 'rejected')->paginate(10);
+        return view('admin/Photo.photoRejected', compact('photoRejected'));
+    }
 }
+

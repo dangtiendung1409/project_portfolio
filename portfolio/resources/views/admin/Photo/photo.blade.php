@@ -92,7 +92,7 @@
                             <td>{{ $photo->title }}</td>
                             <td>{{ $photo->description }}</td>
                             <td>
-                                <img src="{{ asset('' . $photo->image_url) }}" width="450" height="450" alt="{{ $photo->title }}" style="cursor: pointer;" onclick="showModal(this)">
+                                <img src="{{ asset('' . $photo->image_url) }}" width="450" height="450" style="cursor: pointer;" onclick="showModal(this)">
                             </td>
                             <td>{{ $photo->location }}</td>
                             <td>{{ $photo->user->username }}</td>
