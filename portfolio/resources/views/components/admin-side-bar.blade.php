@@ -24,19 +24,19 @@
                 </a>
                 <ul>
                     <li>
-                        <a href="photo">
+                        <a href="/admin/photo">
                             <span class="icon"><i class="mdi mdi-image"></i></span>
                             <span class="menu-item-label">Photo</span>
                         </a>
                     </li>
                     <li>
-                        <a href="photoPending">
+                        <a href="/admin/photoPending">
                             <span class="icon"><i class="mdi mdi-timer-sand"></i></span>
                             <span class="menu-item-label">Photo pending</span>
                         </a>
                     </li>
                     <li>
-                        <a href="photoRejected">
+                        <a href="/admin/photoRejected">
                             <span class="icon"><i class="mdi mdi-cancel"></i></span>
                             <span class="menu-item-label">Photo rejected</span>
                         </a>

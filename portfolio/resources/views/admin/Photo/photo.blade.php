@@ -1,58 +1,6 @@
 @extends('admin/layout')
 @section('content')
-    <style>
-        .text-private {
-            color: red;
-        }
-
-        .text-public {
-            color: green;
-        }
-        .btn-add {
-            color: white;
-            background-color: black;
-
-            border-radius: .357rem;
-            border: none;
-            font-weight: 600;
-            padding: 10px 20px;
-        }
-
-        .btn-danger {
-            color: #FFF;
-            background-color: #dc3545;
-            border-color: #dc3545;
-
-            border-radius: .357rem;
-            border: none;
-            font-weight: 600;
-            padding: 5px 20px;
-        }
-        .btn-danger:hover {
-            color: #FFF;
-            background-color: #c82333;
-            border-color: #bd2130;
-        }
-
-        .btn-danger:focus, .btn-danger.focus {
-            -webkit-box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.5);
-            box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.5);
-        }
-
-        .btn-danger.disabled, .btn-danger:disabled {
-            color: #FFF;
-            background-color: #dc3545;
-            border-color: #dc3545;
-        }
-
-        .button-group {
-            display: flex;
-        }
-
-        .button-group > * {
-            margin-right: 10px;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ asset('Admin/css/add.css') }}">
     <section class="is-title-bar">
         <div class="flex flex-col md:flex-row items-center justify-between space-y-6 md:space-y-0">
             <ul>
@@ -68,12 +16,29 @@
     <section class="is-hero-bar">
         <div class="flex flex-col md:flex-row items-center justify-between space-y-6 md:space-y-0"></div>
         <div class="col-sm-2">
-            <a class="btn btn-add" href="/admin/addBlog"  title="Thêm">
+            <a class="btn btn-add" href="/admin/photo/create"  title="Thêm">
                 <i class="fas fa-plus"></i>
                 Add Photo
             </a>
         </div>
     </section>
+    @if (session('successMessage') || session('errorMessage'))
+        <div id="alertsContainer">
+            @if (session('successMessage'))
+                <div class="alert alert-success" id="successAlert">
+                    <i class="mdi mdi-check-circle" style="margin-right: 8px;"></i>
+                    <span>{{ session('successMessage') }}</span>
+                </div>
+            @endif
+            @if (session('errorMessage'))
+                <div class="alert alert-danger" id="errorAlert">
+                    <i class="mdi mdi-alert-circle" style="margin-right: 8px;"></i>
+                    <span>{{ session('errorMessage') }}</span>
+                </div>
+            @endif
+        </div>
+    @endif
+
     <section class="section main-section">
 
         <div class="card has-table">
@@ -127,7 +92,7 @@
                             <td>{{ $photo->title }}</td>
                             <td>{{ $photo->description }}</td>
                             <td>
-                                <img src="{{ asset('' . $photo->image_url) }}" width="500" height="500">
+                                <img src="{{ asset('' . $photo->image_url) }}" width="450" height="450" alt="{{ $photo->title }}" style="cursor: pointer;" onclick="showModal(this)">
                             </td>
                             <td>{{ $photo->location }}</td>
                             <td>{{ $photo->user->username }}</td>
@@ -138,12 +103,16 @@
                             </td>
                             <td class="actions-cell">
                                 <div class="buttons right nowrap">
-                                    <button class="button small green --jb-modal"  type="button">
+                                    <a href="{{ url('/admin/photo/' . $photo->id . '/edit') }}" class="button small green">
                                         <span class="icon"><i class="mdi mdi-pencil"></i></span>
-                                    </button>
-                                    <button class="button small red --jb-modal"  type="button">
-                                        <span class="icon"><i class="mdi mdi-trash-can"></i></span>
-                                    </button>
+                                    </a>
+                                    <form action="{{ url('/admin/photo/delete/'.$photo->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this photo? This action cannot be undone.');" style="display:inline-block;">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button class="button small red" type="submit">
+                                            <span class="icon"><i class="mdi mdi-trash-can"></i></span>
+                                        </button>
+                                    </form>
                                 </div>
                             </td>
                         </tr>
@@ -166,4 +135,11 @@
             </div>
         </div>
     </section>
+    <!-- The Modal -->
+    <div id="myModal" class="modal">
+        <span class="close">&times;</span>
+        <img class="modal-content" id="imgModal">
+        <div id="caption"></div>
+    </div>
+
 @endsection

@@ -50,5 +50,5 @@ class Photo extends Model
         return $this->belongsToMany(Gallery::class, 'galleries_photos');
     }
     protected $dates = ['upload_date'];
-
+    public $timestamps = false;
 }

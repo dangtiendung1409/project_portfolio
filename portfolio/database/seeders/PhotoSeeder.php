@@ -51,7 +51,7 @@ class PhotoSeeder extends Seeder
             $photos[] = [
                 'title' => generateRandomTitle(),
                 'description' => generateRandomDescription(),
-                'image_url' => '/images/image-' . $i . '.jpeg',
+                'image_url' => '/images/photos/image-' . $i . '.jpeg',
                 'upload_date' => now(),
                 'location' => generateRandomLocation(),
                 'user_id' => rand(1, 3),  // Random từ 1 đến 3 cho user_id
