@@ -84,7 +84,7 @@ class photoController extends Controller
     {
         $photo = Photo::findOrFail($id);
         $categories = Category::all();
-        $availableTags = Tag::all();
+        $availableTags = Tag::take(15)->get();
         $successMessage = Session::get('successMessage');
         $errorMessage = Session::get('errorMessage');
         return view('admin/Photo.editPhoto', compact('photo', 'categories','availableTags','successMessage', 'errorMessage'));
