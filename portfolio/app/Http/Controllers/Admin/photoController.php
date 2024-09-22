@@ -167,6 +167,25 @@ class photoController extends Controller
         $photoPending = Photo::where('photo_status', 'pending')->paginate(10);
         return view('admin/Photo.photoPending', compact('photoPending'));
     }
+    public function detailPhotoPending($id)
+    {
+        $photo = Photo::with(['user', 'category', 'tags'])->findOrFail($id);
+
+        return view('admin/Photo.detailPhotoPending', compact('photo'));
+    }
+    public function updatePhotoStatus(Request $request, $id)
+    {
+        $photo = Photo::findOrFail($id);
+        $photo->photo_status = $request->input('status');
+        try {
+            $photo->save();
+            Session::flash('successMessage', 'status updated successfully!');
+        } catch (\Exception $e) {
+            Session::flash('errorMessage', 'An error occurred while updating the photo status!');
+        }
+        return redirect()->route('admin.photoPending');
+    }
+
 
     // photo rejected
     public function photoRejected()

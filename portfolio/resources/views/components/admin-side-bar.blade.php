@@ -8,7 +8,7 @@
         <p class="menu-label">General</p>
         <ul class="menu-list">
             <li class="active">
-                <a href="dashboard">
+                <a href="/admin/dashboard">
                     <span class="icon"><i class="mdi mdi-desktop-mac"></i></span>
                     <span class="menu-item-label">Dashboard</span>
                 </a>

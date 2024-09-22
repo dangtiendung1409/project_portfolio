@@ -1,6 +1,5 @@
 @extends("admin/layout")
 @section("content")
-    <link rel="stylesheet" href="{{ asset('Admin/css/add.css') }}">
     <section class="is-title-bar">
         <div class="flex flex-col md:flex-row items-center justify-between space-y-6 md:space-y-0">
             <ul>

@@ -1,6 +1,5 @@
 @extends("admin/layout")
 @section("content")
-    <link rel="stylesheet" href="{{ asset('Admin/css/add.css') }}">
     <section class="is-title-bar">
         <div class="flex flex-col md:flex-row items-center justify-between space-y-6 md:space-y-0">
             <ul>
@@ -13,8 +12,22 @@
             </a>
         </div>
     </section>
-
-
+    @if (session('successMessage') || session('errorMessage'))
+        <div id="alertsContainer">
+            @if (session('successMessage'))
+                <div class="alert alert-success" id="successAlert">
+                    <i class="mdi mdi-check-circle" style="margin-right: 8px;"></i>
+                    <span>{{ session('successMessage') }}</span>
+                </div>
+            @endif
+            @if (session('errorMessage'))
+                <div class="alert alert-danger" id="errorAlert">
+                    <i class="mdi mdi-alert-circle" style="margin-right: 8px;"></i>
+                    <span>{{ session('errorMessage') }}</span>
+                </div>
+            @endif
+        </div>
+    @endif
     <section class="section main-section">
 
         <div class="card has-table">
@@ -79,9 +92,9 @@
                             </td>
                             <td class="actions-cell">
                                 <div class="buttons right nowrap">
-                                    <button class="button small green">
+                                    <a href="{{ url('/admin/photoPending/detail/' . $photo->id) }}" class="button small blue">
                                         <span class="icon"><i class="mdi mdi-eye"></i></span>
-                                    </button>
+                                    </a>
                                 </div>
                             </td>
                         </tr>

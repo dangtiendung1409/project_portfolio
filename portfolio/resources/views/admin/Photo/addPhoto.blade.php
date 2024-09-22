@@ -158,7 +158,7 @@
     </section>
     <script>
         let selectedTags = [];
-
+        console.log(selectedTags);
         function addTag(tag) {
             if (!selectedTags.includes(tag)) {
                 selectedTags.push(tag);
@@ -195,7 +195,7 @@
 
                 // Tạo icon xóa
                 let removeButton = document.createElement('span');
-                removeButton.className = 'mdi mdi-close delete-icon'; // Thay đổi class ở đây
+                removeButton.className = 'mdi mdi-close delete-icon';
                 removeButton.onclick = () => removeTag(tag);
 
                 // Thêm icon vào tag
@@ -210,7 +210,6 @@
             selectedTags = selectedTags.filter(t => t !== tag);
             updateTagList();
         }
-
     </script>
 @endsection
 

@@ -10,6 +10,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="{{asset('Admin/favicon-32x32.png')}}"/>
 <link rel="icon" type="image/png" sizes="16x16" href="{{asset('Admin/favicon-16x16.png')}}"/>
 <link rel="mask-icon" href="{{asset('Admin/safari-pinned-tab.svg')}}" color="#00b4b6"/>
+<link rel="stylesheet" href="{{ asset('Admin/css/add.css') }}">
 <meta name="description" content="Admin One - free Tailwind dashboard">
 
 <meta property="og:url" content="https://justboil.github.io/admin-one-tailwind/">

@@ -1,6 +1,5 @@
 @extends('admin/layout')
 @section('content')
-    <link rel="stylesheet" href="{{ asset('Admin/css/add.css') }}">
     <section class="is-title-bar">
         <div class="flex flex-col md:flex-row items-center justify-between space-y-6 md:space-y-0">
             <ul>
@@ -103,7 +102,7 @@
                             </td>
                             <td class="actions-cell">
                                 <div class="buttons right nowrap">
-                                    <a href="{{ url('/admin/photo/' . $photo->id . '/edit') }}" class="button small green">
+                                    <a href="{{ url('/admin/photo/' . 'edit/'. $photo->id ) }}" class="button small green">
                                         <span class="icon"><i class="mdi mdi-pencil"></i></span>
                                     </a>
                                     <form action="{{ url('/admin/photo/delete/'.$photo->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this photo? This action cannot be undone.');" style="display:inline-block;">
