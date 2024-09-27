@@ -30,6 +30,11 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Role::class);
     }
+    // Phương thức kiểm tra quyền của người dùng
+    public function hasRole($role)
+    {
+        return $this->role->roleName === $role;
+    }
     public function photos()
     {
         return $this->hasMany(Photo::class);

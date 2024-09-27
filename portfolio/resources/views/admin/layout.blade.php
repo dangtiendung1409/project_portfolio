@@ -68,10 +68,13 @@
                         <span>Messages</span>
                     </a>
                     <hr class="navbar-divider">
-                    <a class="navbar-item">
-                        <span class="icon"><i class="mdi mdi-logout"></i></span>
-                        <span>Log Out</span>
-                    </a>
+                    <form action="{{ route('logout') }}" method="POST" style="display:inline;">
+                        @csrf
+                        <button type="submit" class="navbar-item" style="border: none; background: none; cursor: pointer;">
+                            <span class="icon"><i class="mdi mdi-logout"></i></span>
+                            <span>Log Out</span>
+                        </button>
+                    </form>
                 </div>
             </div>
             <a href="https://justboil.me/tailwind-admin-templates" class="navbar-item has-divider desktop-icon-only">
@@ -81,10 +84,6 @@
             <a href="https://github.com/justboil/admin-one-tailwind" class="navbar-item has-divider desktop-icon-only">
                 <span class="icon"><i class="mdi mdi-github-circle"></i></span>
                 <span>GitHub</span>
-            </a>
-            <a title="Log out" class="navbar-item desktop-icon-only">
-                <span class="icon"><i class="mdi mdi-logout"></i></span>
-                <span>Log out</span>
             </a>
         </div>
     </div>

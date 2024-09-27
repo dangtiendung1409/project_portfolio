@@ -29,8 +29,6 @@
             <div class="card-content">
                 <form action="{{ url('/admin/photo/update', $photo->id) }}" method="POST" enctype="multipart/form-data">
                     @csrf
-                    @method('PUT')
-
                     <!-- Title -->
                     <div class="field">
                         <label class="label">Title</label>

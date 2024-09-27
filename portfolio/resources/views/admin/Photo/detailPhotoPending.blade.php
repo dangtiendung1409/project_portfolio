@@ -68,12 +68,11 @@
     <div id="caption"></div>
 </div>
 
-<div style="display: flex; gap: 10px; margin-top: 10px; justify-content: flex-end;">
+<div style="display: flex; gap: 10px; margin-top: 10px;margin-right:17px; justify-content: flex-end;">
     @if($photo->photo_status == 'pending')
         <!-- Approve Button -->
         <form method="POST" action="{{ route('admin.updatePhotoStatus', $photo->id) }}">
             @csrf
-            @method('PUT')
             <input type="hidden" name="status" value="approved" />
             <button onclick="return confirm('Are you sure you want to approve this photo?')" type="submit" class="btn btn-success"
                     style="padding: 5px 10px; border-radius: 5px; background-color: green; color: white;">
