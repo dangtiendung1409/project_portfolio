@@ -105,9 +105,8 @@
                                     <a href="{{ url('/admin/photo/' . 'edit/'. $photo->id ) }}" class="button small green">
                                         <span class="icon"><i class="mdi mdi-pencil"></i></span>
                                     </a>
-                                    <form action="{{ url('/admin/photo/delete/'.$photo->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this photo? This action cannot be undone.');" style="display:inline-block;">
+                                    <form action="{{ url('/admin/photo/delete/'.$photo->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this photo?');" style="display:inline-block;">
                                         @csrf
-                                        @method('DELETE')
                                         <button class="button small red" type="submit">
                                             <span class="icon"><i class="mdi mdi-trash-can"></i></span>
                                         </button>

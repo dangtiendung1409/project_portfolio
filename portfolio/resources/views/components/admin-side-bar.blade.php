@@ -44,6 +44,12 @@
                 </ul>
             </li>
             <li>
+                <a href="/admin/category">
+                    <span class="icon"><i class="mdi mdi-format-list-bulleted"></i></span>
+                    <span class="menu-item-label">category management</span>
+                </a>
+            </li>
+            <li>
                 <a class="dropdown">
                     <span class="icon"><i class="mdi mdi-view-list"></i></span>
                     <span class="menu-item-label">Submenus</span>

@@ -56,8 +56,15 @@ class createViewFile extends Command
             </a>
         </div>
     </section>
-
-
+    <section class="is-hero-bar">
+        <div class="flex flex-col md:flex-row items-center justify-between space-y-6 md:space-y-0"></div>
+        <div class="col-sm-2">
+            <a class="btn btn-add" href="/admin/photo/create"  title="Thêm">
+                <i class="fas fa-plus"></i>
+                Add Category
+            </a>
+        </div>
+    </section>
     <section class="section main-section">
 
         <div class="card has-table">
