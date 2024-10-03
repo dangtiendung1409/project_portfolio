@@ -25,6 +25,8 @@ class User extends Authenticatable
         'bio',
         'join_date',
         'role_id',
+        'is_active',
+        'violation_count'
     ];
     public function role()
     {

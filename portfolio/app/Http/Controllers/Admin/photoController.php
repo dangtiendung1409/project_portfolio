@@ -150,17 +150,16 @@ class photoController extends Controller
         $photo = Photo::findOrFail($id);
 
         try {
-            if (file_exists(public_path($photo->image_url))) {
-                unlink(public_path($photo->image_url));
-            }
             $photo->delete();
-            Session::flash('successMessage', 'Photo deleted successfully!');
+
+            Session::flash('successMessage', 'Photo deleted successfully!');  // Thông báo thành công
         } catch (\Exception $e) {
-            Session::flash('errorMessage', 'Error deleting the photo.');
+            Session::flash('errorMessage', 'Error deleting the photo.');  // Thông báo lỗi
         }
 
-        return redirect('/admin/photo');
+        return redirect('/admin/photo');  // Quay về trang quản lý ảnh
     }
+
 
     // photo pending
     public function photoPending()
