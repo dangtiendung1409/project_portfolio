@@ -24,6 +24,11 @@ Route::get('/photo/edit/{id}', [\App\Http\Controllers\Admin\photoController::cla
 Route::post('/photo/update/{id}', [\App\Http\Controllers\Admin\photoController::class, 'update']);
 // Delete photo
 Route::post('/photo/delete/{id}', [\App\Http\Controllers\Admin\photoController::class, 'destroy']);
+// comment photo
+Route::get('/photo/comments/{id}', [\App\Http\Controllers\Admin\photoController::class, 'showComments']);
+Route::post('/photo/comment/{id}/status/{status}', [\App\Http\Controllers\Admin\photoController::class, 'updateStatus'])
+    ->name('admin.comment.updateStatus');
+
 
 //category management
 Route::get('/category',[\App\Http\Controllers\Admin\categoryController::class,'index']);

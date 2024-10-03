@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Models\Comment;
 use App\Models\Photo;
 use App\Models\Tag;
 use Illuminate\Http\Request;
@@ -193,5 +194,25 @@ class photoController extends Controller
         $photoRejected = Photo::where('photo_status', 'rejected')->paginate(10);
         return view('admin/Photo.photoRejected', compact('photoRejected'));
     }
+    // comment photo
+    public function showComments($id){
+        $photo = Photo::findOrFail($id);
+        $comments = $photo->comments()->with('user')->paginate(10);
+
+        return view('admin/Photo.photo_comment', compact('photo','comments'));
+    }
+    public function updateStatus($id, $status)
+    {
+        $comment = Comment::findOrFail($id);
+        $comment->comment_status = $status;
+        try {
+            $comment->save();
+            Session::flash('successMessage', 'Comment status updated successfully!');
+        } catch (\Exception $e) {
+            Session::flash('errorMessage', 'Error updating comment status.');
+        }
+        return redirect()->back();
+    }
+
 }
 

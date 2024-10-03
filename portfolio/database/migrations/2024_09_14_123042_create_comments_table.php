@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('photo_id')->constrained('photos')->onDelete('cascade');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->text('comment_text');
+            $table->string('comment_status', 50);
             $table->dateTime('comment_date');
             $table->timestamps();
         });
