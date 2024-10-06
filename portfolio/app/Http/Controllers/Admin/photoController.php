@@ -43,49 +43,59 @@ class photoController extends Controller
     {
         $request->validate([
             'title' => 'required|max:255',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'images' => 'array|max:3',
+            'images.*' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',// Đảm bảo rằng có ít nhất một ảnh được upload
             'category_id' => 'required|exists:categories,id',
             'privacy_status' => 'required'
         ]);
 
         try {
-            if ($request->hasFile('image')) {
-                $imageName = time() . '.' . $request->image->extension();
-                $request->image->move(public_path('images/photos'), $imageName);
+            // Lưu thông tin chính của ảnh
+            $photo = Photo::create([
+                'title' => $request->input('title'),
+                'description' => $request->input('description'),
+                'upload_date' => now(),
+                'location' => $request->input('location'),
+                'photo_status' => 'approved',
+                'privacy_status' => $request->input('privacy_status'),
+                'user_id' => 3,  // Thay đổi user_id theo nhu cầu của bạn
+                'category_id' => $request->input('category_id')
+            ]);
 
-                // Lưu thông tin ảnh vào bảng Photo
-                $photo = Photo::create([
-                    'title' => $request->input('title'),
-                    'description' => $request->input('description'),
-                    'image_url' => 'images/photos/' . $imageName,
-                    'upload_date' => now(),
-                    'location' => $request->input('location'),
-                    'photo_status' => 'approved',
-                    'privacy_status' => $request->input('privacy_status'),
-                    'user_id' => 3,  // Thay đổi user_id theo nhu cầu của bạn
-                    'category_id' => $request->input('category_id')
-                ]);
+            // Xử lý upload nhiều ảnh
+            if ($request->hasFile('images')) {
+                foreach ($request->file('images') as $image) {
+                    $imageName = time() . '_' . uniqid() . '.' . $image->extension();
+                    $image->move(public_path('images/photos'), $imageName);
 
-                $tags = explode(',', $request->input('tags')); // Lấy danh sách các tag đã chọn
-                foreach ($tags as $tagName) {
-                    $tagName = trim($tagName); // Loại bỏ khoảng trắng
-
-                    // Kiểm tra xem tag đã tồn tại hay chưa
-                    $tag = Tag::where('tag_name', $tagName)->first();
-                    if ($tag) {
-                        // Nếu tag đã tồn tại, lấy ID và attach vào bảng trung gian
-                        $photo->tags()->attach($tag->id);
-                    } else {
-                        // Nếu tag chưa tồn tại, thêm vào bảng tag và attach vào bảng trung gian
-                        $newTag = Tag::create(['tag_name' => $tagName]);
-                        $photo->tags()->attach($newTag->id);
-                    }
+                    // Lưu thông tin ảnh mới vào bảng photo_images
+                    $photo->images()->create([
+                        'photo_status' => 'approved',
+                        'image_url' => 'images/photos/' . $imageName,
+                    ]);
                 }
-
-                Session::flash('successMessage', 'Photo added successfully!');
             }
+
+            // Xử lý tags
+            $tags = explode(',', $request->input('tags')); // Lấy danh sách các tag đã chọn
+            foreach ($tags as $tagName) {
+                $tagName = trim($tagName); // Loại bỏ khoảng trắng
+
+                // Kiểm tra xem tag đã tồn tại hay chưa
+                $tag = Tag::where('tag_name', $tagName)->first();
+                if ($tag) {
+                    // Nếu tag đã tồn tại, lấy ID và attach vào bảng trung gian
+                    $photo->tags()->attach($tag->id);
+                } else {
+                    // Nếu tag chưa tồn tại, thêm vào bảng tag và attach vào bảng trung gian
+                    $newTag = Tag::create(['tag_name' => $tagName]);
+                    $photo->tags()->attach($newTag->id);
+                }
+            }
+
+            Session::flash('successMessage', 'Photos added successfully!');
         } catch (\Exception $e) {
-            Session::flash('errorMessage', 'Error adding the photo: ' . $e->getMessage());
+            Session::flash('errorMessage', 'Error adding the photos: ' . $e->getMessage());
         }
 
         return redirect('/admin/photo');
@@ -107,24 +117,40 @@ class photoController extends Controller
         $request->validate([
             'title' => 'required|max:255',
             'category_id' => 'required|exists:categories,id',
-            'privacy_status' => 'required'
+            'privacy_status' => 'required',
+            'images' => 'array|max:3',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
         try {
+            // Cập nhật thông tin của photo
             $photo->title = $request->input('title');
             $photo->description = $request->input('description');
             $photo->location = $request->input('location');
             $photo->privacy_status = $request->input('privacy_status');
             $photo->category_id = $request->input('category_id');
 
-            // Cập nhật ảnh nếu có
-            if ($request->hasFile('image')) {
-                if ($photo->image_url && file_exists(public_path($photo->image_url))) {
-                    unlink(public_path($photo->image_url));
+            // Kiểm tra có ảnh mới hay không
+            if ($request->hasFile('images')) {
+                // Xóa các ảnh cũ
+                foreach ($photo->images as $image) {
+                    if (file_exists(public_path($image->image_url))) {
+                        unlink(public_path($image->image_url));
+                    }
+                    $image->delete(); // Xóa ảnh trong cơ sở dữ liệu
                 }
-                $imageName = time() . '.' . $request->image->extension();
-                $request->image->move(public_path('images/photos'), $imageName);
-                $photo->image_url = 'images/photos/' . $imageName;
+
+                // Xử lý upload nhiều ảnh mới
+                foreach ($request->file('images') as $image) {
+                    $imageName = time() . '_' . uniqid() . '.' . $image->extension();
+                    $image->move(public_path('images/photos'), $imageName);
+
+                    // Lưu thông tin ảnh mới vào bảng photo_images
+                    $photo->images()->create([
+                        'photo_status' => 'approved',
+                        'image_url' => 'images/photos/' . $imageName,
+                    ]);
+                }
             }
 
             // Cập nhật tags
@@ -147,27 +173,33 @@ class photoController extends Controller
             }
 
             $photo->save(); // Lưu các thay đổi vào database
-            Session::flash('successMessage', 'Photo updated successfully!');
+            Session::flash('successMessage', 'Photos updated successfully!');
         } catch (\Exception $e) {
-            Session::flash('errorMessage', 'Error updating the photo.');
+            Session::flash('errorMessage', 'Error updating the photos: ' . $e->getMessage());
         }
 
         return redirect('/admin/photo');
     }
+
+
 
     public function destroy($id)
     {
         $photo = Photo::findOrFail($id);
 
         try {
+            // Xóa mềm các bản ghi liên quan trong bảng photo_images
+            $photo->images()->delete();
+
+            // Xóa mềm bản ghi trong bảng photos
             $photo->delete();
 
-            Session::flash('successMessage', 'Photo deleted successfully!');
+            Session::flash('successMessage', 'Photo and its images deleted successfully!');
         } catch (\Exception $e) {
-            Session::flash('errorMessage', 'Error deleting the photo.');
+            Session::flash('errorMessage', 'Error deleting the photo and its images.');
         }
 
-        return redirect('/admin/photo');  // Quay về trang quản lý ảnh
+        return redirect('/admin/photo'); // Quay về trang quản lý ảnh
     }
 
 

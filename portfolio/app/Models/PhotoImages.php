@@ -38,4 +38,5 @@ class PhotoImages extends Model
     {
         return $this->belongsToMany(Gallery::class, 'galleries_photos', 'photo_image_id', 'galleries_id');
     }
+    public $timestamps = false;
 }

@@ -56,14 +56,19 @@
                         <label class="label">Upload Image</label>
                         <div class="file has-name">
                             <label class="file-label">
-                                <input class="file-input" type="file"  name="image" onchange="displayThumbnail(this);" >
-                                <img id="thumbnailImage" style="display: none; max-width: 50%;" alt="Thumbnail image" />
+                                <input class="file-input" type="file" name="images[]" onchange="displayThumbnail(this);" multiple>
                             </label>
                         </div>
-                        @error('image')
+                        @error('images')
                         <p class="help is-danger">{{ $message }}</p>
                         @enderror
                     </div>
+
+                    <!-- Thumbnail Display -->
+                    <div id="thumbnail-container" style="display: flex; flex-wrap: wrap; gap: 10px;">
+                        <!-- Thumbnail images will be displayed here -->
+                    </div>
+
 
                     <!-- Location -->
                     <div class="field">
@@ -211,5 +216,40 @@
             updateTagList();
         }
     </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Đặt hàm displayThumbnail ở đây
+            function displayThumbnail(input) {
+                const container = document.getElementById('thumbnail-container');
+                container.innerHTML = '';  // Xóa nội dung cũ
+
+                if (input.files) {
+                    Array.from(input.files).forEach(file => {
+                        const reader = new FileReader();
+                        reader.onload = function (e) {
+                            // Tạo phần tử hình ảnh
+                            const img = document.createElement('img');
+                            img.src = e.target.result;  // Đường dẫn của hình ảnh
+                            img.style.width = '100px';  // Đặt kích thước cho hình ảnh
+                            img.style.height = 'auto';   // Để chiều cao tự động
+                            img.style.border = '1px solid #ccc';  // Thêm viền nếu cần
+                            img.style.borderRadius = '4px';  // Bo góc nếu cần
+                            container.appendChild(img);  // Thêm hình ảnh vào container
+                        };
+                        reader.readAsDataURL(file);  // Đọc file như URL
+                    });
+                }
+            }
+
+            // Gán displayThumbnail cho input
+            const fileInput = document.querySelector('input[type="file"]');
+            if (fileInput) {
+                fileInput.onchange = function () {
+                    displayThumbnail(this);
+                };
+            }
+        });
+    </script>
+
 @endsection
 

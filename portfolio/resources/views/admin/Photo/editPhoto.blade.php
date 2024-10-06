@@ -51,17 +51,24 @@
 
                     <!-- Upload New Image -->
                     <div class="field">
-                        <label class="label">Upload New Image</label>
+                        <label class="label">Upload New Images</label>
                         <div class="file has-name">
                             <label class="file-label">
-                                <input class="file-input" type="file" name="image" onchange="displayThumbnail(this);">
-                                <img id="thumbnailImage" src="{{ asset($photo->image_url) }}" style="max-width: 50%;" alt="Thumbnail image" />
+                                <input class="file-input" type="file" name="images[]" multiple onchange="displayThumbnails(this);">
                             </label>
                         </div>
-                        @error('image')
+                        @error('images')
                         <p class="help is-danger">{{ $message }}</p>
                         @enderror
                     </div>
+
+                    <!-- Thumbnails -->
+                    <div id="thumbnailsContainer">
+                        @foreach($photo->images as $image)
+                            <img src="{{ asset($image->image_url) }}" alt="Thumbnail image" />
+                        @endforeach
+                    </div>
+
 
                     <!-- Location -->
                     <div class="field">
@@ -152,6 +159,20 @@
             </div>
         </div>
     </section>
+    <style>
+        #thumbnailsContainer {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px; /* Khoảng cách giữa các ảnh */
+        }
+
+        #thumbnailsContainer img {
+            max-width: 100px; /* Kích thước tối đa cho mỗi ảnh */
+            height: auto; /* Chiều cao tự động */
+            border: 1px solid #ccc; /* Viền cho ảnh */
+            border-radius: 4px; /* Bo góc cho ảnh */
+        }
+    </style>
 
     <script>
         let selectedTags = @json($photo->tags->pluck('tag_name')->toArray());
@@ -207,4 +228,24 @@
             }
         }
     </script>
+    <script>
+        function displayThumbnails(input) {
+            const container = document.getElementById('thumbnailsContainer');
+            container.innerHTML = ''; // Xóa tất cả thumbnail hiện tại
+
+            if (input.files) {
+                Array.from(input.files).forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        container.appendChild(img); // Thêm ảnh vào container
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+        }
+    </script>
+
+
 @endsection
