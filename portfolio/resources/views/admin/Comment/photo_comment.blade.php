@@ -41,8 +41,8 @@
                 </a>
             </header>
             <div class="card-content">
-                @if($photo->comments->isEmpty())
-                    <div class="notification is-warning" style="text-align: center; color: red; font-size: 20px;">
+                @if($comments->isEmpty())
+                <div class="notification is-warning" style="text-align: center; color: red; font-size: 20px;">
                         No comments found for this photo
                     </div>
                 @else
@@ -65,7 +65,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    @foreach($photo->comments as $comment)
+                    @foreach($comments as $comment)
                     <tr>
                         <td class="checkbox-cell">
                             <label class="checkbox">

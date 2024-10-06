@@ -121,9 +121,6 @@
                                             <span class="icon"><i class="mdi mdi-trash-can"></i></span>
                                         </button>
                                     </form>
-                                    <a href="{{ url('/admin/photo/comments/'. $photo->id ) }}" class="button small blue">
-                                        <span class="icon"><i class="mdi mdi-comment"></i></span>
-                                    </a>
                                 </div>
                             </td>
                         </tr>
