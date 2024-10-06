@@ -11,9 +11,9 @@ Route::get('/photo',[\App\Http\Controllers\Admin\photoController::class,'index']
 //photo pending
 Route::get('/photoPending',[\App\Http\Controllers\Admin\photoController::class,'photoPending'])
     ->name('admin.photoPending');
-Route::get('/photoPending/detail/{id}', [\App\Http\Controllers\Admin\photoController::class, 'detailPhotoPending']);
-Route::post('/admin/updatePhotoStatus/{id}', [\App\Http\Controllers\Admin\PhotoController::class, 'updatePhotoStatus'])
-    ->name('admin.updatePhotoStatus');
+Route::post('/updateStatus/{id}/{status}', [\App\Http\Controllers\Admin\photoController::class, 'updateStatus'])
+    ->name('admin.photoPending.updateStatus');
+
 //photo rejected
 Route::get('/photoRejected',[\App\Http\Controllers\Admin\photoController::class,'photoRejected']);
 // add photo

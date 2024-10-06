@@ -68,7 +68,6 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <tr>
                         @foreach($photoPending as $photo)
                             @php
                                 // Lọc ảnh có trạng thái pending
@@ -77,7 +76,7 @@
                                 });
                             @endphp
 
-                            @if($pendingImages->isNotEmpty())
+                            @foreach($pendingImages as $image)
                                 <tr>
                                     <td class="checkbox-cell">
                                         <label class="checkbox">
@@ -89,26 +88,37 @@
                                     <td>{{ $photo->title }}</td>
                                     <td>{{ $photo->description }}</td>
                                     <td>
-                                        @foreach($pendingImages as $image)
-                                            <img src="{{ asset($image->image_url) }}" width="450" height="450" style="cursor: pointer; margin-bottom: 10px;" onclick="showModal(this)">
-                                        @endforeach
+                                        <img src="{{ asset($image->image_url) }}" width="450" height="450" style="cursor: pointer; margin-bottom: 10px;" onclick="showModal(this)">
                                     </td>
                                     <td>{{ $photo->location }}</td>
                                     <td>{{ $photo->user->username }}</td>
-                                    <td>{{ $photo->category->category_name}}</td>
+                                    <td>{{ $photo->category->category_name }}</td>
                                     <td>{{ date('d-m-Y', strtotime($photo->upload_date)) }}</td>
                                     <td class="{{ $photo->privacy_status === 'private' ? 'text-private' : 'text-public' }}">
                                         {{ $photo->privacy_status }}
                                     </td>
                                     <td class="actions-cell">
                                         <div class="buttons right nowrap">
-                                            <a href="{{ url('/admin/photoPending/detail/' . $photo->id) }}" class="button small blue">
-                                                <span class="icon"><i class="mdi mdi-eye"></i></span>
-                                            </a>
+                                            <!-- Nút approve -->
+                                            <form action="{{ route('admin.photoPending.updateStatus', ['id' => $photo->id, 'status' => 'approved']) }}" method="POST" style="display:inline-block;">
+                                                @csrf
+                                                <button type="submit" class="button small green">
+                                                    <span class="icon"><i class="mdi mdi-check"></i></span> Approve
+                                                </button>
+                                            </form>
+
+                                            <!-- Nút reject -->
+                                            <form action="{{ route('admin.photoPending.updateStatus', ['id' => $photo->id, 'status' => 'rejected']) }}" method="POST" style="display:inline-block;">
+                                                @csrf
+                                                <button type="submit" class="button small red">
+                                                    <span class="icon"><i class="mdi mdi-close"></i></span> Reject
+                                                </button>
+                                            </form>
                                         </div>
                                     </td>
+
                                 </tr>
-                            @endif
+                            @endforeach
                         @endforeach
                         </tbody>
                     </table>

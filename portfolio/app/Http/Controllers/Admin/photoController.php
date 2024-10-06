@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Comment;
 use App\Models\Photo;
+use App\Models\PhotoImages;
 use App\Models\Tag;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
@@ -220,23 +221,20 @@ class photoController extends Controller
         return view('admin/Photo.photoPending', compact('photoPending', 'errorMessage', 'successMessage'));
     }
 
-    public function detailPhotoPending($id)
+    public function updateStatus($id, $status)
     {
-        $photo = Photo::with(['user', 'category', 'tags'])->findOrFail($id);
+        // Tìm ảnh theo ID từ bảng photo_images
+        $photoImage = PhotoImages::findOrFail($id);
 
-        return view('admin/Photo.detailPhotoPending', compact('photo'));
-    }
-    public function updatePhotoStatus(Request $request, $id)
-    {
-        $photo = Photo::findOrFail($id);
-        $photo->photo_status = $request->input('status');
-        try {
-            $photo->save();
-            Session::flash('successMessage', 'status updated successfully!');
-        } catch (\Exception $e) {
-            Session::flash('errorMessage', 'An error occurred while updating the photo status!');
-        }
-        return redirect()->route('admin.photoPending');
+        // Cập nhật trạng thái của ảnh
+        $photoImage->photo_status = $status;
+        $photoImage->save();
+
+        // Đặt thông báo thành công vào session
+        Session::flash('successMessage', "Photo status updated to {$status} successfully!");
+
+        // Redirect lại trang quản lý ảnh pending
+        return redirect()->back();
     }
 
 
@@ -258,24 +256,24 @@ class photoController extends Controller
     }
 
     // comment photo
-    public function showComments($id){
-        $photo = Photo::findOrFail($id);
-        $comments = $photo->comments()->with('user')->paginate(10);
-
-        return view('admin/Photo.photo_comment', compact('photo','comments'));
-    }
-    public function updateStatus($id, $status)
-    {
-        $comment = Comment::findOrFail($id);
-        $comment->comment_status = $status;
-        try {
-            $comment->save();
-            Session::flash('successMessage', 'Comment status updated successfully!');
-        } catch (\Exception $e) {
-            Session::flash('errorMessage', 'Error updating comment status.');
-        }
-        return redirect()->back();
-    }
+//    public function showComments($id){
+//        $photo = Photo::findOrFail($id);
+//        $comments = $photo->comments()->with('user')->paginate(10);
+//
+//        return view('admin/Photo.photo_comment', compact('photo','comments'));
+//    }
+//    public function updateStatus($id, $status)
+//    {
+//        $comment = Comment::findOrFail($id);
+//        $comment->comment_status = $status;
+//        try {
+//            $comment->save();
+//            Session::flash('successMessage', 'Comment status updated successfully!');
+//        } catch (\Exception $e) {
+//            Session::flash('errorMessage', 'Error updating comment status.');
+//        }
+//        return redirect()->back();
+//    }
 
 }
 
