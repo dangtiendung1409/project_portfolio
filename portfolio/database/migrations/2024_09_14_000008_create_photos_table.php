@@ -15,10 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('title', 255);
             $table->text('description')->nullable();
-            $table->string('image_url', 255);
             $table->dateTime('upload_date');
             $table->string('location', 255)->nullable();
-            $table->string('photo_status', 50);
             $table->string('privacy_status', 50);
 
             $table->unsignedBigInteger('user_id');
@@ -26,7 +24,6 @@ return new class extends Migration
 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('category_id')->references('id')->on('categories')->onDelete('cascade');
-            $table->softDeletes();
         });
     }
 

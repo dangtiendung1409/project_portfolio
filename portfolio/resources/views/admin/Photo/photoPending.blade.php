@@ -46,73 +46,84 @@
                         There are no photos pending
                     </div>
                 @else
-                <table>
-                    <thead>
-                    <tr>
-                        <th class="checkbox-cell">
-                            <label class="checkbox">
-                                <input type="checkbox">
-                                <span class="check"></span>
-                            </label>
-                        </th>
-                        <th>id</th>
-                        <th>title</th>
-                        <th>description</th>
-                        <th>image</th>
-                        <th>location</th>
-                        <th>user name</th>
-                        <th>category name</th>
-                        <th>upload date</th>
-                        <th>privacy_status</th>
-                        <th></th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr>
-                    @foreach($photoPending as $photo)
+                    <table>
+                        <thead>
                         <tr>
-                            <td class="checkbox-cell">
+                            <th class="checkbox-cell">
                                 <label class="checkbox">
                                     <input type="checkbox">
                                     <span class="check"></span>
                                 </label>
-                            </td>
-                            <td>{{ $photo->id }}</td>
-                            <td>{{ $photo->title }}</td>
-                            <td>{{ $photo->description }}</td>
-                            <td>
-                                <img src="{{ asset('' . $photo->image_url) }}" width="450" height="450" style="cursor: pointer;" onclick="showModal(this)">
-                            </td>
-                            <td>{{ $photo->location }}</td>
-                            <td>{{ $photo->user->username }}</td>
-                            <td>{{ $photo->category->category_name}}</td>
-                            <td>{{ date('d-m-Y', strtotime($photo->upload_date)) }}</td>
-                            <td class="{{ $photo->privacy_status === 'private' ? 'text-private' : 'text-public' }}">
-                                {{ $photo->privacy_status }}
-                            </td>
-                            <td class="actions-cell">
-                                <div class="buttons right nowrap">
-                                    <a href="{{ url('/admin/photoPending/detail/' . $photo->id) }}" class="button small blue">
-                                        <span class="icon"><i class="mdi mdi-eye"></i></span>
-                                    </a>
-                                </div>
-                            </td>
+                            </th>
+                            <th>id</th>
+                            <th>title</th>
+                            <th>description</th>
+                            <th>image</th>
+                            <th>location</th>
+                            <th>user name</th>
+                            <th>category name</th>
+                            <th>upload date</th>
+                            <th>privacy_status</th>
+                            <th></th>
                         </tr>
-                    @endforeach
-                    </tbody>
-                </table>
-                <div class="table-pagination">
-                    <div class="flex items-center justify-between">
-                        <div class="buttons">
-                            @foreach ($photoPending->getUrlRange(1, $photoPending->lastPage()) as $page => $url)
-                                <a href="{{ $url }}" class="button {{ $photoPending->currentPage() == $page ? 'active' : '' }}">
-                                    {{ $page }}
-                                </a>
-                            @endforeach
+                        </thead>
+                        <tbody>
+                        <tr>
+                        @foreach($photoPending as $photo)
+                            @php
+                                // Lọc ảnh có trạng thái pending
+                                $pendingImages = $photo->images->filter(function($image) {
+                                    return $image->photo_status == 'pending';
+                                });
+                            @endphp
+
+                            @if($pendingImages->isNotEmpty())
+                                <tr>
+                                    <td class="checkbox-cell">
+                                        <label class="checkbox">
+                                            <input type="checkbox">
+                                            <span class="check"></span>
+                                        </label>
+                                    </td>
+                                    <td>{{ $photo->id }}</td>
+                                    <td>{{ $photo->title }}</td>
+                                    <td>{{ $photo->description }}</td>
+                                    <td>
+                                        @foreach($pendingImages as $image)
+                                            <img src="{{ asset($image->image_url) }}" width="450" height="450" style="cursor: pointer; margin-bottom: 10px;" onclick="showModal(this)">
+                                        @endforeach
+                                    </td>
+                                    <td>{{ $photo->location }}</td>
+                                    <td>{{ $photo->user->username }}</td>
+                                    <td>{{ $photo->category->category_name}}</td>
+                                    <td>{{ date('d-m-Y', strtotime($photo->upload_date)) }}</td>
+                                    <td class="{{ $photo->privacy_status === 'private' ? 'text-private' : 'text-public' }}">
+                                        {{ $photo->privacy_status }}
+                                    </td>
+                                    <td class="actions-cell">
+                                        <div class="buttons right nowrap">
+                                            <a href="{{ url('/admin/photoPending/detail/' . $photo->id) }}" class="button small blue">
+                                                <span class="icon"><i class="mdi mdi-eye"></i></span>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endif
+                        @endforeach
+                        </tbody>
+                    </table>
+                    <div class="table-pagination">
+                        <div class="flex items-center justify-between">
+                            <div class="buttons">
+                                @foreach ($photoPending->getUrlRange(1, $photoPending->lastPage()) as $page => $url)
+                                    <a href="{{ $url }}" class="button {{ $photoPending->currentPage() == $page ? 'active' : '' }}">
+                                        {{ $page }}
+                                    </a>
+                                @endforeach
+                            </div>
+                            <small>Page {{ $photoPending->currentPage() }} of {{ $photoPending->lastPage() }}</small>
                         </div>
-                        <small>Page {{ $photoPending->currentPage() }} of {{ $photoPending->lastPage() }}</small>
                     </div>
-                </div>
                 @endif
             </div>
         </div>

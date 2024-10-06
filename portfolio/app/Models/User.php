@@ -61,7 +61,17 @@ class User extends Authenticatable
     {
         return $this->hasMany(Notification::class);
     }
+    // Mối quan hệ đến các báo cáo mà người này đã tạo
+    public function reports()
+    {
+        return $this->hasMany(Report::class, 'reporter_id');
+    }
 
+    // Mối quan hệ đến các báo cáo mà người này bị tố cáo
+    public function violations()
+    {
+        return $this->hasMany(Report::class, 'violator_id');
+    }
     public function followers()
     {
         return $this->belongsToMany(User::class, 'follows', 'following_id', 'follower_id');

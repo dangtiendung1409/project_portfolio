@@ -13,8 +13,8 @@ class LikeSeeder extends Seeder
     public function run(): void
     {
         $likes = [
-            ['user_id' => 1, 'photo_id' => 1, 'like_date' => now()],
-            ['user_id' => 2, 'photo_id' => 2, 'like_date' => now()],
+            ['user_id' => 1, 'photo_image_id' => 1, 'like_date' => now()],
+            ['user_id' => 2, 'photo_image_id' => 2, 'like_date' => now()],
         ];
 
         foreach ($likes as $like) {

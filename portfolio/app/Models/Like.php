@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Like extends Model
 {
     use HasFactory;
-    protected $fillable = ['user_id', 'photo_id', 'like_date'];
+    protected $fillable = ['user_id', 'photo_image_id', 'like_date'];
 
     protected $dates = ['like_date'];
 
@@ -17,8 +17,8 @@ class Like extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function photo()
+    public function photoImage()
     {
-        return $this->belongsTo(Photo::class);
+        return $this->belongsTo(PhotoImages::class, 'photo_image_id');
     }
 }

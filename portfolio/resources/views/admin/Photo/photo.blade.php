@@ -80,6 +80,14 @@
                     <tbody>
                     <tr>
                     @foreach($photos as $photo)
+                        @php
+                            // Lọc ảnh có trạng thái approved
+                            $approvedImages = $photo->images->filter(function($image) {
+                                return $image->photo_status == 'approved';
+                            });
+                        @endphp
+
+                        @if($approvedImages->isNotEmpty())
                         <tr>
                             <td class="checkbox-cell">
                                 <label class="checkbox">
@@ -91,7 +99,9 @@
                             <td>{{ $photo->title }}</td>
                             <td>{{ $photo->description }}</td>
                             <td>
-                                <img src="{{ asset('' . $photo->image_url) }}" width="450" height="450" style="cursor: pointer;" onclick="showModal(this)">
+                                @foreach($photo->images as $image)
+                                    <img src="{{ asset($image->image_url) }}" width="450" height="450" style="cursor: pointer; margin-bottom: 10px;" onclick="showModal(this)">
+                                @endforeach
                             </td>
                             <td>{{ $photo->location }}</td>
                             <td>{{ $photo->user->username }}</td>
@@ -117,6 +127,7 @@
                                 </div>
                             </td>
                         </tr>
+                        @endif
                     @endforeach
                     </tbody>
                 </table>

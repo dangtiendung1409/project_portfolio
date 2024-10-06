@@ -50,6 +50,12 @@
                 </a>
             </li>
             <li>
+                <a href="/admin/report">
+                    <span class="icon"><i class="mdi mdi-flag"></i></span>
+                    <span class="menu-item-label">report management</span>
+                </a>
+            </li>
+            <li>
                 <a class="dropdown">
                     <span class="icon"><i class="mdi mdi-view-list"></i></span>
                     <span class="menu-item-label">Submenus</span>

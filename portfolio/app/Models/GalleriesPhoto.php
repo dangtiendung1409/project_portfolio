@@ -10,5 +10,5 @@ class GalleriesPhoto extends Model
     use HasFactory;
     public $timestamps = false;
 
-    protected $fillable = ['galleries_id', 'photo_id'];
+    protected $fillable = ['galleries_id', 'photo_image_id'];
 }

@@ -14,11 +14,21 @@ class photoController extends Controller
 {
     public function index()
     {
-        $photos = Photo::where('photo_status', 'approved')->paginate(20);
+        // Lấy tất cả các ảnh có trạng thái approved và thực hiện phân trang
+        $photos = Photo::whereHas('images', function($query) {
+            $query->where('photo_status', 'approved');
+        })->with(['images' => function ($query) {
+            $query->where('photo_status', 'approved');
+        }])->paginate(20);
+
+        // Lấy thông điệp từ session
         $successMessage = Session::get('successMessage');
         $errorMessage = Session::get('errorMessage');
-        return view('admin/Photo.photo', compact('photos', 'successMessage', 'errorMessage'));
+
+        // Trả về view với dữ liệu đã chuẩn bị
+        return view('admin.Photo.photo', compact('photos', 'successMessage', 'errorMessage'));
     }
+
 
     public function create()
     {
@@ -152,9 +162,9 @@ class photoController extends Controller
         try {
             $photo->delete();
 
-            Session::flash('successMessage', 'Photo deleted successfully!');  // Thông báo thành công
+            Session::flash('successMessage', 'Photo deleted successfully!');
         } catch (\Exception $e) {
-            Session::flash('errorMessage', 'Error deleting the photo.');  // Thông báo lỗi
+            Session::flash('errorMessage', 'Error deleting the photo.');
         }
 
         return redirect('/admin/photo');  // Quay về trang quản lý ảnh
@@ -164,9 +174,20 @@ class photoController extends Controller
     // photo pending
     public function photoPending()
     {
-        $photoPending = Photo::where('photo_status', 'pending')->paginate(10);
-        return view('admin/Photo.photoPending', compact('photoPending'));
+        // Lấy tất cả các ảnh có trạng thái pending và thực hiện phân trang
+        $photoPending = Photo::whereHas('images', function($query) {
+            $query->where('photo_status', 'pending');
+        })->with(['images' => function ($query) {
+            $query->where('photo_status', 'pending');
+        }])->paginate(10);
+
+        // Lấy thông điệp từ session
+        $successMessage = Session::get('successMessage');
+        $errorMessage = Session::get('errorMessage');
+
+        return view('admin/Photo.photoPending', compact('photoPending', 'errorMessage', 'successMessage'));
     }
+
     public function detailPhotoPending($id)
     {
         $photo = Photo::with(['user', 'category', 'tags'])->findOrFail($id);
@@ -190,9 +211,20 @@ class photoController extends Controller
     // photo rejected
     public function photoRejected()
     {
-        $photoRejected = Photo::where('photo_status', 'rejected')->paginate(10);
-        return view('admin/Photo.photoRejected', compact('photoRejected'));
+        // Lấy tất cả các ảnh có trạng thái rejected và thực hiện phân trang
+        $photoRejected = Photo::whereHas('images', function($query) {
+            $query->where('photo_status', 'rejected');
+        })->with(['images' => function ($query) {
+            $query->where('photo_status', 'rejected');
+        }])->paginate(10);
+
+        // Lấy thông điệp từ session
+        $successMessage = Session::get('successMessage');
+        $errorMessage = Session::get('errorMessage');
+
+        return view('admin/Photo.photoRejected', compact('photoRejected', 'errorMessage', 'successMessage'));
     }
+
     // comment photo
     public function showComments($id){
         $photo = Photo::findOrFail($id);

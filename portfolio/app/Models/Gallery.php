@@ -17,8 +17,8 @@ class Gallery extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function photos()
+    public function photoImages()
     {
-        return $this->belongsToMany(Photo::class, 'galleries_photos');
+        return $this->belongsToMany(PhotoImages::class, 'galleries_photos', 'galleries_id', 'photo_image_id');
     }
 }

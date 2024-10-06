@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 class PhotoSeeder extends Seeder
 {
@@ -43,25 +42,53 @@ class PhotoSeeder extends Seeder
             $locations = ['Mountain Range', 'Downtown', 'Beachside', 'Countryside', 'Riverside', 'National Park', 'Desert', 'Rainforest'];
             return collect($locations)->random();
         }
-        $privacyStatus = ['public', 'private'];
 
+        $privacyStatus = ['public', 'private'];
         $photos = [];
+        $photoImages = [];
+
+        // Danh sách tên ảnh có sẵn
+        $imageNames = [];
+        for ($k = 1; $k <= 200; $k++) {
+            $imageNames[] = '/images/photos/image-' . $k . '.jpeg';
+        }
 
         for ($i = 1; $i <= 200; $i++) {
+            // Tạo dữ liệu cho bảng 'photos'
             $photos[] = [
                 'title' => generateRandomTitle(),
                 'description' => generateRandomDescription(),
-                'image_url' => '/images/photos/image-' . $i . '.jpeg',
                 'upload_date' => now(),
                 'location' => generateRandomLocation(),
-                'user_id' => rand(1, 3),  // Random từ 1 đến 3 cho user_id
-                'category_id' => rand(1, 30),  // Random từ 1 đến 30 cho category_id
-                'photo_status' => 'approved',
+                'user_id' => rand(1, 3),
+                'category_id' => rand(1, 30),
                 'privacy_status' => collect($privacyStatus)->random(),  // Random Public hoặc Private
             ];
+
+            // Tạo từ 1 đến 3 hình ảnh cho mỗi 'photo' trong bảng 'photo_images'
+            $numberOfImages = rand(1, 3); // Số hình ảnh ngẫu nhiên cho mỗi photo
+            $usedImages = []; // Mảng lưu trữ các hình ảnh đã sử dụng để tránh trùng lặp
+
+            for ($j = 0; $j < $numberOfImages; $j++) {
+                // Chọn ngẫu nhiên một tên ảnh chưa được sử dụng
+                do {
+                    $randomImage = $imageNames[array_rand($imageNames)];
+                } while (in_array($randomImage, $usedImages));
+
+                $usedImages[] = $randomImage; // Thêm vào danh sách đã sử dụng
+
+                $photoImages[] = [
+                    'photo_id' => $i,
+                    'photo_status' => 'approved',
+                    'image_url' => $randomImage,
+                ];
+            }
         }
 
-        // Chèn tất cả các bản ghi vào bảng 'photos'
+        // Chèn dữ liệu vào bảng 'photos'
         DB::table('photos')->insert($photos);
+
+        // Chèn dữ liệu vào bảng 'photo_images'
+        DB::table('photo_images')->insert($photoImages);
     }
 }

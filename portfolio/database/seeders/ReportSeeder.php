@@ -13,8 +13,8 @@ class ReportSeeder extends Seeder
     public function run(): void
     {
         $reports = [
-            ['photo_id' => 1, 'reporter_id' => 2, 'report_reason' => 'Inappropriate content', 'report_date' => now(), 'status' => 'Pending', 'action_taken' => 'None'],
-            ['photo_id' => 2, 'reporter_id' => 1, 'report_reason' => 'Spam', 'report_date' => now(), 'status' => 'Resolved', 'action_taken' => 'Removed'],
+            ['photo_image_id' => 1, 'reporter_id' => 2, 'violator_id'=> 1, 'report_reason' => 'Inappropriate content', 'report_date' => now(), 'status' => 'pending', 'action_taken' => 'none'],
+            ['photo_image_id' => 2, 'reporter_id' => 1,'violator_id'=> 2, 'report_reason' => 'Spam', 'report_date' => now(), 'status' => 'resolved', 'action_taken' => 'removed'],
         ];
 
         foreach ($reports as $report) {

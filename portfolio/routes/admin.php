@@ -41,4 +41,6 @@ Route::post('/category/update/{id}', [\App\Http\Controllers\Admin\categoryContro
 // Delete category
 Route::post('/category/delete/{id}', [\App\Http\Controllers\Admin\categoryController::class, 'destroy'])->name('category.destroy');
 
+//report management
+Route::get('/report',[\App\Http\Controllers\Admin\reportController::class,'index']);
 });

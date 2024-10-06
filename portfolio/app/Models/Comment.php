@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Comment extends Model
 {
     use HasFactory;
-    protected $fillable = ['photo_id', 'user_id', 'comment_text', 'comment_date','comment_status'];
+    protected $fillable = ['photo_image_id', 'user_id', 'comment_text', 'comment_date','comment_status'];
 
     protected $dates = ['comment_date'];
 
@@ -17,8 +17,8 @@ class Comment extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function photo()
+    public function photoImage()
     {
-        return $this->belongsTo(Photo::class);
+        return $this->belongsTo(PhotoImages::class, 'photo_image_id');
     }
 }

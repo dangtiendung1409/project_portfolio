@@ -13,8 +13,8 @@ class GalleriesPhotosSeeder extends Seeder
     public function run(): void
     {
         $galleriesPhotos = [
-            ['galleries_id' => 1, 'photo_id' => 1],
-            ['galleries_id' => 2, 'photo_id' => 2],
+            ['galleries_id' => 1, 'photo_image_id' => 1],
+            ['galleries_id' => 2, 'photo_image_id' => 2],
         ];
 
         foreach ($galleriesPhotos as $galleryPhoto) {
