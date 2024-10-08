@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
@@ -16,19 +15,24 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        // Lấy thông tin đăng nhập từ trường 'email' và 'password'
+        // Get login credentials from 'email' and 'password' fields
         $credentials = $request->only('email', 'password');
 
-        // Kiểm tra nếu tài khoản tồn tại nhưng không đúng mật khẩu
+        // Check if the user exists
         $user = User::where('email', $credentials['email'])->first();
 
         if ($user) {
-            // Kiểm tra nếu người dùng có quyền là user
+            // Check if the user account is active
+            if ($user->is_active == 0) {
+                return back()->withErrors(['login' => 'Your account is locked.']);
+            }
+
+            // Check if the user has the role 'user'
             if ($user->hasRole('user')) {
                 return back()->withErrors(['login' => 'Wrong account and password.']);
             }
 
-            // Kiểm tra xác thực
+            // Authenticate the user
             if (Auth::attempt(['email' => $credentials['email'], 'password' => $credentials['password']])) {
                 if ($user->hasRole('admin')) {
                     return redirect()->route('admin.dashboard');
@@ -37,7 +41,7 @@ class AuthController extends Controller
             }
         }
 
-        // Nếu không tìm thấy user hoặc sai mật khẩu
+        // If the user is not found or the password is incorrect
         return back()->withErrors(['login' => 'Wrong account and password.']);
     }
 

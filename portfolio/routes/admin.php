@@ -44,5 +44,9 @@ Route::post('/category/update/{id}', [\App\Http\Controllers\Admin\categoryContro
 Route::post('/category/delete/{id}', [\App\Http\Controllers\Admin\categoryController::class, 'destroy'])->name('category.destroy');
 
 //report management
-Route::get('/report',[\App\Http\Controllers\Admin\reportController::class,'index']);
+Route::get('/reportPending',[\App\Http\Controllers\Admin\reportController::class,'reportPending']);
+Route::get('/reportResolved',[\App\Http\Controllers\Admin\reportController::class,'reportResolved']);
+Route::post('/report/updateStatus/{id}/{action}', [\App\Http\Controllers\Admin\ReportController::class, 'updateStatus'])
+     ->name('admin.report.updateStatus');
+
 });

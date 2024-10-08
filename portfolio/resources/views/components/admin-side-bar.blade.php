@@ -56,10 +56,25 @@
                 </a>
             </li>
             <li>
-                <a href="/admin/report">
+                <a class="dropdown">
                     <span class="icon"><i class="mdi mdi-flag"></i></span>
                     <span class="menu-item-label">report management</span>
+                    <span class="icon"><i class="mdi mdi-plus"></i></span>
                 </a>
+                <ul>
+                    <li>
+                        <a href="/admin/reportPending">
+                            <span class="icon"><i class="mdi mdi-alert"></i></span>
+                            <span>report pending</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/reportResolved">
+                            <span class="icon"><i class="mdi mdi-check-circle"></i></span>
+                            <span>report resolved</span>
+                        </a>
+                    </li>
+                </ul>
             </li>
             <li>
                 <a class="dropdown">
