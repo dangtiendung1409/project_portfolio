@@ -27,11 +27,6 @@ class Photo extends Model
     {
         return $this->belongsTo(User::class);
     }
-
-    public function comments()
-    {
-        return $this->hasMany(Comment::class, 'photo_image_id');
-    }
     public function category()
     {
         return $this->belongsTo(Category::class);
