@@ -8,10 +8,15 @@ Route::get('/dashboard',[\App\Http\Controllers\Admin\dashboardController::class,
 
 //photo management
 Route::get('/photo',[\App\Http\Controllers\Admin\photoController::class,'index']);
+
+// list comment photo
+Route::get('/photo/comment/{photo_image_id}', [\App\Http\Controllers\Admin\PhotoController::class, 'showComment'])
+    ->name('photo.showComment');
+
 //photo pending
 Route::get('/photoPending',[\App\Http\Controllers\Admin\photoController::class,'photoPending'])
     ->name('admin.photoPending');
-Route::post('/updateStatus/{id}/{status}', [\App\Http\Controllers\Admin\photoController::class, 'updateStatus'])
+Route::post('/photo/updateStatus/{id}/{status}', [\App\Http\Controllers\Admin\photoController::class, 'updateStatus'])
     ->name('admin.photoPending.updateStatus');
 
 //photo rejected
@@ -28,7 +33,7 @@ Route::post('/photo/delete/{id}', [\App\Http\Controllers\Admin\photoController::
 // comment photo management
 Route::get('/listComment', [\App\Http\Controllers\Admin\commentController::class, 'listComment'])
     ->name('admin.comment.listComment');
-Route::post('/updateStatus/{id}/{status}', [\App\Http\Controllers\Admin\commentController::class, 'updateStatus'])
+Route::post('/comment/updateStatus/{id}/{status}', [\App\Http\Controllers\Admin\commentController::class, 'updateStatus'])
     ->name('admin.comment.updateStatus');
 
 
@@ -48,5 +53,13 @@ Route::get('/reportPending',[\App\Http\Controllers\Admin\reportController::class
 Route::get('/reportResolved',[\App\Http\Controllers\Admin\reportController::class,'reportResolved']);
 Route::post('/report/updateStatus/{id}/{action}', [\App\Http\Controllers\Admin\ReportController::class, 'updateStatus'])
      ->name('admin.report.updateStatus');
+
+// user management
+Route::get('/users', [\App\Http\Controllers\Admin\userController::class, 'index'])
+    ->name('admin.users.index');
+Route::get('/usersInActive', [\App\Http\Controllers\Admin\userController::class, 'usersInActive'])
+    ->name('admin.users.usersInActive');
+Route::post('/unlock-user/{id}', [\App\Http\Controllers\Admin\userController::class, 'unlockUser'])
+    ->name('admin.unlockUser');
 
 });

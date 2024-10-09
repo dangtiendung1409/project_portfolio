@@ -19,7 +19,7 @@
             <li>
                 <a class="dropdown">
                     <span class="icon"><i class="mdi mdi-image"></i></span>
-                    <span class="menu-item-label">photo management</span>
+                    <span class="menu-item-label">Photo management</span>
                     <span class="icon"><i class="mdi mdi-plus"></i></span>
                 </a>
                 <ul>
@@ -44,34 +44,56 @@
                 </ul>
             </li>
             <li>
+                <a class="dropdown">
+                    <span class="icon"><i class="mdi mdi-account-group"></i></span>
+                    <span class="menu-item-label">User Management</span>
+                    <span class="icon"><i class="mdi mdi-plus"></i></span>
+                </a>
+                <ul>
+                    <li>
+                        <a href="/admin/users">
+                            <span class="icon"><i class="mdi mdi-account-check"></i></span>
+                            <span>Active Users</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/usersInActive">
+                            <span class="icon"><i class="mdi mdi-account-off"></i></span>
+                            <span>Inactive Users</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+
+            <li>
                 <a href="/admin/listComment">
                     <span class="icon"><i class="mdi mdi-comment"></i></span>
-                    <span class="menu-item-label">comment management</span>
+                    <span class="menu-item-label">Comment management</span>
                 </a>
             </li>
             <li>
                 <a href="/admin/category">
                     <span class="icon"><i class="mdi mdi-format-list-bulleted"></i></span>
-                    <span class="menu-item-label">category management</span>
+                    <span class="menu-item-label">Category management</span>
                 </a>
             </li>
             <li>
                 <a class="dropdown">
                     <span class="icon"><i class="mdi mdi-flag"></i></span>
-                    <span class="menu-item-label">report management</span>
+                    <span class="menu-item-label">Report management</span>
                     <span class="icon"><i class="mdi mdi-plus"></i></span>
                 </a>
                 <ul>
                     <li>
                         <a href="/admin/reportPending">
                             <span class="icon"><i class="mdi mdi-alert"></i></span>
-                            <span>report pending</span>
+                            <span>Report pending</span>
                         </a>
                     </li>
                     <li>
                         <a href="/admin/reportResolved">
                             <span class="icon"><i class="mdi mdi-check-circle"></i></span>
-                            <span>report resolved</span>
+                            <span>Report resolved</span>
                         </a>
                     </li>
                 </ul>

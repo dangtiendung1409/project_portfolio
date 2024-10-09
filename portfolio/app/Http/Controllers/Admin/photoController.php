@@ -29,7 +29,13 @@ class photoController extends Controller
         // Trả về view với dữ liệu đã chuẩn bị
         return view('admin.Photo.photo', compact('photos', 'successMessage', 'errorMessage'));
     }
+    public function showComment($photo_image_id){
+        $comments = Comment::where('photo_image_id', $photo_image_id)
+            ->where('comment_status', 'approved')
+            ->paginate(10);
 
+        return view('admin/photo.listComment', compact('comments'));
+    }
 
     public function create()
     {

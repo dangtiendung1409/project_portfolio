@@ -100,7 +100,7 @@
                                     <td class="actions-cell">
                                         <div class="buttons right nowrap">
                                             <!-- Nút approve -->
-                                            <form action="{{ route('admin.photoPending.updateStatus', ['id' => $photo->id, 'status' => 'approved']) }}" method="POST" style="display:inline-block;">
+                                            <form action="{{ route('admin.photoPending.updateStatus', ['id' => $photo->id, 'status' => 'approved']) }}" method="POST" onsubmit="return confirm('Are you sure you want to update status approve?');" style="display:inline-block;">
                                                 @csrf
                                                 <button type="submit" class="button small green">
                                                     <span class="icon"><i class="mdi mdi-check"></i></span> Approve
@@ -108,7 +108,7 @@
                                             </form>
 
                                             <!-- Nút reject -->
-                                            <form action="{{ route('admin.photoPending.updateStatus', ['id' => $photo->id, 'status' => 'rejected']) }}" method="POST" style="display:inline-block;">
+                                            <form action="{{ route('admin.photoPending.updateStatus', ['id' => $photo->id, 'status' => 'rejected']) }}" method="POST" onsubmit="return confirm('Are you sure you want to update status reject?');" style="display:inline-block;">
                                                 @csrf
                                                 <button type="submit" class="button small red">
                                                     <span class="icon"><i class="mdi mdi-close"></i></span> Reject
@@ -116,7 +116,6 @@
                                             </form>
                                         </div>
                                     </td>
-
                                 </tr>
                             @endforeach
                         @endforeach
