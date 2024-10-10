@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 Route::middleware(['auth', 'role:admin'])->group(function () {
 //dashboard
-Route::get('/dashboard',[\App\Http\Controllers\Admin\dashboardController::class,'index'])
+Route::get('/dashboard',[\App\Http\Controllers\Admin\dashboardController::class,'dashboard'])
     ->name('admin.dashboard');
 
 //photo management
