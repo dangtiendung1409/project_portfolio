@@ -62,6 +62,8 @@
                             <th>Bio</th>
                             <th>Join Date</th>
                             <th>Status</th>
+                            <th>Followers</th>
+                            <th>Total Photos</th>
                             <th>Violation count</th>
                             <th>Actions</th>
                             <th></th>
@@ -95,6 +97,8 @@
                                         <span style="color: red;">Inactive</span>
                                     @endif
                                 </td>
+                                <td> {{ $user->followers()->count() }}</td>
+                                <td>{{ $user->photos_count }}</td>
                                 <td>{{$user->violation_count}}</td>
                                 <td class="actions-cell">
                                     <div class="buttons right nowrap">

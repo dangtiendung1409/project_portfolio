@@ -4,7 +4,7 @@
         <div class="flex flex-col md:flex-row items-center justify-between space-y-6 md:space-y-0">
             <ul>
                 <li>Admin</li>
-                <li>List User</li>
+                <li>List galleries</li>
             </ul>
             <a href="https://justboil.me/"  target="_blank" class="button blue">
                 <span class="icon"><i class="mdi mdi-credit-card-outline"></i></span>
@@ -18,16 +18,16 @@
             <header class="card-header">
                 <p class="card-header-title">
                     <span class="icon"><i class="mdi mdi-account-multiple"></i></span>
-                    List User
+                    List galleries for {{ $user->username }}
                 </p>
                 <a href="#" class="card-header-icon">
                     <span class="icon"><i class="mdi mdi-reload"></i></span>
                 </a>
             </header>
             <div class="card-content">
-                @if($users->isEmpty())
+                @if($galleries->isEmpty())
                     <div class="notification is-warning" style="text-align: center; color: red; font-size: 20px;">
-                        No users exist
+                        No galleries exist
                     </div>
                 @else
                 <table>
@@ -39,22 +39,14 @@
                                 <span class="check"></span>
                             </label>
                         </th>
-                        <th>ID</th>
-                        <th>User name</th>
-                        <th>Email</th>
-                        <th>Profile Picture</th>
-                        <th>Bio</th>
-                        <th>Join Date</th>
-                        <th>Status</th>
-                        <th>Followers</th>
-                        <th>Total Photos</th>
-                        <th>Violation count</th>
-                        <th>Actions</th>
+                        <th>galleries name</th>
+                        <th>galleries description</th>
+                        <th>creation date</th>
                         <th></th>
                     </tr>
                     </thead>
                     <tbody>
-                    @foreach($users as $user)
+                    @foreach($galleries as $galleriesUser)
                     <tr>
                         <td class="checkbox-cell">
                             <label class="checkbox">
@@ -62,56 +54,33 @@
                                 <span class="check"></span>
                             </label>
                         </td>
-                        <td>{{ $user->id }}</td>
-                        <td>{{ $user->username }}</td>
-                        <td>{{ $user->email }}</td>
-                        <td>
-                            @if($user->profile_picture)
-                                <img src="{{ asset($user->profile_picture) }}" alt="Profile Picture" width="50">
-                            @else
-                                No Picture
-                            @endif
-                        </td>
-                        <td>{{ $user->bio ?? 'No Bio' }}</td>
-                        <td>{{ date('d-m-Y', strtotime($user->join_date)) }}</td>
-                        <td>
-                            @if($user->is_active)
-                                <span style="color: green;">Active</span>
-                            @else
-                                <span style="color: red;">Inactive</span>
-                            @endif
-                        </td>
-                       <td> {{ $user->followers()->count() }}</td>
-                        <td>{{ $user->photos_count }}</td>
-                        <td>{{$user->violation_count}}</td>
+                        <td>{{$galleriesUser->galleries_name}}</td>
+                        <td>{{$galleriesUser->galleries_description}}</td>
+                        <td>{{ date('d-m-Y', strtotime($galleriesUser->creation_date)) }}</td>
                         <td class="actions-cell">
                             <div class="buttons right nowrap">
-                                <a href="{{ url('/admin/users/'. 'photos/' .$user->id) }}" class="button small green">
+                                <a href="{{ url('/admin/users/galleries/'. 'photos/' .$galleriesUser->id) }}" class="button small green">
                                     <span class="icon"><i class="mdi mdi-image"></i></span>
-                                </a>
-                                <a href="{{ url('admin/users/'. 'galleries/' . $user->id) }}" class="button small blue">
-                                    <span class="icon"><i class="mdi mdi-folder-image"></i></span>
                                 </a>
                             </div>
                         </td>
                     </tr>
-
                     @endforeach
                     </tbody>
                 </table>
                     <div class="table-pagination">
                         <div class="flex items-center justify-between">
                             <div class="buttons">
-                                @foreach ($users->getUrlRange(1, $users->lastPage()) as $page => $url)
-                                    <a href="{{ $url }}" class="button {{ $users->currentPage() == $page ? 'active' : '' }}">
+                                @foreach ($galleries->getUrlRange(1, $galleries->lastPage()) as $page => $url)
+                                    <a href="{{ $url }}" class="button {{ $galleries->currentPage() == $page ? 'active' : '' }}">
                                         {{ $page }}
                                     </a>
                                 @endforeach
                             </div>
-                            <small>Page {{ $users->currentPage() }} of {{ $users->lastPage() }}</small>
+                            <small>Page {{ $galleries->currentPage() }} of {{ $galleries->lastPage() }}</small>
                         </div>
                     </div>
-                @endif
+                    @endif
             </div>
         </div>
     </section>

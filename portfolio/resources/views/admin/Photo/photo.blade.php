@@ -67,7 +67,6 @@
                                     <span class="check"></span>
                                 </label>
                             </th>
-                            <th>id</th>
                             <th>title</th>
                             <th>description</th>
                             <th>image</th>
@@ -97,7 +96,6 @@
                                                 <span class="check"></span>
                                             </label>
                                         </td>
-                                        <td>{{ $photo->id }}</td>
                                         <td>{{ $photo->title }}</td>
                                         <td>{{ $photo->description }}</td>
                                         <td>

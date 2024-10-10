@@ -59,7 +59,16 @@ Route::get('/users', [\App\Http\Controllers\Admin\userController::class, 'index'
     ->name('admin.users.index');
 Route::get('/usersInActive', [\App\Http\Controllers\Admin\userController::class, 'usersInActive'])
     ->name('admin.users.usersInActive');
+// unlock account user
 Route::post('/unlock-user/{id}', [\App\Http\Controllers\Admin\userController::class, 'unlockUser'])
     ->name('admin.unlockUser');
+// list photo user
+Route::get('/users/photos/{id}', [\App\Http\Controllers\Admin\userController::class, 'getUserPhotos'])
+    ->name('user.photos');
+// galleries photo user
+Route::get('/users/galleries/{id}', [\App\Http\Controllers\Admin\userController::class, 'getUserGalleries'])
+    ->name('user.galleries');
+Route::get('/users/galleries/photos/{id}', [\App\Http\Controllers\Admin\UserController::class, 'getGalleryPhotos'])
+    ->name('galleries.photos');
 
 });
