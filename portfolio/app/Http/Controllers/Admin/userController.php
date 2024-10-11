@@ -14,10 +14,37 @@ class userController extends Controller
 {
     public function index(Request $request)
     {
-        // Lấy danh sách người dùng active
-        $users = User::where('is_active', 1)
+        $query = User::query();
+
+        // Lọc theo username
+        if ($request->filled('username')) {
+            $query->where('username', 'like', '%' . $request->input('username') . '%');
+        }
+
+        // Lọc theo email
+        if ($request->filled('email')) {
+            $query->where('email', 'like', '%' . $request->input('email') . '%');
+        }
+
+        // Lọc theo join_date (từ ngày nào đến ngày nào)
+        if ($request->filled('start_date')) {
+            $query->whereDate('join_date', '>=', $request->input('start_date'));
+        }
+        if ($request->filled('end_date')) {
+            $query->whereDate('join_date', '<=', $request->input('end_date'));
+        }
+
+        // Lọc theo số lần vi phạm (violation_count)
+        if ($request->filled('violation_count')) {
+            $query->where('violation_count', '>=', $request->input('violation_count'));
+        }
+
+        // Lấy danh sách người dùng đã active
+        $users = $query->where('is_active', 1)
             ->withCount('photos')
-            ->paginate(10);
+            ->paginate(10)
+            ->appends($request->all());
+
         return view('admin/User.user', compact('users'));
     }
 
