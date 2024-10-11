@@ -38,11 +38,10 @@ class userController extends Controller
         if ($request->filled('violation_count')) {
             $query->where('violation_count', '>=', $request->input('violation_count'));
         }
-
-        // Lấy danh sách người dùng đã active
+        $size = $request->input('size', 10);
         $users = $query->where('is_active', 1)
             ->withCount('photos')
-            ->paginate(10)
+            ->paginate($size)
             ->appends($request->all());
 
         return view('admin/User.user', compact('users'));
@@ -50,10 +49,10 @@ class userController extends Controller
 
     public function usersInActive(Request $request)
     {
-        // Lấy danh sách người dùng inactive
+        $size = $request->input('size', 10);
         $users = User::where('is_active', 0)
             ->withCount('photos')
-            ->paginate(10);
+            ->paginate($size);
         return view('admin/User.InActiveUser', compact('users'));
     }
     public function unlockUser($id)
@@ -69,8 +68,9 @@ class userController extends Controller
 
         return redirect()->back();  // Chuyển hướng về trang trước
     }
-    public function getUserPhotos($id)
+    public function getUserPhotos($id,Request $request)
     {
+        $size = $request->input('size', 10);
         $photos = Photo::where('user_id', $id)
             ->whereHas('images', function ($query) {
                 $query->where('photo_status', 'approved');
@@ -78,24 +78,26 @@ class userController extends Controller
             ->with(['images' => function ($query) {
                 $query->where('photo_status', 'approved');
             }])
-            ->paginate(20);
+            ->paginate($size);
 
         $user = User::findOrFail($id);
         // Trả về view hiển thị ảnh
         return view('admin/User.userPhotos', compact('photos','user'));
     }
-    public function getUserGalleries($id)
+    public function getUserGalleries($id,Request $request)
     {
-        $galleries = Gallery::where("user_id",$id)->paginate(10);
+        $size = $request->input('size', 10);
+        $galleries = Gallery::where("user_id",$id)->paginate($size);
         $user = User::findOrFail($id);
         // Trả về view hiển thị ảnh
         return view('admin/User.galleries',compact('galleries','user'));
     }
-    public function getGalleryPhotos($id)
+    public function getGalleryPhotos($id,Request $request)
     {
+        $size = $request->input('size', 10);
         $gallery = Gallery::with('photoImages')->findOrFail($id);
 
-        $photos = $gallery->photoImages()->paginate(10);
+        $photos = $gallery->photoImages()->paginate($size);
 
         return view('admin/User.galleryPhotos', compact('gallery', 'photos'));
     }

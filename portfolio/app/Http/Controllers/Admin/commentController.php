@@ -40,12 +40,11 @@ class commentController extends Controller
         if ($request->filled('end_date')) {
             $query->whereDate('comment_date', '<=', $request->input('end_date'));
         }
-
-        // Pagination và sắp xếp
+        $size = $request->input('size', 10);
         $comments = $query
             ->orderByRaw("CASE WHEN comment_status = 'pending' THEN 0 ELSE 1 END")
             ->orderBy('comment_date', 'desc')
-            ->paginate(10)
+            ->paginate($size)
             ->appends($request->all());
 
         $successMessage = Session::get('successMessage');

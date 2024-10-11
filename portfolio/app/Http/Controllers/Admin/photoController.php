@@ -52,18 +52,19 @@ class photoController extends Controller
         if ($request->filled('privacy_status')) {
             $query->where('privacy_status', $request->input('privacy_status'));
         }
-
+        $size = $request->input('size', 20);
         $photos = $query->with(['images' => function ($query) {
             $query->where('photo_status', 'approved');
-        }])->paginate(10)->appends($request->all());
+        }])->paginate($size)->appends($request->all());
 
         return view('admin/Photo.photo', compact('photos', 'categories'));
     }
 
-    public function showComment($photo_image_id){
+    public function showComment($photo_image_id,Request $request){
+        $size = $request->input('size', 20); $size = $request->input('size', 20);
         $comments = Comment::where('photo_image_id', $photo_image_id)
             ->where('comment_status', 'approved')
-            ->paginate(10);
+            ->paginate($size);
 
         return view('admin/photo.listComment', compact('comments'));
     }
@@ -242,14 +243,14 @@ class photoController extends Controller
 
 
     // photo pending
-    public function photoPending()
+    public function photoPending(Request $request)
     {
-        // Lấy tất cả các ảnh có trạng thái pending và thực hiện phân trang
+        $size = $request->input('size', 20);
         $photoPending = Photo::whereHas('images', function($query) {
             $query->where('photo_status', 'pending');
         })->with(['images' => function ($query) {
             $query->where('photo_status', 'pending');
-        }])->paginate(10);
+        }])->paginate($size);
 
         // Lấy thông điệp từ session
         $successMessage = Session::get('successMessage');
@@ -276,14 +277,14 @@ class photoController extends Controller
 
 
     // photo rejected
-    public function photoRejected()
+    public function photoRejected(Request $request)
     {
-        // Lấy tất cả các ảnh có trạng thái rejected và thực hiện phân trang
+        $size = $request->input('size', 20);
         $photoRejected = Photo::whereHas('images', function($query) {
             $query->where('photo_status', 'rejected');
         })->with(['images' => function ($query) {
             $query->where('photo_status', 'rejected');
-        }])->paginate(10);
+        }])->paginate($size);
 
         // Lấy thông điệp từ session
         $successMessage = Session::get('successMessage');

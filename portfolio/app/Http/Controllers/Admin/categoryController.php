@@ -9,9 +9,10 @@ use Illuminate\Support\Facades\Session;
 
 class categoryController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $categories = Category::paginate(10);
+        $size = $request->input('size', 20);
+        $categories = Category::paginate($size);
         return view("admin/Category.category",compact('categories'));
     }
 

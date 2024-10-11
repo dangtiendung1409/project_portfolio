@@ -45,17 +45,18 @@ class reportController extends Controller
             $query->where('action_taken', $request->input('action_taken'));
         }
 
-        // Lấy danh sách báo cáo
-        $reports = $query->with(['violator', 'reporter', 'photoImage'])->paginate(10)->appends($request->all());
+        $size = $request->input('size', 10);
+        $reports = $query->with(['violator', 'reporter', 'photoImage'])->paginate($size)->appends($request->all());
 
         return view('admin/Report.reportPending', compact('reports'));
     }
 
 
     // Hiển thị báo cáo đã 'resolved'
-    public function reportResolved()
+    public function reportResolved(Request $request)
     {
-        $reports = Report::where('status', 'resolved')->with(['reporter', 'violator', 'photoImage'])->paginate(10);
+        $size = $request->input('size', 10);
+        $reports = Report::where('status', 'resolved')->with(['reporter', 'violator', 'photoImage'])->paginate($size);
         return view('Admin/Report.reportResolved', compact('reports'));
     }
 

@@ -20,9 +20,16 @@
                     <span class="icon"><i class="mdi mdi-comment-text-multiple"></i></span>
                     List comment
                 </p>
-                <a href="#" class="card-header-icon">
-                    <span class="icon"><i class="mdi mdi-reload"></i></span>
-                </a>
+                <form class="card-header-icon" method="get" onchange="this.submit()">
+                    <select style="margin-left:-10px; padding: 5px 10px; border: 1px solid #F1F1F1" name="size">
+                        <option value="10" {{ request('size') == 10 ? 'selected' : '' }}>10</option>
+                        <option value="20" {{ request('size') == 20 ? 'selected' : '' }}>20</option>
+                        <option value="50" {{ request('size') == 50 ? 'selected' : '' }}>50</option>
+                        <option value="100" {{ request('size') == 100 ? 'selected' : '' }}>100</option>
+                    </select>
+
+                    <input type="hidden" name="page" value="{{ request('page', 1) }}">
+                </form>
             </header>
             <div class="card-content">
                 @if($comments->isEmpty())
@@ -64,7 +71,7 @@
                     <div class="flex items-center justify-between">
                         <div class="buttons">
                             @foreach ($comments->getUrlRange(1, $comments->lastPage()) as $page => $url)
-                                <a href="{{ $url }}" class="button {{ $comments->currentPage() == $page ? 'active' : '' }}">
+                                <a href="{{ $url . '&size=' . request('size') }}" class="button {{ $comments->currentPage() == $page ? 'active' : '' }}">
                                     {{ $page }}
                                 </a>
                             @endforeach
