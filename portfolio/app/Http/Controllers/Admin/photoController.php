@@ -13,22 +13,53 @@ use Illuminate\Support\Facades\Session;
 
 class photoController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        // Lấy tất cả các ảnh có trạng thái approved và thực hiện phân trang
-        $photos = Photo::whereHas('images', function($query) {
-            $query->where('photo_status', 'approved');
-        })->with(['images' => function ($query) {
-            $query->where('photo_status', 'approved');
-        }])->paginate(20);
+        $query = Photo::query();
+        $categories = Category::all();
 
-        // Lấy thông điệp từ session
-        $successMessage = Session::get('successMessage');
-        $errorMessage = Session::get('errorMessage');
+        // Lọc theo title
+        if ($request->filled('title')) {
+            $query->where('title', 'like', '%' . $request->input('title') . '%');
+        }
 
-        // Trả về view với dữ liệu đã chuẩn bị
-        return view('admin.Photo.photo', compact('photos', 'successMessage', 'errorMessage'));
+        // Lọc theo location
+        if ($request->filled('location')) {
+            $query->where('location', 'like', '%' . $request->input('location') . '%');
+        }
+
+        // Lọc theo user name
+        if ($request->filled('user_name')) {
+            $query->whereHas('user', function ($q) use ($request) {
+                $q->where('username', 'like', '%' . $request->input('user_name') . '%');
+            });
+        }
+
+        // Lọc theo category
+        if ($request->filled('category_id')) {
+            $query->where('category_id', $request->input('category_id'));
+        }
+
+        // Lọc theo ngày upload
+        if ($request->filled('start_date')) {
+            $query->whereDate('upload_date', '>=', $request->input('start_date'));
+        }
+        if ($request->filled('end_date')) {
+            $query->whereDate('upload_date', '<=', $request->input('end_date'));
+        }
+
+        // Lọc theo privacy_status
+        if ($request->filled('privacy_status')) {
+            $query->where('privacy_status', $request->input('privacy_status'));
+        }
+
+        $photos = $query->with(['images' => function ($query) {
+            $query->where('photo_status', 'approved');
+        }])->paginate(10)->appends($request->all());
+
+        return view('admin/Photo.photo', compact('photos', 'categories'));
     }
+
     public function showComment($photo_image_id){
         $comments = Comment::where('photo_image_id', $photo_image_id)
             ->where('comment_status', 'approved')
