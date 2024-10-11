@@ -28,6 +28,49 @@
             @endif
         </div>
     @endif
+    <form style="display: flex; align-items: center; border-radius: 5px; margin-top: 10px; flex-wrap: wrap;" action="{{url('admin/reportPending')}}" method="get">
+        <!-- Lọc theo name violator -->
+        <div class="input-group input-group-sm" style="margin-right: 5px; margin-bottom: 10px;">
+            <input class="form-control" type="text" name="violator_name" placeholder="Violator Name" style=" margin-left:22px; height: 45px; font-size: 0.765625rem; background-color: #F1F1F1; border-radius: 5px; width: 120px;" />
+        </div>
+
+        <!-- Lọc theo name reporter -->
+        <div class="input-group input-group-sm" style="margin-right: 5px; margin-bottom: 10px;">
+            <input class="form-control" type="text" name="reporter_name" placeholder="Reporter Name" style="height: 45px; font-size: 0.765625rem; background-color: #F1F1F1; border-radius: 5px; width: 120px;" />
+        </div>
+
+        <!-- Lọc theo lý do báo cáo -->
+        <div class="input-group input-group-sm" style="margin-right: 5px; margin-bottom: 10px;">
+            <input class="form-control" type="text" name="report_reason" placeholder="Report Reason" style="height: 45px; font-size: 0.765625rem; background-color: #F1F1F1; border-radius: 5px; width: 120px;" />
+        </div>
+
+        <!-- Lọc theo ngày báo cáo từ ngày nào đến ngày nào -->
+        <div class="input-group input-group-sm" style="margin-right: 5px; margin-bottom: 10px;">
+            <input type="date" class="form-control" name="start_date" placeholder="From Date" style="height: 45px; font-size: 0.765625rem; background-color: #F1F1F1; border-radius: 5px; width: 150px;" />
+        </div>
+        <div class="input-group input-group-sm" style="margin-right: 5px; margin-bottom: 10px;">
+            <input type="date" class="form-control" name="end_date" placeholder="To Date" style="height: 45px; font-size: 0.765625rem; background-color: #F1F1F1; border-radius: 5px; width: 150px;" />
+        </div>
+
+        <!-- Lọc theo action taken -->
+        <div class="input-group input-group-sm" style="margin-right: 5px; margin-bottom: 10px;">
+            <select name="action_taken" class="form-control" style="height: 45px; font-size: 0.765625rem; background-color: #F1F1F1; border-radius: 5px; width: 150px;">
+                <option value="">Select Action</option>
+                <option value="none">None</option>
+                <option value="removed">Removed</option>
+                <option value="warning">Warning</option>
+                <option value="no violation">No Violation</option>
+            </select>
+        </div>
+
+        <!-- Nút lọc -->
+        <div class="input-group input-group-sm" style="margin-bottom: 10px; margin-left: 1px;">
+            <button style="height: 45px; background-color: #F1F1F1; border: none; border-radius: 5px;" type="submit" class="btn btn-default">
+                <i class="mdi mdi-magnify" style="padding: 10px;"></i>
+            </button>
+        </div>
+    </form>
+
     <section class="section main-section">
 
         <div class="card has-table">

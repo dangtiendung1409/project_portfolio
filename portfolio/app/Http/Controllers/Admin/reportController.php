@@ -9,11 +9,48 @@ use App\Models\Notification;
 class reportController extends Controller
 {
     // Hiển thị báo cáo đang ở trạng thái 'pending'
-    public function reportPending()
+    public function reportPending(Request $request)
     {
-        $reports = Report::where('status', 'pending')->with(['reporter', 'violator', 'photoImage'])->paginate(10);
-        return view('Admin/Report.reportPending', compact('reports'));
+        $query = Report::query();
+
+        // Lọc theo violator name
+        if ($request->filled('violator_name')) {
+            $query->whereHas('violator', function ($q) use ($request) {
+                $q->where('username', 'like', '%' . $request->input('violator_name') . '%');
+            });
+        }
+
+        // Lọc theo reporter name
+        if ($request->filled('reporter_name')) {
+            $query->whereHas('reporter', function ($q) use ($request) {
+                $q->where('username', 'like', '%' . $request->input('reporter_name') . '%');
+            });
+        }
+
+        // Lọc theo report reason
+        if ($request->filled('report_reason')) {
+            $query->where('report_reason', 'like', '%' . $request->input('report_reason') . '%');
+        }
+
+        // Lọc theo report date
+        if ($request->filled('start_date')) {
+            $query->whereDate('report_date', '>=', $request->input('start_date'));
+        }
+        if ($request->filled('end_date')) {
+            $query->whereDate('report_date', '<=', $request->input('end_date'));
+        }
+
+        // Lọc theo action_taken
+        if ($request->filled('action_taken')) {
+            $query->where('action_taken', $request->input('action_taken'));
+        }
+
+        // Lấy danh sách báo cáo
+        $reports = $query->with(['violator', 'reporter', 'photoImage'])->paginate(10)->appends($request->all());
+
+        return view('admin/Report.reportPending', compact('reports'));
     }
+
 
     // Hiển thị báo cáo đã 'resolved'
     public function reportResolved()

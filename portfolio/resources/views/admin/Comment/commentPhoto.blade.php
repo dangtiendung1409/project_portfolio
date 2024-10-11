@@ -78,6 +78,11 @@
                 </a>
             </header>
             <div class="card-content">
+                @if($comments->isEmpty())
+                    <div class="notification is-warning" style="text-align: center; color: red; font-size: 20px;">
+                        There are no comments
+                    </div>
+                @else
                 <table>
                     <thead>
                     <tr>
@@ -170,6 +175,7 @@
                         <small>Page {{ $comments->currentPage() }} of {{ $comments->lastPage() }}</small>
                     </div>
                 </div>
+                    @endif
             </div>
         </div>
     </section>
