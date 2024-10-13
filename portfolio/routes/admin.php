@@ -71,4 +71,16 @@ Route::get('/users/galleries/{id}', [\App\Http\Controllers\Admin\userController:
 Route::get('/users/galleries/photos/{id}', [\App\Http\Controllers\Admin\UserController::class, 'getGalleryPhotos'])
     ->name('galleries.photos');
 
+//Account setting
+Route::get('/profile', [\App\Http\Controllers\Admin\accountSettingController::class, 'profile'])
+    ->name('admin.profile');
+Route::post('/profile', [\App\Http\Controllers\Admin\accountSettingController::class, 'updateProfile'])
+    ->name('admin.updateProfile');
+
+Route::get('/change-password', [\App\Http\Controllers\Admin\accountSettingController::class, 'changePassword'])
+    ->name('admin.changePassword');
+Route::post('/update-password', [\App\Http\Controllers\Admin\accountSettingController::class, 'updatePassword'])
+    ->name('admin.updatePassword');
+
+
 });

@@ -100,19 +100,21 @@
             </li>
             <li>
                 <a class="dropdown">
-                    <span class="icon"><i class="mdi mdi-view-list"></i></span>
-                    <span class="menu-item-label">Submenus</span>
+                    <span class="icon"><i class="mdi mdi-account-settings"></i></span>
+                    <span class="menu-item-label">Account settings</span>
                     <span class="icon"><i class="mdi mdi-plus"></i></span>
                 </a>
                 <ul>
                     <li>
-                        <a href="#void">
-                            <span>Sub-item One</span>
+                        <a href="/admin/profile">
+                            <span class="icon"><i class="mdi mdi-account"></i></span>
+                            <span>Profile</span>
                         </a>
                     </li>
                     <li>
-                        <a href="#void">
-                            <span>Sub-item Two</span>
+                        <a href="/admin/change-password">
+                            <span class="icon"><i class="mdi mdi-lock"></i></span>
+                            <span>Change password</span>
                         </a>
                     </li>
                 </ul>
