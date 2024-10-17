@@ -39,9 +39,9 @@ class accountSettingController extends Controller
             if ($user->profile_picture && file_exists(public_path($user->profile_picture))) {
                 unlink(public_path($user->profile_picture));
             }
-            $imageName = time() . '.' . $request->profile_picture->getClientOriginalExtension();
-            $request->profile_picture->move(public_path('images/avatars'), $imageName);
 
+            $imageName = time() . '_' . uniqid() . '.' . $request->profile_picture->extension();
+            $request->profile_picture->move(public_path('images/avatars'), $imageName);
             $user->profile_picture = 'images/avatars/' . $imageName;
         }
 

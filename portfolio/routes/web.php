@@ -14,12 +14,15 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('index');
 });
 Route::get('login', [\App\Http\Controllers\Auth\AuthController::class, 'showLoginForm'])->name('login');
 Route::post('login', [\App\Http\Controllers\Auth\AuthController::class, 'login']);
 Route::post('logout', [\App\Http\Controllers\Auth\AuthController::class, 'logout'])->name('logout');
 
+Route::get('/apiDocs', function () {
+    return view('apiDocs');
+});
 
 //Route::middleware(['auth', 'role:user'])->group(function () {
 //    Route::get('/user/dashboard', function () {
