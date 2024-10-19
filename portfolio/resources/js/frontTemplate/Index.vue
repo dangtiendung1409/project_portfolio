@@ -4,7 +4,7 @@
             <div class="site-section site-portfolio">
                 <div class="container">
                     <TabBar :activeItem="activeItem" :setActive="setActive" />
-                    <ForYou v-if="activeItem === 'forYou'" />
+                    <ForYou v-if="activeItem === 'forYou'" :photos="photos" />
                     <Following v-else-if="activeItem === 'following'" :users="followingUsers" />
                     <Explore v-else-if="activeItem === 'explore'" :users="followingUsers"/>
                 </div>
@@ -140,6 +140,7 @@
     </Layout>
 </template>
 <script>
+import axios from 'axios';
 import Layout from './Layout.vue'
 import TabBar from './components/TabBar.vue';
 import ForYou from './components/ForYou.vue';
@@ -158,6 +159,7 @@ export default {
     data() {
         return {
             activeItem: 'forYou',
+            photos: [],
             followingUsers: [
                 {
                     id: 1, name: 'Paul Boomsma',
@@ -202,9 +204,30 @@ export default {
             ],
         }
     },
+    watch: {
+        activeItem(newItem) {
+            if (newItem === 'forYou') {
+                this.getPhoto();
+            }
+        }
+    },
+    mounted() {
+        if (this.activeItem === 'forYou') {
+            this.getPhoto();
+        }
+    },
     methods: {
         setActive(item) {
             this.activeItem = item;
+        },
+        async getPhoto() {
+            try {
+                const response = await axios.get(getUrlList().getPhotoData);
+                this.photos = response.data;
+                console.log(this.photos);
+            } catch (error) {
+                console.error(error);
+            }
         }
     }
 }
