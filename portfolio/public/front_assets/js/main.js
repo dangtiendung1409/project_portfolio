@@ -29,7 +29,7 @@
 	      columnWidth: '.col-sm-3'
 	    });
 	  });
-	  
+
 	  $container.isotope({ filter: '*' });
 
 	  $('#filters').on( 'click', 'a', function(e) {
@@ -64,4 +64,9 @@ AOS.init({
 	easing: 'ease',
 	duration: 1000,
 	once: true
+});
+
+document.querySelector('.hamburger').addEventListener('click', function() {
+    const navLinks = document.querySelector('.nav-links');
+    navLinks.style.display = (navLinks.style.display === 'flex') ? 'none' : 'flex';
 });
