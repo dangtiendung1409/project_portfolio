@@ -6,7 +6,7 @@
                     <h3>{{ item.photo.title }}</h3>
                     <span>{{ item.photo.category.category_name }}</span>
                 </div>
-                <img class="img-fluid rounded-image" :src="`${item.image_url}`">
+                <img v-lazy="`${item.image_url}`" class="img-fluid rounded-image" alt="">
             </a>
         </div>
     </div>
@@ -22,3 +22,4 @@ export default {
     }
 };
 </script>
+

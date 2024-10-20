@@ -519,6 +519,14 @@ h6,
         margin-left: 10px;
     }
 }
+img.lazy-loading {
+    opacity: 0.5; /* Làm mờ ảnh loading */
+    transition: opacity 0.3s ease-in-out;
+}
+
+img.lazy-loaded {
+    opacity: 1; /* Khi ảnh tải xong */
+}
 /*app bar*/
 .app-bar {
     display: flex;
@@ -543,6 +551,10 @@ h6,
 }
 #portfolio-grid {
     margin-top: 150px;
+}
+#portfolio-grid img{
+    height: 170px;
+    width: 250px;
 }
 #explore-grid {
     margin-top: 150px;
