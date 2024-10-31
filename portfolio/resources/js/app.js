@@ -16,6 +16,7 @@ app.directive('lazy', {
 
         const observer = new IntersectionObserver((entries, observer) => {
             entries.forEach(entry => {
+                // console.log('entry: ',entry)
                 if (entry.isIntersecting) {
                     // Khi ảnh vào khung nhìn, thay đổi src thành ảnh thật
                     el.src = binding.value;

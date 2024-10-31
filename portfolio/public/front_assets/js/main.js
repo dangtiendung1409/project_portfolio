@@ -70,3 +70,20 @@ document.querySelector('.hamburger').addEventListener('click', function() {
     const navLinks = document.querySelector('.nav-links');
     navLinks.style.display = (navLinks.style.display === 'flex') ? 'none' : 'flex';
 });
+// dropdown
+function toggleDropdown() {
+    document.getElementById("dropdownMenu").classList.toggle("show");
+}
+
+// Đóng dropdown nếu người dùng nhấp ra ngoài
+window.onclick = function(event) {
+    if (!event.target.matches('.fa-user')) {
+        var dropdowns = document.getElementsByClassName("dropdown-content");
+        for (var i = 0; i < dropdowns.length; i++) {
+            var openDropdown = dropdowns[i];
+            if (openDropdown.classList.contains('show')) {
+                openDropdown.classList.remove('show');
+            }
+        }
+    }
+}

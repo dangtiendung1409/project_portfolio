@@ -3,13 +3,19 @@
         <h3>You’re not following anyone yet</h3>
         <p>Start following photographers and stay updated with their latest photos here.</p>
         <div class="following-users">
-            <div v-for="user in users" :key="user.id" class="user-card">
+            <div v-for="item in follows" :key="item.id" class="user-card">
                 <div class="card">
                     <div class="background-images">
-                        <img v-for="bg in user.backgroundImages" :key="bg" :src="bg" class="bg-img" />
+                        <!-- Duyệt qua các ảnh của user -->
+                        <img v-for="(photoImage, index) in item.images"
+                             :key="index"
+                             :src="photoImage.image_url"
+                             class="bg-img" />
                     </div>
-                    <img :src="user.image" alt="User Image" class="profile-img" />
-                    <h4>{{ user.name }}</h4>
+
+
+                    <img :src="item.profile_picture" alt="User Image" class="profile-img" />
+                    <h4>{{ item.username }}</h4>
                     <button class="btn-follow">Follow</button>
                 </div>
             </div>
@@ -20,7 +26,10 @@
 <script>
 export default {
     props: {
-        users: Array,
-    },
+        follows: {
+            type: Array,
+            required: true
+        }
+    }
 };
 </script>

@@ -21,3 +21,5 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 // frontend data
 Route::get('/getPhotoData', [\App\Http\Controllers\Front\HomePageController::class, 'getImages']);
+Route::get('/getFollowData', [\App\Http\Controllers\Front\HomePageController::class, 'getFollows']);
+

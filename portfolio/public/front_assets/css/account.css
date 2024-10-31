@@ -1,0 +1,273 @@
+/*my photo*/
+.my-photo-page {
+    padding: 20px;
+    height: calc(150vh - 100px);
+    display: flex;
+    flex-direction: column;
+}
+
+.content-layout {
+    display: flex;
+    height: 100%;
+    margin-top: 50px;
+}
+
+
+.header {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    background-color: #ffffff;
+    padding: 48px 40px 10px;
+    border-radius: 8px;
+    margin: 0;
+}
+
+.header-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.header-content span {
+    font-size: 24px;
+    line-height: 28px;
+    font-weight: bold;
+    text-transform: none;
+    margin: 0px;
+    color: rgb(34, 34, 34);
+}
+
+.header-subtitle span {
+    font-size: 16px;
+    line-height: 20px;
+    letter-spacing: 0px;
+    text-transform: none;
+    margin: 0px;
+    color: rgb(8, 112, 209);
+    font-weight: bold;
+}
+.tabs {
+    display: flex;
+    margin-top: 0; /* Thay đổi margin-top thành 0 */
+    padding-top: 10px; /* Thêm padding-top nếu cần */
+}
+
+.tab-item {
+    font-size: 16px;
+    font-weight: bold;
+    color: rgb(8, 112, 209);
+    margin-right: 20px;
+    cursor: pointer;
+}
+
+.tab-item.active {
+    text-decoration: underline;
+    text-underline-offset: 10px;
+    text-decoration-color: rgb(8, 112, 209); /* Màu sắc gạch dưới */
+}
+.trial-info {
+    margin-top: 30px;
+    padding: 290px;
+    text-align: center;
+    background-color: #fff;
+    flex-shrink: 0;
+    border-radius: 8px; /* Thêm bo góc nếu cần */
+
+}
+
+.trial-button {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.trial-button:hover {
+    background-color: #0056b3;
+}
+/* Likes */
+.photo-gallery {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 4 ảnh mỗi dòng */
+    gap: 20px;
+    padding: 20px;
+    height: 800px;
+    overflow-y: auto;
+    border-radius: 8px;
+}
+
+.photo-gallery::-webkit-scrollbar {
+    width: 8px;
+}
+
+.photo-gallery::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+}
+
+.photo-item {
+    position: relative;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.photo-overlay {
+    position: relative;
+}
+
+.photo-image {
+    width: 100%; /* Chiều rộng 100% */
+    height: auto; /* Tự động điều chỉnh chiều cao */
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.photo-item:hover .photo-image {
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+.photo-details {
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    right: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: white;
+    opacity: 0; /* Ẩn mặc định */
+    transition: opacity 0.3s ease;
+}
+.photo-details i {
+    font-size: 24px;
+    color: #ffffff;
+    margin-left: 8px;
+}
+.photo-item:hover .photo-details {
+    opacity: 1;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 12px;
+    border: 2px solid white;
+}
+
+.user-name {
+    font-size: 18px;
+    font-weight: bold;
+    color: #ffffff;
+}
+.sort-select {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-top: 15px;
+}
+
+.show-options, .sort-options {
+    display: flex;
+    align-items: center;
+    margin-right: 20px;
+}
+
+label {
+    margin-right: 10px;
+}
+
+select {
+    padding: 10px 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: border-color 0.3s;
+}
+
+select:focus {
+    border-color: rgb(8, 112, 209);
+    outline: none;
+}
+/* side bar*/
+.sidebar {
+    width: 270px;
+    background-color: #fff;
+    padding: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.user-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 30px;
+    border-bottom: 1px solid #ccc;
+}
+
+.avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin-bottom: 10px;
+}
+
+.user-details {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.username {
+    margin: 0;
+    font-size: 16px;
+    font-weight: bold;
+    line-height: 1.2;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.sidebar ul li {
+    margin: 10px 0;
+}
+
+.sidebar ul li a {
+    text-decoration: none;
+    color: #333;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    transition: background-color 0.3s, color 0.3s;
+    padding: 20px;
+    border-radius: 4px;
+}
+
+.sidebar ul li a i {
+    margin-right: 10px;
+    color: inherit;
+}
+
+.sidebar ul li a.active {
+    background-color: #007bff;
+    color: white;
+}
+
+.sidebar ul li a:hover {
+    background-color: #b3e0ff;
+    color: #007bff;
+}

@@ -1,9 +1,10 @@
+
 <template>
     <nav class="navbar">
         <div class="navbar-left">
-            <a class="navbar-brand" href="index.html">MyPortfolio</a>
+            <router-link class="navbar-brand" :to="'/'">MyPortfolio</router-link>
             <div class="nav-links">
-                <a href="#" class="nav-link" style="color: #007bff">Discover</a>
+                <router-link :to="'/'" class="nav-link" style="color: #007bff">Discover</router-link>
                 <a href="#" class="nav-link">About us</a>
                 <a href="#" class="nav-link">Blog</a>
                 <a href="#" class="nav-link">Category</a>
@@ -15,7 +16,28 @@
                 <i class="fas fa-search search-icon"></i>
             </div>
             <div class="icon-container">
-                <i class="fa-regular fa-user" style="font-size: 24px;"></i>
+                <div class="user-dropdown">
+                    <i class="fa-regular fa-user" style="font-size: 24px;" onclick="toggleDropdown()"></i>
+                    <div id="dropdownMenu" class="dropdown-content">
+                        <router-link :to="'/myPhotos'" >
+                            <i class="fa-solid fa-camera"></i>
+                            <span>My Photo</span>
+                        </router-link>
+                        <router-link :to="'/MyPhoto'">
+                            <i class="fa-solid fa-user-circle"></i>
+                            <span>My Profile</span>
+                        </router-link>
+                        <router-link :to="'/MyPhoto'">
+                            <i class="fa-solid fa-images"></i>
+                            <span>My Gallery</span>
+                        </router-link>
+                        <router-link :to="'/MyPhoto'">
+                            <i class="fa-solid fa-sign-out-alt"></i>
+                            <span>Logout</span>
+                        </router-link>
+                    </div>
+                </div>
+
                 <i class="fa-regular fa-envelope" style="font-size: 24px;"></i>
                 <i class="fa-regular fa-bell" style="font-size: 24px;"></i>
             </div>

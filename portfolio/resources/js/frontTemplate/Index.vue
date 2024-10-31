@@ -5,7 +5,7 @@
                 <div class="container">
                     <TabBar :activeItem="activeItem" :setActive="setActive" />
                     <ForYou v-if="activeItem === 'forYou'" :photos="photos" />
-                    <Following v-else-if="activeItem === 'following'" :users="followingUsers" />
+                    <Following v-else-if="activeItem === 'following'" :users="followingUsers" :follows="follows"/>
                     <Explore v-else-if="activeItem === 'explore'" :users="followingUsers"/>
                 </div>
             </div>
@@ -160,6 +160,7 @@ export default {
         return {
             activeItem: 'forYou',
             photos: [],
+            follows: [],
             followingUsers: [
                 {
                     id: 1, name: 'Paul Boomsma',
@@ -209,11 +210,17 @@ export default {
             if (newItem === 'forYou') {
                 this.getPhoto();
             }
+            if (newItem === 'following') {
+                this.getFollow();
+            }
         }
     },
     mounted() {
         if (this.activeItem === 'forYou') {
             this.getPhoto();
+        }
+        if (this.activeItem === 'following'){
+            this.getFollow();
         }
     },
     methods: {
@@ -227,6 +234,15 @@ export default {
                 console.log(this.photos);
             } catch (error) {
                 console.error(error);
+            }
+        },
+        async getFollow(){
+            try{
+                const response = await axios.get(getUrlList().getFollowData);
+                this.follows = response.data;
+                console.log(this.follows);
+            }catch (error){
+                console.log(error);
             }
         }
     }
