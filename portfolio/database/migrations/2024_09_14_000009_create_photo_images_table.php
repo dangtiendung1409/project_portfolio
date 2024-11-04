@@ -16,7 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('photo_id');
             $table->string('photo_status', 50);
             $table->string('image_url', 255);
-
+            $table->char('photo_token', 36)->unique();
             $table->foreign('photo_id')->references('id')->on('photos')->onDelete('cascade');
             $table->softDeletes();
         });

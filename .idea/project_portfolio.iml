@@ -120,6 +120,9 @@
       <excludeFolder url="file://$MODULE_DIR$/portfolio/vendor/symfony/polyfill-uuid" />
       <excludeFolder url="file://$MODULE_DIR$/portfolio/vendor/symfony/yaml" />
       <excludeFolder url="file://$MODULE_DIR$/portfolio/vendor/symfony/translation" />
+      <excludeFolder url="file://$MODULE_DIR$/portfolio/vendor/tymon/jwt-auth" />
+      <excludeFolder url="file://$MODULE_DIR$/portfolio/vendor/lcobucci/clock" />
+      <excludeFolder url="file://$MODULE_DIR$/portfolio/vendor/lcobucci/jwt" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

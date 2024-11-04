@@ -29,7 +29,7 @@ class AuthController extends Controller
 
             // Check if the user has the role 'user'
             if ($user->hasRole('user')) {
-                return back()->withErrors(['login' => 'Wrong account and password.']);
+                return back()->withErrors(['login' => 'Wrong account or password.']);
             }
 
             // Authenticate the user
@@ -42,12 +42,12 @@ class AuthController extends Controller
         }
 
         // If the user is not found or the password is incorrect
-        return back()->withErrors(['login' => 'Wrong account and password.']);
+        return back()->withErrors(['login' => 'Wrong account or password.']);
     }
 
     public function logout()
     {
         Auth::logout();
-        return redirect()->route('login');
+        return redirect()->route('loginAdmin');
     }
 }

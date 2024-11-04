@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Support\Str;
 class PhotoSeeder extends Seeder
 {
     /**
@@ -81,6 +81,7 @@ class PhotoSeeder extends Seeder
                     'photo_id' => $i,
                     'photo_status' => 'approved',
                     'image_url' => $randomImage,
+                    'photo_token' => (string) Str::uuid(),
                 ];
             }
         }

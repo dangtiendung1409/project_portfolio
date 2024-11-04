@@ -16,12 +16,10 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('index');
 });
-Route::get('/{vue_capture?}', function() {
-    return view('index');
-})->where('vue_capture', '[\/\w\.-]*');
-Route::get('login', [\App\Http\Controllers\Auth\AuthController::class, 'showLoginForm'])->name('login');
-Route::post('login', [\App\Http\Controllers\Auth\AuthController::class, 'login']);
-Route::post('logout', [\App\Http\Controllers\Auth\AuthController::class, 'logout'])->name('logout');
+
+Route::get('loginAdmin', [\App\Http\Controllers\Auth\AuthController::class, 'showLoginForm'])->name('loginAdmin');
+Route::post('loginAdmin', [\App\Http\Controllers\Auth\AuthController::class, 'login']);
+Route::post('logoutAdmin', [\App\Http\Controllers\Auth\AuthController::class, 'logout'])->name('logoutAdmin');
 
 Route::get('/apiDocs', function () {
     return view('apiDocs');
@@ -32,3 +30,6 @@ Route::get('/apiDocs', function () {
 //        return view('user.dashboard');
 //    })->name('user.dashboard');
 //});
+Route::get('/{vue_capture?}', function() {
+    return view('index');
+})->where('vue_capture', '[\/\w\.-]*');

@@ -24,7 +24,7 @@
                 </p>
             </header>
             <div class="card-content">
-                <form method="POST" action="{{ route('login') }}">
+                <form method="POST" action="{{ route('loginAdmin') }}">
                     @csrf
                     @if ($errors->has('login'))
                         <div class="error-message">

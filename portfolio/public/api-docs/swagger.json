@@ -11,71 +11,20 @@
     {
       "name": "User",
       "description": "All User Operations"
+    },
+    {
+      "name": "HomePage",
+      "description": "HomePage Data Operations"
     }
 
   ],
   "paths": {
-      "/auth/register": {
+      "/login": {
           "post": {
-              "tags": [
-                  "User"
-              ],
-              "summary": "User Register",
-              "operationId": "register",
-              "produces": [
-                  "application/json"
-              ],
-              "security": [
-                  {
-                      "APIKeyHeader": []
-                  }
-              ],
-              "parameters": [
-                  {
-                      "name": "name",
-                      "in": "formData",
-                      "description": "Enter Name",
-                      "required": true,
-                      "type": "string"
-                  },
-                  {
-                      "name": "email",
-                      "in": "formData",
-                      "description": "Enter Email",
-                      "required": true,
-                      "type": "string"
-                  },
-                  {
-                      "name": "password",
-                      "in": "formData",
-                      "description": "password",
-                      "required": true,
-                      "type": "string"
-                  }
-
-              ],
-              "responses": {
-                  "200": {
-                      "description": "Data"
-                  }
-              }
-          }
-      },
-      "/auth/login": {
-          "post": {
-              "tags": [
-                  "User"
-              ],
+              "tags": ["User"],
               "summary": "User Login",
               "operationId": "login",
-              "produces": [
-                  "application/json"
-              ],
-              "security": [
-                  {
-                      "APIKeyHeader": []
-                  }
-              ],
+              "produces": ["application/json"],
               "parameters": [
                   {
                       "name": "email",
@@ -87,122 +36,192 @@
                   {
                       "name": "password",
                       "in": "formData",
-                      "description": "password",
+                      "description": "Enter Password",
                       "required": true,
                       "type": "string"
                   }
-
               ],
               "responses": {
                   "200": {
-                      "description": "Data"
+                      "description": "Successful login",
+                      "schema": {
+                          "$ref": "#/definitions/loginResponse"
+                      }
+                  },
+                  "401": {
+                      "description": "Invalid credentials"
+                  },
+                  "403": {
+                      "description": "Account is locked"
+                  },
+                  "500": {
+                      "description": "Internal server error"
                   }
               }
           }
       },
-      "/user": {
-          "get": {
-              "tags": [
-                  "User"
-              ],
-              "summary": "Show User Data",
-              "operationId": "showUser",
-              "produces": [
-                  "application/json"
-              ],
-              "security": [
-                  {
-                      "APIKeyHeader": []
-                  }
-              ],
-              "parameters": [
-                  {
-                      "name": "Authorization",
-                      "in": "header",
-                      "description": "Enter Bearer Token",
-                      "required": true,
-                      "type": "string"
-                  }
-
-              ],
-              "responses": {
-                  "200": {
-                      "description": "Data"
-                  }
-              }
-          }
-      },
-      "/updateUser": {
+      "/register": {
           "post": {
               "tags": [
                   "User"
               ],
-              "summary": "Show User Data",
-              "operationId": "updateUser",
+              "summary": "User Registration",
+              "operationId": "registerUser",
               "produces": [
                   "application/json"
               ],
-              "security": [
-                  {
-                      "APIKeyHeader": []
-                  }
-              ],
               "parameters": [
                   {
-                      "name": "Authorization",
-                      "in": "header",
-                      "description": "Enter Bearer Token",
+                      "name": "fullName",
+                      "in": "formData",
+                      "description": "Full name of the user",
                       "required": true,
                       "type": "string"
                   },
                   {
-                      "name": "name",
+                      "name": "email",
                       "in": "formData",
-                      "description": "Enter name",
-                      "required": false,
+                      "description": "Email address",
+                      "required": true,
+                      "type": "string"
+                  },
+                  {
+                      "name": "password",
+                      "in": "formData",
+                      "description": "Password",
+                      "required": true,
+                      "type": "string"
+                  },
+                  {
+                      "name": "password_confirmation",
+                      "in": "formData",
+                      "description": "Password confirmation",
+                      "required": true,
                       "type": "string"
                   }
-
               ],
               "responses": {
                   "200": {
-                      "description": "Data"
+                      "description": "Registration successful"
+                  },
+                  "400": {
+                      "description": "Validation error"
+                  },
+                  "500": {
+                      "description": "Internal server error"
                   }
               }
           }
       },
-      "/auth/logout": {
+      "/logout": {
           "post": {
               "tags": [
                   "User"
               ],
-              "summary": "Show User Data",
-              "operationId": "updateUser",
+              "summary": "User Logout",
+              "operationId": "logoutUser",
               "produces": [
                   "application/json"
-              ],
-              "security": [
-                  {
-                      "APIKeyHeader": []
-                  }
               ],
               "parameters": [
                   {
                       "name": "Authorization",
                       "in": "header",
-                      "description": "Enter Bearer Token",
+                      "description": "Bearer token for authentication",
                       "required": true,
                       "type": "string"
                   }
-
               ],
               "responses": {
                   "200": {
-                      "description": "Data"
+                      "description": "Logout successful"
+                  },
+                  "401": {
+                      "description": "Unauthorized"
+                  },
+                  "500": {
+                      "description": "Internal server error"
+                  }
+              }
+          }
+      },
+      "/getPhotoData": {
+          "get": {
+              "tags": [
+                  "HomePage"
+              ],
+              "summary": "Get Photo Data",
+              "operationId": "getPhotoData",
+              "produces": [
+                  "application/json"
+              ],
+              "parameters": [],
+              "responses": {
+                  "200": {
+                      "description": "Photo data retrieved successfully",
+                      "schema": {
+                          "type": "array",
+                          "items": {
+                              "type": "object",
+                              "properties": {
+                                  "id": {
+                                      "type": "integer"
+                                  },
+                                  "url": {
+                                      "type": "string"
+                                  },
+                                  "description": {
+                                      "type": "string"
+                                  }
+                              }
+                          }
+                      }
+                  },
+                  "500": {
+                      "description": "Internal server error"
+                  }
+              }
+          }
+      },
+      "/getFollowData": {
+          "get": {
+              "tags": [
+                  "HomePage"
+              ],
+              "summary": "Get Follow Data",
+              "operationId": "getFollowData",
+              "produces": [
+                  "application/json"
+              ],
+              "parameters": [],
+              "responses": {
+                  "200": {
+                      "description": "Follow data retrieved successfully",
+                      "schema": {
+                          "type": "array",
+                          "items": {
+                              "type": "object",
+                              "properties": {
+                                  "id": {
+                                      "type": "integer"
+                                  },
+                                  "user_id": {
+                                      "type": "integer"
+                                  },
+                                  "follower_id": {
+                                      "type": "integer"
+                                  }
+                              }
+                          }
+                      }
+                  },
+                  "500": {
+                      "description": "Internal server error"
                   }
               }
           }
       }
+
   },
   "securityDefinitions": {
     "APIKeyHeader": {
@@ -211,22 +230,34 @@
       "name": "api-key"
     }
   },
-  "definitions": {
-    "user": {
-      "type": "object",
-      "properties": {
-        "user_id": {
-          "type": "number"
+    "definitions": {
+        "user": {
+            "type": "object",
+            "properties": {
+                "user_id": {
+                    "type": "number"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                }
+            }
         },
-        "name": {
-          "type": "string"
-        },
-        "email": {
-          "type": "string"
+        "loginResponse": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string",
+                    "description": "JWT token for the user"
+                },
+                "user": {
+                    "$ref": "#/definitions/user"
+                }
+            }
         }
-      }
-    }
-  },
+    },
   "schemes": [
     "http",
     "https"

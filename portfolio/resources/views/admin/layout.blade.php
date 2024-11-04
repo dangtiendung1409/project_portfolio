@@ -68,7 +68,7 @@
                         <span>Messages</span>
                     </a>
                     <hr class="navbar-divider">
-                    <form action="{{ route('logout') }}" method="POST" style="display:inline;">
+                    <form action="{{ route('logoutAdmin') }}" method="POST" style="display:inline;">
                         @csrf
                         <button type="submit" class="navbar-item" style="border: none; background: none; cursor: pointer;">
                             <span class="icon"><i class="mdi mdi-logout"></i></span>

@@ -16,10 +16,10 @@
                 <i class="fas fa-search search-icon"></i>
             </div>
             <div class="icon-container">
-                <div class="user-dropdown">
-                    <i class="fa-regular fa-user" style="font-size: 24px;" onclick="toggleDropdown()"></i>
+                <div v-if="isLoggedIn" class="user-dropdown">
+                    <i class="fa-regular fa-user" style="font-size: 24px;" @click="toggleDropdown('dropdownMenu')"></i>
                     <div id="dropdownMenu" class="dropdown-content">
-                        <router-link :to="'/myPhotos'" >
+                        <router-link :to="'/myPhotos'">
                             <i class="fa-solid fa-camera"></i>
                             <span>My Photo</span>
                         </router-link>
@@ -31,17 +31,20 @@
                             <i class="fa-solid fa-images"></i>
                             <span>My Gallery</span>
                         </router-link>
-                        <router-link :to="'/MyPhoto'">
+                        <router-link :to="'/login'" @click.prevent="handleLogout">
                             <i class="fa-solid fa-sign-out-alt"></i>
                             <span>Logout</span>
                         </router-link>
                     </div>
                 </div>
-
-                <i class="fa-regular fa-envelope" style="font-size: 24px;"></i>
-                <i class="fa-regular fa-bell" style="font-size: 24px;"></i>
+                <div v-else>
+                    <router-link :to="'/login'" class="btn-custom login-btn">Log in</router-link>
+                    <router-link :to="'/register'" class="btn-custom signup-btn">Sign up</router-link>
+                </div>
+                <i v-if="isLoggedIn" class="fa-regular fa-envelope" style="font-size: 24px;"></i>
+                <i v-if="isLoggedIn" class="fa-regular fa-bell" style="font-size: 24px;"></i>
             </div>
-            <button class="upload-button">
+            <button v-if="isLoggedIn" class="upload-button">
                 <i class="fa-solid fa-arrow-up"></i> Upload
             </button>
             <button class="hamburger" aria-label="Toggle navigation">
@@ -54,9 +57,7 @@
     </nav>
 
     <main>
-        <slot name="content">
-
-        </slot>
+        <slot name="content"></slot>
     </main>
     <footer class="footer" role="contentinfo">
         <div class="container">
@@ -64,12 +65,6 @@
                 <div class="col-sm-6">
                     <p class="mb-1">&copy; Copyright MyPortfolio. All Rights Reserved</p>
                     <div class="credits">
-                        <!--
-                          All the links in the footer should remain intact.
-                          You can delete the links only if you purchased the pro version.
-                          Licensing information: https://bootstrapmade.com/license/
-                          Purchase the pro version with working PHP/AJAX contact form: https://bootstrapmade.com/buy/?theme=MyPortfolio
-                        -->
                         Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
                     </div>
                 </div>
@@ -87,25 +82,83 @@
 <script>
 import axios from 'axios';
 import getUrlList from "../provider.js";
+
 export default {
     name: 'Layout',
+    data() {
+        return {
+            isLoggedIn: false,
+        };
+    },
+    mounted() {
+        // Kiểm tra xem token có tồn tại trong localStorage hay không
+        this.isLoggedIn = !!localStorage.getItem('token');
 
-    mounted(){
-        var src = ['/front_assets/vendor/jquery/jquery.min.js','/front_assets/vendor/jquery/jquery-migrate.min.js',
-            '/front_assets/vendor/bootstrap/js/bootstrap.min.js', '/front_assets/vendor/easing/easing.min.js',
-            '/front_assets/vendor/php-email-form/validate.js', '/front_assets/vendor/isotope/isotope.pkgd.min.js',
-            '/front_assets/vendor/aos/aos.js', '/front_assets/vendor/owlcarousel/owl.carousel.min.js',
+        // Thêm các script cần thiết
+        const src = [
+            '/front_assets/vendor/jquery/jquery.min.js',
+            '/front_assets/vendor/jquery/jquery-migrate.min.js',
+            '/front_assets/vendor/bootstrap/js/bootstrap.min.js',
+            '/front_assets/vendor/easing/easing.min.js',
+            '/front_assets/vendor/php-email-form/validate.js',
+            '/front_assets/vendor/isotope/isotope.pkgd.min.js',
+            '/front_assets/vendor/aos/aos.js',
+            '/front_assets/vendor/owlcarousel/owl.carousel.min.js',
             '/front_assets/js/main.js'
         ];
-        for (var i=0; i<src.length;i++){
+        src.forEach(srcFile => {
             const script = document.createElement('script');
-            script.src = src[i];
-            script.async =false;
+            script.src = srcFile;
+            script.async = false;
             document.getElementById('scripts').appendChild(script);
-        }
+        });
     },
-    methods:{
-
+    methods: {
+        async handleLogout() {
+            try {
+                await axios.post(getUrlList().logout);
+                localStorage.removeItem('token');
+                this.isLoggedIn = false;
+                window.location.href = '/login';
+            } catch (error) {
+                console.error('Logout failed', error);
+                alert('Logout failed. Please try again.');
+            }
+        },
+        toggleDropdown(dropdownId) {
+            const dropdown = document.getElementById(dropdownId);
+            if (dropdown) {
+                dropdown.classList.toggle('show');
+            }
+        }
     }
+
 }
 </script>
+<style scoped>
+.btn-custom {
+    border: 1px solid black;
+    border-radius: 30px;
+    padding: 5px 15px;
+    font-size: 16px;
+    text-decoration: none;
+    color: black;
+    margin-left: 10px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.btn-custom:hover {
+    background-color: black;
+    color: white;
+}
+
+.login-btn {
+    font-weight: bold;
+    border: none; /* Remove border for login button */
+    background-color: transparent;
+}
+
+.signup-btn {
+    font-weight: bold;
+}
+</style>

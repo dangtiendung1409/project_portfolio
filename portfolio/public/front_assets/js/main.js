@@ -71,13 +71,18 @@ document.querySelector('.hamburger').addEventListener('click', function() {
     navLinks.style.display = (navLinks.style.display === 'flex') ? 'none' : 'flex';
 });
 // dropdown
-function toggleDropdown() {
-    document.getElementById("dropdownMenu").classList.toggle("show");
+function toggleDropdown(id) {
+    const dropdownElement = document.getElementById(id);
+    if (dropdownElement) {
+        dropdownElement.classList.toggle("show");
+    } else {
+        console.error(`Element with ID ${id} not found`);
+    }
 }
 
 // Đóng dropdown nếu người dùng nhấp ra ngoài
 window.onclick = function(event) {
-    if (!event.target.matches('.fa-user')) {
+    if (!event.target.matches('.fa-user') && !event.target.matches('.fas.fa-ellipsis-h')) {
         var dropdowns = document.getElementsByClassName("dropdown-content");
         for (var i = 0; i < dropdowns.length; i++) {
             var openDropdown = dropdowns[i];
@@ -87,3 +92,5 @@ window.onclick = function(event) {
         }
     }
 }
+
+

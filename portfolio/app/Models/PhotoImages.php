@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-
+use Illuminate\Support\Str;
 class PhotoImages extends Model
 {
     use HasFactory;
@@ -13,10 +13,19 @@ class PhotoImages extends Model
     protected $fillable = [
         'image_url',
         'photo_status',
-        'photo_id'
-
-
+        'photo_id',
+        'photo_token'
     ];
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            if (empty($model->photo_token)) {
+                $model->photo_token = (string) Str::uuid(); // Tạo UUID tự động
+            }
+        });
+    }
     public function photo()
     {
         return $this->belongsTo(Photo::class, 'photo_id');

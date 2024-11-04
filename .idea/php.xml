@@ -114,6 +114,9 @@
       <path value="$PROJECT_DIR$/portfolio/vendor/symfony/polyfill-uuid" />
       <path value="$PROJECT_DIR$/portfolio/vendor/symfony/yaml" />
       <path value="$PROJECT_DIR$/portfolio/vendor/symfony/translation" />
+      <path value="$PROJECT_DIR$/portfolio/vendor/tymon/jwt-auth" />
+      <path value="$PROJECT_DIR$/portfolio/vendor/lcobucci/clock" />
+      <path value="$PROJECT_DIR$/portfolio/vendor/lcobucci/jwt" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.1">

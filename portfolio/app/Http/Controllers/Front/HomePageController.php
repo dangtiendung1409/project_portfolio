@@ -11,9 +11,10 @@ class HomePageController extends Controller
 {
     public function getImages()
     {
-        $images = PhotoImages::with('photo.category')->get();
+        $images = PhotoImages::with(['photo.category', 'photo.user'])->get();
         return response()->json($images);
     }
+
     public function getFollows() {
         // Lấy tất cả users cùng với 4 ảnh đầu tiên từ tất cả các photo của họ
         $follows = User::with(['photos.images' => function ($query) {
