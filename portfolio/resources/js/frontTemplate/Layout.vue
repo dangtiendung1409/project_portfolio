@@ -17,7 +17,16 @@
             </div>
             <div class="icon-container">
                 <div v-if="isLoggedIn" class="user-dropdown">
-                    <i class="fa-regular fa-user" style="font-size: 24px;" @click="toggleDropdown('dropdownMenu')"></i>
+                    <img v-if="userProfilePicture"
+                         :src="'http://127.0.0.1:8000/' + userProfilePicture"
+                         alt="User"
+                         style="width: 30px; height: 30px; border-radius: 50%;"
+                         @click="toggleDropdown('dropdownMenu')" />
+                    <img v-else
+                         src="/images/imageUserDefault.png"
+                         alt="Default User"
+                         style="width: 30px; height: 30px; border-radius: 50%;"
+                         @click="toggleDropdown('dropdownMenu')" />
                     <div id="dropdownMenu" class="dropdown-content">
                         <router-link :to="'/myPhotos'">
                             <i class="fa-solid fa-camera"></i>
@@ -80,6 +89,7 @@
     <div id="scripts"></div>
 </template>
 <script>
+import jwt_decode from 'jwt-decode';
 import axios from 'axios';
 import getUrlList from "../provider.js";
 
@@ -88,41 +98,83 @@ export default {
     data() {
         return {
             isLoggedIn: false,
+            userProfilePicture: '',
         };
     },
     mounted() {
-        // Kiểm tra xem token có tồn tại trong localStorage hay không
-        this.isLoggedIn = !!localStorage.getItem('token');
-
-        // Thêm các script cần thiết
-        const src = [
-            '/front_assets/vendor/jquery/jquery.min.js',
-            '/front_assets/vendor/jquery/jquery-migrate.min.js',
-            '/front_assets/vendor/bootstrap/js/bootstrap.min.js',
-            '/front_assets/vendor/easing/easing.min.js',
-            '/front_assets/vendor/php-email-form/validate.js',
-            '/front_assets/vendor/isotope/isotope.pkgd.min.js',
-            '/front_assets/vendor/aos/aos.js',
-            '/front_assets/vendor/owlcarousel/owl.carousel.min.js',
-            '/front_assets/js/main.js'
-        ];
-        src.forEach(srcFile => {
-            const script = document.createElement('script');
-            script.src = srcFile;
-            script.async = false;
-            document.getElementById('scripts').appendChild(script);
-        });
+        // Kiểm tra và thiết lập trạng thái đăng nhập
+        this.checkLoginStatus();
+        this.loadExternalScripts();
     },
     methods: {
+        async checkLoginStatus() {
+            const token = localStorage.getItem('token');
+            if (token) {
+                try {
+                    const decodedToken = jwt_decode(token);
+                    const currentTime = Date.now() / 1000; // Thời gian hiện tại tính bằng giây
+                    const expTime = decodedToken.exp; // Thời gian hết hạn của token
+
+                    // Kiểm tra token đã hết hạn chưa
+                    if (expTime > currentTime) {
+                        this.isLoggedIn = true;
+                        const remainingTime = expTime - currentTime; // Thời gian còn lại trước khi token hết hạn
+
+                        // Gọi refreshToken trước khi token hết hạn 1 phút
+                        setTimeout(async () => {
+                            await this.refreshToken();
+                        }, (remainingTime - 60) * 1000);
+
+                        // Gọi API để lấy thông tin người dùng
+                        const response = await axios.get(getUrlList().getUser, {
+                            headers: { Authorization: `Bearer ${token}` }
+                        });
+
+                        // Lưu thông tin ảnh người dùng
+                        this.userProfilePicture = response.data.user.profile_picture;
+                    } else {
+                        this.isLoggedIn = false;
+                        localStorage.removeItem('token');
+                    }
+                } catch (error) {
+                    console.error('Token decode error:', error);
+                    this.isLoggedIn = false;
+                    localStorage.removeItem('token');
+                }
+            } else {
+                this.isLoggedIn = false;
+            }
+        },
+        async refreshToken() {
+            try {
+                const refreshToken = localStorage.getItem('refresh_token');
+                if (!refreshToken) return; // Không làm gì nếu không có refresh token
+
+                const response = await axios.post(getUrlList().refreshToken, {}, {
+                    headers: { Authorization: `Bearer ${refreshToken}` },
+                });
+
+                localStorage.setItem('token', response.data.token);
+                this.checkLoginStatus(); // Kiểm tra lại trạng thái đăng nhập
+            } catch (error) {
+                console.error('Failed to refresh token', error);
+                this.handleLogout();
+            }
+        },
         async handleLogout() {
             try {
-                await axios.post(getUrlList().logout);
+                const token = localStorage.getItem('token');
+                if (token) {
+                    await axios.post(getUrlList().logout, {}, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                }
                 localStorage.removeItem('token');
+                localStorage.removeItem('refresh_token');
                 this.isLoggedIn = false;
                 window.location.href = '/login';
             } catch (error) {
-                console.error('Logout failed', error);
-                alert('Logout failed. Please try again.');
+                console.error('Logout failed:', error);
             }
         },
         toggleDropdown(dropdownId) {
@@ -130,12 +182,42 @@ export default {
             if (dropdown) {
                 dropdown.classList.toggle('show');
             }
-        }
-    }
-
-}
+        },
+        loadExternalScripts() {
+            const src = [
+                '/front_assets/vendor/jquery/jquery.min.js',
+                '/front_assets/vendor/jquery/jquery-migrate.min.js',
+                '/front_assets/vendor/bootstrap/js/bootstrap.min.js',
+                '/front_assets/vendor/easing/easing.min.js',
+                '/front_assets/vendor/php-email-form/validate.js',
+                '/front_assets/vendor/isotope/isotope.pkgd.min.js',
+                '/front_assets/vendor/aos/aos.js',
+                '/front_assets/vendor/owlcarousel/owl.carousel.min.js',
+                '/front_assets/js/main.js',
+            ];
+            src.forEach(srcFile => {
+                const script = document.createElement('script');
+                script.src = srcFile;
+                script.async = false;
+                document.getElementById('scripts').appendChild(script);
+            });
+        },
+    },
+};
 </script>
+
 <style scoped>
+.user-dropdown img {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+.dropdown-content {
+    top: 40px;
+    right: -110px;
+}
+
 .btn-custom {
     border: 1px solid black;
     border-radius: 30px;

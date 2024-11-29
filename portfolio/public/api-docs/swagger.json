@@ -145,6 +145,37 @@
               }
           }
       },
+      "/user": {
+          "get": {
+              "tags": ["User"],
+              "summary": "Get User Info",
+              "operationId": "getUserInfo",
+              "produces": ["application/json"],
+              "parameters": [
+                  {
+                      "name": "Authorization",
+                      "in": "header",
+                      "description": "Bearer token for authentication",
+                      "required": true,
+                      "type": "string"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "User info retrieved successfully",
+                      "schema": {
+                          "$ref": "#/definitions/user"
+                      }
+                  },
+                  "401": {
+                      "description": "Unauthorized"
+                  },
+                  "500": {
+                      "description": "Internal server error"
+                  }
+              }
+          }
+      },
       "/getPhotoData": {
           "get": {
               "tags": [

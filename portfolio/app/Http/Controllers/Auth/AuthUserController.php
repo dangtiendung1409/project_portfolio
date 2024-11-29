@@ -6,30 +6,34 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use Tymon\JWTAuth\Exceptions\JWTException;
 class AuthUserController extends Controller
 {
     public function login(Request $request)
     {
         $credentials = $request->only('email', 'password');
-        $user = User::where('email', $credentials['email'])->first();
 
-        if ($user) {
-            if ($user->is_active == 0) {
-                return response()->json(['login' => 'Your account is locked.'], 403);
-            }
-
-            if (Auth::attempt($credentials)) {
-                $token = JWTAuth::fromUser($user); // Tạo token JWT
-                return response()->json([
-                    'message' => 'Login successful',
-                    'token' => $token, // Trả token về client
-                    'route' => url('/')
-                ], 200);
-            }
+        if (!$token = JWTAuth::attempt($credentials)) {
+            return response()->json(['error' => 'Wrong account or password.'], 401);
         }
 
-        return response()->json(['login' => 'Wrong account or password.'], 401);
+        $user = JWTAuth::user();
+
+        if ($user->is_active == 0) {
+            return response()->json(['error' => 'Your account is locked.'], 403);
+        }
+
+        // Tạo refresh token với thời hạn khác
+        $refreshToken = JWTAuth::customClaims(['exp' => now()->addMinutes(env('JWT_REFRESH_TTL', 20160))->timestamp])->fromUser($user);
+
+        return response()->json([
+            'message' => 'Login successful',
+            'token' => $token,
+            'refresh_token' => $refreshToken,
+            'route' => url('/')
+        ], 200);
     }
+
     public function register(Request $request)
     {
         $request->validate([
@@ -52,8 +56,44 @@ class AuthUserController extends Controller
 
     public function logout(Request $request)
     {
-        Auth::logout();
-        return response()->json(['message' => 'Logout successful'], 200);
+        try {
+            JWTAuth::invalidate(JWTAuth::getToken()); // Thu hồi token hiện tại
+            return response()->json(['message' => 'Logout successful'], 200);
+        } catch (JWTException $e) {
+            return response()->json(['error' => 'Failed to logout, please try again.'], 500);
+        }
     }
 
+    public function refreshToken(Request $request)
+    {
+        try {
+            // Kiểm tra và làm mới token
+            $newToken = JWTAuth::refresh(JWTAuth::getToken());
+            return response()->json([
+                'message' => 'Token refreshed successfully',
+                'token' => $newToken
+            ], 200);
+        } catch (JWTException $e) {
+            return response()->json(['error' => 'Failed to refresh token.'], 500);
+        }
+    }
+    public function getUser(Request $request)
+    {
+        try {
+            // Lấy thông tin người dùng từ token JWT
+            $user = JWTAuth::parseToken()->authenticate(); // Giải mã token và lấy người dùng
+
+            // Kiểm tra nếu người dùng không hợp lệ
+            if (!$user) {
+                return response()->json(['error' => 'User not found.'], 404);
+            }
+
+            // Trả về thông tin người dùng
+            return response()->json([
+                'user' => $user,
+            ], 200);
+        } catch (\Tymon\JWTAuth\Exceptions\JWTException $e) {
+            return response()->json(['error' => 'Invalid token.'], 401);
+        }
+    }
 }

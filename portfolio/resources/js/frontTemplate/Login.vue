@@ -79,19 +79,22 @@ export default {
         };
     },
     methods: {
-
         async handleLogin() {
             try {
                 const response = await axios.post(getUrlList().login, {
                     email: this.email,
                     password: this.password,
                 });
-                // Lưu token vào local storage
+
+                // Lưu token vào localStorage
                 localStorage.setItem('token', response.data.token);
-                window.location.href = response.data.route; // Điều hướng tới trang chính
+                localStorage.setItem('refresh_token', response.data.refresh_token);
+
+                // Điều hướng tới route được trả về
+                window.location.href = response.data.route;
             } catch (error) {
                 console.error(error);
-                this.errorMessage = error.response?.data?.login || 'An error occurred';
+                this.errorMessage = error.response?.data?.error || 'Login failed, please try again.';
             }
         }
     }

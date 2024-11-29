@@ -7,6 +7,8 @@ const baseUrl = 'http://127.0.0.1:8000/api';
           login : ''+baseUrl+'/login',
           register : ''+baseUrl+'/register',
           logout : ''+baseUrl+'/logout',
+          refreshToken: ''+baseUrl+'/refresh-token',
+          getUser : ''+baseUrl+'/user',
 
       }
 }
