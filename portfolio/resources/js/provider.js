@@ -9,6 +9,7 @@ const baseUrl = 'http://127.0.0.1:8000/api';
           logout : ''+baseUrl+'/logout',
           refreshToken: ''+baseUrl+'/refresh-token',
           getUser : ''+baseUrl+'/user',
+          getPhotoDetail : ''+baseUrl+'/getPhotoDetail'
 
       }
 }

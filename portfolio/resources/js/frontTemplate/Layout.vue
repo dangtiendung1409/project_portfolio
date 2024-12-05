@@ -148,16 +148,21 @@ export default {
         async refreshToken() {
             try {
                 const refreshToken = localStorage.getItem('refresh_token');
-                if (!refreshToken) return; // Không làm gì nếu không có refresh token
-
+                if (!refreshToken) {
+                    // Nếu không có refresh_token thì yêu cầu đăng nhập lại
+                    alert('token does not exist');
+                    return;
+                }
                 const response = await axios.post(getUrlList().refreshToken, {}, {
                     headers: { Authorization: `Bearer ${refreshToken}` },
                 });
 
-                localStorage.setItem('token', response.data.token);
+                const newToken = response.data.token;
+                localStorage.setItem('token', newToken);
                 this.checkLoginStatus(); // Kiểm tra lại trạng thái đăng nhập
             } catch (error) {
-                console.error('Failed to refresh token', error);
+                // console.error('Failed to refresh token:', error.response?.data || error.message);
+                // alert('Session expired. Please log in again.');
                 this.handleLogout();
             }
         },

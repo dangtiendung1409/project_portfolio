@@ -2,139 +2,45 @@
     <Layout>
         <template v-slot:content="slotProps">
             <div class="site-section">
-                <div class="site-section pb-0">
-                    <div class="container">
-                        <div class="row align-items-stretch">
-                            <div class="col-md-8" data-aos="fade-up">
-                                <img src="/front_assets/img/img_1.jpg" alt="Image" class="img-fluid">
-                            </div>
-                            <div class="col-md-3 ml-auto" data-aos="fade-up" data-aos-delay="100">
-                                <div class="sticky-content">
-                                    <h3 class="h3">Boxed Water</h3>
-                                    <p class="mb-4"><span class="text-muted">Design</span></p>
+                <div>
+                    <div class="row">
+                        <!-- Main Image Section -->
+                        <div class="col-md-9" data-aos="fade-up">
+                            <img :src="photoDetail.image_url" alt="Image" class="img-fluid photo-img" />
+                        </div>
 
-                                    <div class="mb-5">
-                                        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Dolores illo, id recusandae molestias
-                                            illum unde pariatur, enim tempora.</p>
-
-                                    </div>
-
-
-                                    <h4 class="h4 mb-3">What I did</h4>
-                                    <ul class="list-unstyled list-line mb-5">
-                                        <li>Design</li>
-                                        <li>HTML5/CSS3</li>
-                                        <li>CMS</li>
-                                        <li>Logo</li>
+                        <!-- Info Section on the Right -->
+                        <div class="col-md-3" data-aos="fade-up" data-aos-delay="100">
+                            <div class="info-container">
+                                <!-- Header with Icons in a Separate Div -->
+                                <div class="icon-wrapper">
+                                    <button class="btn icon-btn">
+                                        <i class="fa-regular fa-heart"></i>
+                                    </button>
+                                    <button class="btn icon-btn">
+                                        <i class="fa-solid fa-share-nodes"></i>
+                                    </button>
+                                    <button class="btn icon-btn">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                    <button class="btn icon-btn">
+                                        <i class="fa-solid fa-ellipsis"></i>
+                                    </button>
+                                </div>
+                                <!-- Details Section -->
+                                <div class="details-wrapper">
+                                    <h3 class="h3">{{ photoDetail.photo.title }}</h3>
+                                    <p class="text-muted">{{ photoDetail.photo.description }}</p>
+                                    <ul class="list-unstyled">
+                                        <li><strong>Country:</strong> {{ photoDetail.photo.country || "NOR" }}</li>
+                                        <li><strong>Date:</strong> 20 February 2019</li>
+                                        <li><strong>Likes:</strong> 400</li>
+                                        <li><strong>Views:</strong> 27.5K</li>
                                     </ul>
-
-                                    <p><a href="#" class="readmore">Visit Website</a></p>
                                 </div>
+
                             </div>
                         </div>
-                    </div>
-                </div>
-
-
-                <div class="site-section pb-0">
-                    <div class="container">
-                        <div class="row justify-content-center text-center mb-4">
-                            <div class="col-5">
-                                <h3 class="h3 heading">More Works</h3>
-                                <p>Lorem ipsum dolor sit amet consectetur adipisicing elit explicabo inventore.</p>
-                            </div>
-                        </div>
-
-                        <div class="row" data-aos="fade-up" data-aos-delay="200">
-                            <div class="item web col-sm-6 col-md-4 col-lg-4 mb-4">
-                                <a href="work-single.html" class="item-wrap fancybox">
-                                    <div class="work-info">
-                                        <h3>Boxed Water</h3>
-                                        <span>Web</span>
-                                    </div>
-                                    <img class="img-fluid" src="img/img_1.jpg">
-                                </a>
-                            </div>
-                            <div class="item photography col-sm-6 col-md-4 col-lg-4 mb-4">
-                                <a href="work-single.html" class="item-wrap fancybox">
-                                    <div class="work-info">
-                                        <h3>Build Indoo</h3>
-                                        <span>Photography</span>
-                                    </div>
-                                    <img class="img-fluid" src="img/img_2.jpg">
-                                </a>
-                            </div>
-                            <div class="item branding col-sm-6 col-md-4 col-lg-4 mb-4">
-                                <a href="work-single.html" class="item-wrap fancybox">
-                                    <div class="work-info">
-                                        <h3>Cocooil</h3>
-                                        <span>Branding</span>
-                                    </div>
-                                    <img class="img-fluid" src="img/img_3.jpg">
-                                </a>
-                            </div>
-                            <div class="item design col-sm-6 col-md-4 col-lg-4 mb-4">
-                                <a href="work-single.html" class="item-wrap fancybox">
-                                    <div class="work-info">
-                                        <h3>Nike Shoe</h3>
-                                        <span>Design</span>
-                                    </div>
-                                    <img class="img-fluid" src="img/img_4.jpg">
-                                </a>
-                            </div>
-                            <div class="item photography col-sm-6 col-md-4 col-lg-4 mb-4">
-                                <a href="work-single.html" class="item-wrap fancybox">
-                                    <div class="work-info">
-                                        <h3>Kitchen Sink</h3>
-                                        <span>Photography</span>
-                                    </div>
-                                    <img class="img-fluid" src="img/img_5.jpg">
-                                </a>
-                            </div>
-                            <div class="item branding col-sm-6 col-md-4 col-lg-4 mb-4">
-                                <a href="work-single.html" class="item-wrap fancybox">
-                                    <div class="work-info">
-                                        <h3>Amazon</h3>
-                                        <span>brandingn</span>
-                                    </div>
-                                    <img class="img-fluid" src="img/img_6.jpg">
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-
-
-                <div class="site-section pb-0">
-                    <div class="container">
-
-                        <div class="owl-carousel testimonial-carousel">
-
-                            <div class="testimonial-wrap">
-                                <div class="testimonial">
-                                    <img src="img/person_1.jpg" alt="Image" class="img-fluid">
-                                    <blockquote>
-                                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam necessitatibus incidunt ut
-                                            officiis explicabo inventore.</p>
-                                    </blockquote>
-                                    <p>&mdash; Jean Hicks</p>
-                                </div>
-                            </div>
-
-                            <div class="testimonial-wrap">
-                                <div class="testimonial">
-                                    <img src="img/person_2.jpg" alt="Image" class="img-fluid">
-                                    <blockquote>
-                                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam necessitatibus incidunt ut
-                                            officiis explicabo inventore.</p>
-                                    </blockquote>
-                                    <p>&mdash; Chris Stanworth</p>
-                                </div>
-                            </div>
-
-                        </div>
-
                     </div>
                 </div>
             </div>
@@ -142,14 +48,96 @@
     </Layout>
 </template>
 <script>
-import axios from 'axios';
-import Layout from './Layout.vue'
+import axios from "axios";
+import Layout from "./Layout.vue";
 import getUrlList from "../provider.js";
+
 export default {
-    name: 'PhotoDetail',
-    components : {
+    name: "PhotoDetail",
+    components: {
         Layout,
     },
-    methods: {}
-}
+    data() {
+        return {
+            photoDetail: {
+                photo: {
+                    title: "",
+                    description: "",
+                    country: "NOR", // Quốc gia mặc định
+                },
+                image_url: "",
+            },
+        };
+    },
+    methods: {
+        async fetchPhotoDetail(token) {
+            try {
+                const response = await axios.get(`${getUrlList().getPhotoDetail}/${token}`);
+                this.photoDetail = response.data.data;
+            } catch (error) {
+                console.error("Error fetching photo details:", error);
+            }
+        },
+    },
+    created() {
+        const token = this.$route.params.token;
+        this.fetchPhotoDetail(token);
+    },
+};
 </script>
+<style scoped>
+.photo-img {
+  width: 100%;
+  height: 630px;
+    padding-left: 30px;
+  object-fit: cover; /* Ensure image covers the area */
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.info-container {
+    word-break: break-word;
+    width: 325px;
+    height: 100%;
+    padding: 24px;
+    -webkit-box-align: center;
+    align-items: center;
+    background: rgb(247, 248, 250);
+    transition-property: width;
+    transition-duration: 0.2s;
+    transition-timing-function: ease;
+    position: relative;
+}
+
+.icon-wrapper {
+    display: flex;
+    justify-content: space-around; /* Spread icons evenly */
+    margin-bottom: 20px;
+    background-color: #ffffff; /* Background for the icons */
+    padding: 24px 22px;
+    border-radius: 5px;
+
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.details-wrapper {
+    background-color: #ffffff; /* Background color for the details section */
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.icon-btn {
+    border: none; /* Remove button borders */
+    background: none; /* Remove background */
+    cursor: pointer;
+    font-size: 20px; /* Icon size */
+}
+
+ .text-muted {
+  color: #6c757d;
+}
+.h3 {
+      margin: 10px 0;
+}
+</style>

@@ -35,5 +35,20 @@ class HomePageController extends Controller
 
         return response()->json($result);
     }
+    public function getPhotoDetail(Request $request, $token)
+    {
+        $photoImage = PhotoImages::with([
+            'photo.user',
+            'photo.category',
+        ])->where('photo_token', $token)->first();
+
+        if (!$photoImage) {
+            return response()->json(['message' => 'Photo not found'], 404);
+        }
+
+        return response()->json([
+            'data' => $photoImage,
+        ], 200);
+    }
 
 }

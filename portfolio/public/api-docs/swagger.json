@@ -251,6 +251,60 @@
                   }
               }
           }
+      },
+      "/getPhotoDetail/{token}": {
+          "get": {
+              "tags": [
+                  "HomePage"
+              ],
+              "summary": "Get Photo Detail by Token",
+              "operationId": "getPhotoDetail",
+              "produces": [
+                  "application/json"
+              ],
+              "parameters": [
+                  {
+                      "name": "token",
+                      "in": "path",
+                      "description": "Unique token representing the photo detail",
+                      "required": true,
+                      "type": "string"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "Photo details retrieved successfully",
+                      "schema": {
+                          "type": "object",
+                          "properties": {
+                              "id": {
+                                  "type": "integer"
+                              },
+                              "image_url": {
+                                  "type": "string"
+                              },
+                              "description": {
+                                  "type": "string"
+                              },
+                              "created_at": {
+                                  "type": "string",
+                                  "format": "date-time"
+                              },
+                              "updated_at": {
+                                  "type": "string",
+                                  "format": "date-time"
+                              }
+                          }
+                      }
+                  },
+                  "404": {
+                      "description": "Photo detail not found"
+                  },
+                  "500": {
+                      "description": "Internal server error"
+                  }
+              }
+          }
       }
 
   },
