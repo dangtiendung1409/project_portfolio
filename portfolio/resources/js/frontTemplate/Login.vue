@@ -26,7 +26,6 @@
             <div class="login-container">
                 <div class="login-box">
                     <h2>Sign In</h2>
-
                     <form @submit.prevent="handleLogin">
                         <div v-if="errorMessage" style="color: red; margin-bottom: 15px;">
                             {{ errorMessage }}
@@ -66,6 +65,7 @@
 import axios from 'axios';
 import Layout from './Layout.vue'
 import getUrlList from "../provider.js";
+import { notification } from 'ant-design-vue';
 export default {
     name: 'Login',
     components: {
@@ -77,6 +77,18 @@ export default {
             password: '',
             errorMessage: '',
         };
+    },
+    mounted() {
+        const successMessage = localStorage.getItem("successMessage");
+        if (successMessage) {
+            notification.success({
+                message: "Success",
+                description: successMessage,
+                placement: "topRight", // Hiển thị góc trên bên phải
+                duration: 3, // Thời gian hiển thị (3 giây)
+            });
+            localStorage.removeItem("successMessage");
+        }
     },
     methods: {
         async handleLogin() {

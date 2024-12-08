@@ -86,6 +86,7 @@
 import axios from 'axios';
 import Layout from './Layout.vue'
 import getUrlList from "../provider.js";
+import { notification } from "ant-design-vue";
 export default {
     name: 'Login',
     components: {
@@ -114,8 +115,13 @@ export default {
                     password: this.password,
                     password_confirmation: this.password_confirmation,
                 });
-                alert(response.data.message);
-                this.$router.push('/login');
+                notification.success({
+                    message: "Success",
+                    description: "Registration successful! Please login to continue.",
+                    placement: "topRight", // Góc trên bên phải
+                    duration: 3, // Hiển thị 3 giây
+                });
+                this.$router.push("/login");
             } catch (error) {
                 console.error('Registration failed', error);
                 if (error.response && error.response.data.errors) {
