@@ -38,6 +38,8 @@
 import axios from 'axios';
 import Layout from '../Layout.vue';
 import Sidebar from './components/Sidebar.vue';
+import getUrlList from '../../provider.js';
+import { notification } from 'ant-design-vue';
 
 export default {
     name: 'ChangePassword',
@@ -55,14 +57,64 @@ export default {
         };
     },
     methods: {
-        changePassword() {
-            // Logic to handle password change
+        async changePassword() {
             if (this.password.new !== this.password.confirm) {
-                alert("New password and confirmation do not match.");
+                notification.error({
+                    message: 'Error',
+                    description: 'New password and confirmation do not match.',
+                    placement: 'topRight',
+                    duration: 5,
+                });
                 return;
             }
-            console.log('Changing password:', this.password);
-            // Send request to API to change password
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await axios.post(getUrlList().changePassword, {
+                    current_password: this.password.current,
+                    new_password: this.password.new,
+                    new_password_confirmation: this.password.confirm
+                }, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+
+                notification.success({
+                    message: 'Success',
+                    description: response.data.message,
+                    placement: 'topRight',
+                    duration: 5,
+                });
+
+                // Reset password fields
+                this.password.current = '';
+                this.password.new = '';
+                this.password.confirm = '';
+            } catch (error) {
+                if (error.response && error.response.status === 422) {
+                    // Lỗi xác thực
+                    const errors = error.response.data.errors;
+                    for (const key in errors) {
+                        if (errors.hasOwnProperty(key)) {
+                            notification.error({
+                                message: 'Error',
+                                description: errors[key].join(', '),
+                                placement: 'topRight',
+                                duration: 5,
+                            });
+                        }
+                    }
+                } else {
+                    // Lỗi không mong muốn
+                    notification.error({
+                        message: 'Error',
+                        description: error.response ? error.response.data.message : 'An unexpected error occurred.',
+                        placement: 'topRight',
+                        duration: 5,
+                    });
+                }
+            }
         }
     }
 }

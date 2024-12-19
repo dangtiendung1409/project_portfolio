@@ -28,6 +28,7 @@ Route::get('/getPhotoDetail/{token}', [HomePageController::class, 'getPhotoDetai
 
 Route::middleware('auth:api')->group(function () {
     Route::post('/update-profile', [HomePageController::class, 'updateProfile']);
+    Route::post('/change-password', [HomePageController::class, 'changePassword']);
     Route::get('/user', [AuthUserController::class, 'getUser']);
     Route::get('/liked-photos', [HomePageController::class, 'getLikedPhotos']);
 });
