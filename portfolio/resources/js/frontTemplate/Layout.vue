@@ -92,14 +92,20 @@
 import jwt_decode from 'jwt-decode';
 import axios from 'axios';
 import getUrlList from "../provider.js";
-
+import { useUserStore } from '@/stores/userStore';
+import { mapState } from 'pinia';
 export default {
     name: 'Layout',
     data() {
         return {
             isLoggedIn: false,
-            userProfilePicture: '',
         };
+    },
+    computed: {
+        ...mapState(useUserStore, ['user']),
+        userProfilePicture() {
+            return this.user.profile_picture;
+        }
     },
     mounted() {
         // Kiểm tra và thiết lập trạng thái đăng nhập
@@ -125,13 +131,8 @@ export default {
                             await this.refreshToken();
                         }, (remainingTime - 60) * 1000);
 
-                        // Gọi API để lấy thông tin người dùng
-                        const response = await axios.get(getUrlList().getUser, {
-                            headers: { Authorization: `Bearer ${token}` }
-                        });
-
-                        // Lưu thông tin ảnh người dùng
-                        this.userProfilePicture = response.data.user.profile_picture;
+                        const store = useUserStore();
+                        await store.fetchUserData();
                     } else {
                         this.isLoggedIn = false;
                         localStorage.removeItem('token');

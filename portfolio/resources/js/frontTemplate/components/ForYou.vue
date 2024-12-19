@@ -7,8 +7,6 @@
                     <img v-lazy="`${item.image_url}`" class="img-fluid rounded-image" alt="">
                 </router-link>
                 <div class="work-info">
-                    <h3>{{ item.photo.title }}</h3>
-                    <span>{{ item.photo.category.category_name }}</span>
                     <div class="user-info2">
                         <img class="user-image2" :src="item.photo.user.profile_picture || '/images/userDefault.png'" style="width: 30px; height: 30px">
                         <span class="user-name2">{{ item.photo.user.username }}</span>
@@ -69,7 +67,7 @@ export default {
     display: flex;
     align-items: center;
     flex-direction: row;
-    margin-bottom: -70px;
+    margin-top: 110px;
     margin-left: 10px;
 }
 

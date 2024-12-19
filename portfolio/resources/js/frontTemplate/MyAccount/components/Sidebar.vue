@@ -2,9 +2,9 @@
 <template>
     <aside class="sidebar">
         <div class="user-info">
-            <img class="avatar" src="/front_assets/img/user1.jpeg" alt="User Avatar" />
+            <img class="avatar" :src="user.profile_picture || '/images/imageUserDefault.png'" alt="User Avatar" />
             <div class="user-details">
-                <h2 class="username">Đặng Tiến Dũng</h2>
+                <h2 class="username">{{ user.username }}</h2>
             </div>
         </div>
         <ul>
@@ -18,6 +18,7 @@
 </template>
 
 <script>
+import { useUserStore } from '@/stores/userStore';
 import '@assets/css/account.css';
 export default {
     name: 'Sidebar',
@@ -32,9 +33,22 @@ export default {
             ],
         };
     },
+    computed: {
+        user() {
+            const store = useUserStore();
+            return store.user;
+        },
+    },
+    created() {
+        this.fetchUserData();
+    },
     methods: {
         isActive(path) {
             return this.$route.path === path;
+        },
+        async fetchUserData() {
+            const store = useUserStore();
+            await store.fetchUserData();
         },
     },
 };

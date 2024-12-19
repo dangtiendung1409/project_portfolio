@@ -16,16 +16,18 @@ use App\Http\Controllers\Auth\AuthUserController;
 */
 
 // frontend data
-Route::post('/login', [\App\Http\Controllers\Auth\AuthUserController::class, 'login']);
-Route::post('/register', [\App\Http\Controllers\Auth\AuthUserController::class, 'register']);
-Route::post('/refresh-token', [\App\Http\Controllers\Auth\AuthUserController::class, 'refreshToken']);
-Route::post('/logout', [\App\Http\Controllers\Auth\AuthUserController::class, 'logout']);
+Route::post('/login', [AuthUserController::class, 'login']);
+Route::post('/register', [AuthUserController::class, 'register']);
+Route::post('/refresh-token', [AuthUserController::class, 'refreshToken']);
+Route::post('/logout', [AuthUserController::class, 'logout']);
 
-Route::get('/getPhotoData', [\App\Http\Controllers\Front\HomePageController::class, 'getImages']);
-Route::get('/getFollowData', [\App\Http\Controllers\Front\HomePageController::class, 'getFollows']);
+Route::get('/getPhotoData', [HomePageController::class, 'getImages']);
+Route::get('/getFollowData', [HomePageController::class, 'getFollows']);
 Route::get('/getPhotoDetail/{token}', [HomePageController::class, 'getPhotoDetail']);
 
-Route::middleware('auth:api')->group(function () {
-    Route::get('/user', [AuthUserController::class, 'getUser']);
 
+Route::middleware('auth:api')->group(function () {
+    Route::post('/update-profile', [HomePageController::class, 'updateProfile']);
+    Route::get('/user', [AuthUserController::class, 'getUser']);
+    Route::get('/liked-photos', [HomePageController::class, 'getLikedPhotos']);
 });

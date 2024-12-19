@@ -305,8 +305,149 @@
                   }
               }
           }
+      },
+      "/liked-photos": {
+          "get": {
+              "tags": [
+                  "AccountUser"
+              ],
+              "summary": "Get photos liked by the user",
+              "operationId": "getLikedPhotos",
+              "produces": [
+                  "application/json"
+              ],
+              "parameters": [
+                  {
+                      "name": "Authorization",
+                      "in": "header",
+                      "description": "Bearer token for authentication",
+                      "required": true,
+                      "type": "string"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "Liked photos retrieved successfully",
+                      "schema": {
+                          "type": "array",
+                          "items": {
+                              "type": "object",
+                              "properties": {
+                                  "id": {
+                                      "type": "integer"
+                                  },
+                                  "photo_image": {
+                                      "type": "object",
+                                      "properties": {
+                                          "id": {
+                                              "type": "integer"
+                                          },
+                                          "image_url": {
+                                              "type": "string"
+                                          },
+                                          "photo": {
+                                              "type": "object",
+                                              "properties": {
+                                                  "id": {
+                                                      "type": "integer"
+                                                  },
+                                                  "title": {
+                                                      "type": "string"
+                                                  },
+                                                  "user": {
+                                                      "type": "object",
+                                                      "properties": {
+                                                          "id": {
+                                                              "type": "integer"
+                                                          },
+                                                          "name": {
+                                                              "type": "string"
+                                                          },
+                                                          "avatar": {
+                                                              "type": "string"
+                                                          }
+                                                      }
+                                                  }
+                                              }
+                                          }
+                                      }
+                                  }
+                              }
+                          }
+                      }
+                  },
+                  "401": {
+                      "description": "Unauthorized"
+                  },
+                  "500": {
+                      "description": "Internal server error"
+                  }
+              }
+          }
+      },
+      "/update-profile": {
+          "post": {
+              "tags": ["AccountUser"],
+              "summary": "Update User Profile",
+              "operationId": "updateProfile",
+              "produces": ["application/json"],
+              "consumes": ["multipart/form-data"],
+              "parameters": [
+                  {
+                      "name": "Authorization",
+                      "in": "header",
+                      "description": "Bearer token for authentication",
+                      "required": true,
+                      "type": "string"
+                  },
+                  {
+                      "name": "username",
+                      "in": "formData",
+                      "description": "Username of the user",
+                      "required": false,
+                      "type": "string"
+                  },
+                  {
+                      "name": "email",
+                      "in": "formData",
+                      "description": "Email address",
+                      "required": false,
+                      "type": "string"
+                  },
+                  {
+                      "name": "bio",
+                      "in": "formData",
+                      "description": "Bio of the user",
+                      "required": false,
+                      "type": "string"
+                  },
+                  {
+                      "name": "profile_picture",
+                      "in": "formData",
+                      "description": "Profile picture file",
+                      "required": false,
+                      "type": "file"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "Profile updated successfully",
+                      "schema": {
+                          "$ref": "#/definitions/user"
+                      }
+                  },
+                  "400": {
+                      "description": "Validation error"
+                  },
+                  "401": {
+                      "description": "Unauthorized"
+                  },
+                  "500": {
+                      "description": "Internal server error"
+                  }
+              }
+          }
       }
-
   },
   "securityDefinitions": {
     "APIKeyHeader": {

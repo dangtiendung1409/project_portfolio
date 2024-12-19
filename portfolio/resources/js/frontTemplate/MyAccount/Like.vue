@@ -29,14 +29,30 @@
                         </div>
                         <!-- Horizontal scrollable photo container -->
                         <div class="photo-gallery">
-                            <div v-for="photo in photos" :key="photo.id" class="photo-item">
+                            <div v-for="like in likedPhotos" :key="like.id" class="photo-item">
                                 <div class="photo-overlay">
-                                    <img :src="photo.url" alt="photo" class="photo-image" />
+                                    <router-link :to="{ name: 'PhotoDetail', params: { token: like.photo_image.photo_token } }">
+                                    <img :src="like.photo_image.image_url" alt="photo" class="photo-image" />
+                                    </router-link>
                                     <div class="photo-details">
-                                        <img :src="photo.userAvatar" alt="User Avatar" class="user-avatar" />
-                                        <span class="user-name">{{ photo.userName }}</span>
-                                        <i class="fa-regular fa-heart"></i>
-                                        <i class="fa-solid fa-ellipsis"></i>
+                                        <img
+                                            :src="like.photo_image.photo.user.profile_picture || '/images/imageUserDefault.png'"
+                                            alt="User Avatar"
+                                            class="user-avatar"
+                                        />
+                                        <span class="user-name2">{{ like.photo_image.photo.user.username }}</span>
+                                        <span class="icon-heart2"><i class="fas fa-heart"></i></span>
+                                        <span class="icon-dots2">
+                           <i :class="['fas', 'fa-ellipsis-h', { 'active': activeDropdown === 'dotsDropdown-' + like.id }]" @click="toggleDropdown('dotsDropdown-' + like.id)"></i>
+                       </span>
+                                    </div>
+                                    <div v-if="activeDropdown === 'dotsDropdown-' + like.id" class="dropdown-content show" style="right: 25px">
+                                        <ul>
+                                            <li><i class="fa-regular fa-square-plus"></i> Add to Gallery</li>
+                                            <li><i class="fas fa-user-slash"></i> Block User</li>
+                                            <li><i class="fas fa-user-plus"></i> Follow User</li>
+                                            <li><i class="fas fa-flag"></i> Report This Photo</li>
+                                        </ul>
                                     </div>
                                 </div>
                             </div>
@@ -49,44 +65,57 @@
 </template>
 
 <script>
+import axios from 'axios';
+import getUrlList from '../../provider.js';
 import Layout from '../Layout.vue';
 import Sidebar from './components/Sidebar.vue';
 import '@assets/css/account.css';
+
 export default {
     name: 'Like',
     components: {
         Layout,
-        Sidebar
+        Sidebar,
     },
     data() {
         return {
-            photos: [
-                { id: 1, url: '/front_assets/img/img_5.jpg', userAvatar: '/front_assets/img/user1.jpeg', userName: 'John Doe' },
-                { id: 2, url: '/front_assets/img/img_1.jpg', userAvatar: '/front_assets/img/user1.jpeg', userName: 'Jane Smith' },
-                { id: 3, url: '/front_assets/img/img_1.jpg', userAvatar: '/front_assets/img/user1.jpeg', userName: 'Jane Smith' },
-                { id: 4, url: '/front_assets/img/img_1.jpg', userAvatar: '/front_assets/img/user1.jpeg', userName: 'Jane Smith' },
-                { id: 5, url: '/front_assets/img/img_1.jpg', userAvatar: '/front_assets/img/user1.jpeg', userName: 'Jane Smith' },
-                { id: 6, url: '/front_assets/img/img_1.jpg', userAvatar: '/front_assets/img/user1.jpeg', userName: 'Jane Smith' },
-                { id: 7, url: '/front_assets/img/img_1.jpg', userAvatar: '/front_assets/img/user1.jpeg', userName: 'Jane Smith' },
-                { id: 8, url: '/front_assets/img/img_1.jpg', userAvatar: '/front_assets/img/user1.jpeg', userName: 'Jane Smith' },
-                { id: 9, url: '/front_assets/img/img_1.jpg', userAvatar: '/front_assets/img/user1.jpeg', userName: 'Jane Smith' },
-                { id: 10, url: '/front_assets/img/img_1.jpg', userAvatar: '/front_assets/img/user1.jpeg', userName: 'Jane Smith' },
-                { id: 11, url: '/front_assets/img/img_1.jpg', userAvatar: '/front_assets/img/user1.jpeg', userName: 'Jane Smith' },
-                { id: 12, url: '/front_assets/img/img_1.jpg', userAvatar: '/front_assets/img/user1.jpeg', userName: 'Jane Smith' },
-                { id: 13, url: '/front_assets/img/img_1.jpg', userAvatar: '/front_assets/img/user1.jpeg', userName: 'Jane Smith' },
-                { id: 14, url: '/front_assets/img/img_1.jpg', userAvatar: '/front_assets/img/user1.jpeg', userName: 'Jane Smith' },
-                { id: 15, url: '/front_assets/img/img_1.jpg', userAvatar: '/front_assets/img/user1.jpeg', userName: 'Jane Smith' },
-                { id: 16, url: '/front_assets/img/img_1.jpg', userAvatar: '/front_assets/img/user1.jpeg', userName: 'Jane Smith' },
-                { id: 17, url: '/front_assets/img/img_1.jpg', userAvatar: '/front_assets/img/user1.jpeg', userName: 'Jane Smith' },
-                { id: 18, url: '/front_assets/img/img_1.jpg', userAvatar: '/front_assets/img/user1.jpeg', userName: 'Jane Smith' },
-                { id: 19, url: '/front_assets/img/img_1.jpg', userAvatar: '/front_assets/img/user1.jpeg', userName: 'Jane Smith' },
-                { id: 20, url: '/front_assets/img/img_1.jpg', userAvatar: '/front_assets/img/user1.jpeg', userName: 'Jane Smith' },
-
-            ]
+            likedPhotos: [],
+            activeDropdown: null
         };
-    }
+    },
+    mounted() {
+        this.fetchLikedPhotos();
+    },
+    methods: {
+        toggleDropdown(id) {
+            if (this.activeDropdown === id) {
+                this.activeDropdown = null;
+            } else {
+                this.activeDropdown = id;
+            }
+        },
+        async fetchLikedPhotos() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                console.error('No token found');
+                return;
+            }
+
+            try {
+                const response = await axios.get(getUrlList().getLikedPhotos, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+
+                // Gán dữ liệu trả về từ API
+                this.likedPhotos = response.data.data;
+            } catch (error) {
+                console.error('Error fetching liked photos:', error);
+            }
+        },
+    },
 };
 </script>
+
 <style scoped>
 main {
     flex: 1;
@@ -97,5 +126,69 @@ main {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+}
+.user-name2 {
+    font-size: 18px;
+    color: #fff;
+    margin-right: auto;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 120px;
+}
+
+.icon-heart2, .icon-dots2 {
+    flex-grow: 0;
+    margin-left: 10px;
+    font-size: 18px;
+    margin-right: 10px;
+    position: relative;
+}
+
+.icon-heart2:hover {
+    color: #ff5a5f;
+}
+.icon-dots2 {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+}
+
+.dropdown-content li {
+    padding: 15px 15px 15px 25px;
+    display: flex;
+    align-items: center;
+    color: #222222;
+    white-space: nowrap;
+    z-index: 1000;
+}
+
+.dropdown-content li:hover {
+    color: whitesmoke; /* Màu chữ khi hover */
+    background-color: #1890ff; /* Màu nền khi hover */
+}
+
+.dropdown-content li i {
+    margin-right: 8px;
+}
+
+.dropdown-content li:hover i {
+    color: whitesmoke;
+    background-color: #1890ff;
+}
+
+/* Thêm CSS cho trạng thái active */
+.icon-dots2 .fa-ellipsis-h.active {
+    color: whitesmoke;
+    background-color: #1890ff;
+    border-radius: 50%;
+    padding: 5px;
 }
 </style>

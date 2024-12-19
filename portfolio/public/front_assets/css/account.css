@@ -120,9 +120,7 @@
 .photo-image {
     width: 100%; /* Chiều rộng 100% */
     height: auto; /* Tự động điều chỉnh chiều cao */
-    border-radius: 12px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-radius: 10px;
 }
 
 .photo-item:hover .photo-image {
@@ -159,7 +157,7 @@
     border: 2px solid white;
 }
 
-.user-name {
+.user-name-account {
     font-size: 18px;
     font-weight: bold;
     color: #ffffff;
