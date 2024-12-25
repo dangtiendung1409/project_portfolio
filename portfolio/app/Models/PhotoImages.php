@@ -26,6 +26,10 @@ class PhotoImages extends Model
             }
         });
     }
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class, 'photo_image_id');
+    }
     public function photo()
     {
         return $this->belongsTo(Photo::class, 'photo_id');

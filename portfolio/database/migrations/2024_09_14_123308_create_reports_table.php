@@ -20,7 +20,6 @@ return new class extends Migration
             $table->dateTime('report_date');
             $table->string('status', 50);
             $table->string('action_taken', 50)->nullable();
-            $table->timestamps();
         });
     }
 

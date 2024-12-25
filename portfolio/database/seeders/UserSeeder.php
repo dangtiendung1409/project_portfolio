@@ -20,7 +20,7 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('12345'),
                 'profile_picture' => 'https://example.com/images/john_doe.jpg',
                 'bio' => 'Photographer and traveler.',
-                'join_date' => now(),
+                'created_at' => now(),
                 'role_id' => 2,
             ],
             [
@@ -29,7 +29,7 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('12345'),
                 'profile_picture' => 'https://example.com/images/john_doe.jpg',
                 'bio' => 'Photographer and traveler.',
-                'join_date' => now(),
+                'created_at' => now(),
                 'role_id' => 2,
             ],
             [
@@ -38,7 +38,7 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('12345'),
                 'profile_picture' => 'https://example.com/images/jane_doe.jpg',
                 'bio' => 'Lover of nature and animals.',
-                'join_date' => now(),
+                'created_at' => now(),
                 'role_id' => 1,
             ],
         ];

@@ -17,13 +17,15 @@ class GalleriesSeeder extends Seeder
                 'galleries_name' => 'Nature Photography',
                 'galleries_description' => 'A collection of beautiful nature photos.',
                 'user_id' => 1,
-                'creation_date' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
             [
                 'galleries_name' => 'Urban Exploration',
                 'galleries_description' => 'Photos capturing the essence of urban life.',
                 'user_id' => 2,
-                'creation_date' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
         ];
 

@@ -8,12 +8,49 @@ use Illuminate\Database\Eloquent\Model;
 class Notification extends Model
 {
     use HasFactory;
-    protected $fillable = ['user_id', 'notification_type', 'content', 'is_read', 'notification_date'];
+
+    protected $fillable = [
+        'user_id',
+        'like_id',
+        'comment_id',
+        'photo_image_id',
+        'type',
+        'content',
+        'is_read',
+        'notification_date',
+    ];
 
     protected $dates = ['notification_date'];
 
+    /**
+     * Mối quan hệ với người dùng nhận thông báo.
+     */
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Mối quan hệ với like liên quan.
+     */
+    public function like()
+    {
+        return $this->belongsTo(Like::class);
+    }
+
+    /**
+     * Mối quan hệ với comment liên quan.
+     */
+    public function comment()
+    {
+        return $this->belongsTo(Comment::class);
+    }
+
+    /**
+     * Mối quan hệ với photo image liên quan.
+     */
+    public function photoImage()
+    {
+        return $this->belongsTo(PhotoImages::class);
     }
 }

@@ -1,4 +1,3 @@
-
 <template>
     <div id="portfolio-grid" class="row no-gutter" data-aos="fade-up" data-aos-delay="200">
         <div v-for="item in photos" :key="item.id" class="item web col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
@@ -10,9 +9,11 @@
                     <div class="user-info2">
                         <img class="user-image2" :src="item.photo.user.profile_picture || '/images/userDefault.png'" style="width: 30px; height: 30px">
                         <span class="user-name2">{{ item.photo.user.username }}</span>
-                        <span class="icon-heart2"><i class="fas fa-heart"></i></span>
+                        <span class="icon-heart2" @click="toggleLike(item)">
+                           <i :class="['fas', 'fa-heart', { 'liked': item.liked }]"></i>
+                        </span>
                         <span class="icon-dots2">
-                           <i :class="['fas', 'fa-ellipsis-h', { 'active': activeDropdown === 'dotsDropdown-' + item.id }]" @click="toggleDropdown('dotsDropdown-' + item.id)"></i>
+                           <i :class="['fas', 'fa-ellipsis-h', { 'active': activeDropdown === 'dotsDropdown-' + item.id }]" @click.stop="toggleDropdown('dotsDropdown-' + item.id)"></i>
                        </span>
                     </div>
                 </div>
@@ -26,11 +27,13 @@
                 </ul>
             </div>
         </div>
-
     </div>
 </template>
+
 <script>
 import lazyDirective from '../../lazy.js';
+import { useLikeStore } from '@/stores/likeStore';
+
 export default {
     directives: {
         lazy: lazyDirective,
@@ -46,13 +49,52 @@ export default {
             activeDropdown: null // Biến lưu trữ dropdown đang mở
         };
     },
+    async mounted() {
+        const likeStore = useLikeStore();
+        await likeStore.fetchLikedPhotos(); // Lấy danh sách các ảnh đã được like từ store
+        this.updateLikedState();
+    },
     methods: {
+        updateLikedState() {
+            const likeStore = useLikeStore();
+            this.photos.forEach(photo => {
+                photo.liked = likeStore.likedPhotos.includes(photo.id); // Cập nhật trạng thái liked của từng ảnh
+            });
+        },
         toggleDropdown(id) {
             if (this.activeDropdown === id) {
                 this.activeDropdown = null;
             } else {
                 this.activeDropdown = id;
             }
+        },
+        async toggleLike(item) {
+            const photo_image_id = item.id;
+            console.log('photo_image_id:', photo_image_id); // In ra photo_image_id
+            if (!photo_image_id) {
+                console.error('photo_image_id is missing');
+                return;
+            }
+            const likeStore = useLikeStore();
+            try {
+                if (item.liked) {
+                    await likeStore.unlikePhoto(photo_image_id); // Sử dụng photo_image_id
+                } else {
+                    await likeStore.likePhoto(photo_image_id); // Sử dụng photo_image_id
+                }
+                item.liked = !item.liked; // Đảo ngược trạng thái liked
+            } catch (error) {
+                console.error('Failed to toggle like:', error);
+            }
+        }
+    },
+    watch: {
+        photos: {
+            handler() {
+                this.updateLikedState();
+            },
+            deep: true,
+            immediate: true
         }
     }
 };
@@ -67,8 +109,11 @@ export default {
     display: flex;
     align-items: center;
     flex-direction: row;
-    margin-top: 110px;
     margin-left: 10px;
+}
+
+.user-image2, .user-name2, .icon-heart2, .icon-dots2 {
+    pointer-events: auto; /* Cho phép tương tác */
 }
 
 .user-image2 {
@@ -95,7 +140,11 @@ export default {
 }
 
 .icon-heart2:hover {
-    color: #ff5a5f;
+    cursor: pointer;
+}
+
+.icon-heart2 .fa-heart.liked {
+    color: #ff5a5f; /* Màu khi đã like */
 }
 
 .icon-dots2 {

@@ -8,9 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Gallery extends Model
 {
     use HasFactory;
-    protected $fillable = ['galleries_name', 'galleries_description', 'user_id', 'creation_date'];
-
-    protected $dates = ['creation_date'];
+    protected $fillable = ['galleries_name', 'galleries_description', 'user_id'];
 
     public function user()
     {

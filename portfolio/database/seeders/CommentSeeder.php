@@ -13,8 +13,8 @@ class CommentSeeder extends Seeder
     public function run(): void
     {
         $comments = [
-            ['photo_image_id' => 1, 'user_id' => 2,'comment_status'=>'pending', 'comment_text' => 'Amazing photo!', 'comment_date' => now()],
-            ['photo_image_id' => 2, 'user_id' => 1,'comment_status'=>'pending', 'comment_text' => 'Great shot!', 'comment_date' => now()],
+            ['photo_image_id' => 1, 'user_id' => 2, 'comment_text' => 'Amazing photo!', 'created_at' => now(),'updated_at' => now()],
+            ['photo_image_id' => 2, 'user_id' => 1, 'comment_text' => 'Great shot!', 'created_at' => now(),'updated_at' => now()],
         ];
 
         foreach ($comments as $comment) {

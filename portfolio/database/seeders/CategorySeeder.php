@@ -22,13 +22,17 @@ class CategorySeeder extends Seeder
             'Night', 'People','Performing Arts',
             'Sport', 'Still Life', 'Street',
             'Transportation','Travel','Underwater',
-            'Urban ExplorationWedding','Countryside','Other'
-
+            'Urban Exploration','Wedding','Countryside','Other'
         ];
 
-        foreach ($categories as $category) {
+        foreach ($categories as $index => $category) {
+            $randomImageNumber = rand(1, 200); // Lấy số ngẫu nhiên từ 1 đến 200
+            $imagePath = '/images/photos/image-' . $randomImageNumber . '.jpeg'; // Đường dẫn ảnh
+
             DB::table('categories')->insert([
                 'category_name' => $category,
+                'slug' => strtolower(str_replace(' ', '-', $category)), // Tạo slug từ category_name
+                'image' => $imagePath, // Gán đường dẫn ảnh
             ]);
         }
     }

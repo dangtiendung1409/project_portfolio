@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Auth;
 
 class HomePageController extends Controller
 {
+    // Home Page
     public function getImages()
     {
         $images = PhotoImages::with(['photo.category', 'photo.user'])->get();
@@ -40,7 +41,36 @@ class HomePageController extends Controller
 
         return response()->json($result);
     }
+    public function likePhoto(Request $request)
+    {
+        $user = Auth::user();
+        $photoImageId = $request->input('photo_image_id');
 
+        // Kiểm tra xem like đã tồn tại chưa
+        $like = Like::where('user_id', $user->id)->where('photo_image_id', $photoImageId)->first();
+
+        if (!$like) {
+            // Tạo like mới
+            Like::create([
+                'user_id' => $user->id,
+                'photo_image_id' => $photoImageId,
+                'like_date' => now(),
+            ]);
+        }
+
+        return response()->json(['message' => 'Photo liked successfully'], 200);
+    }
+
+    public function unlikePhoto(Request $request)
+    {
+        $user = Auth::user();
+        $photoImageId = $request->input('photo_image_id');
+
+        // Xóa like
+        Like::where('user_id', $user->id)->where('photo_image_id', $photoImageId)->delete();
+
+        return response()->json(['message' => 'Photo unliked successfully'], 200);
+    }
     // photo details
     public function getPhotoDetail(Request $request, $token)
     {
