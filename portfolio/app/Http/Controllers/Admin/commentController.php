@@ -28,22 +28,21 @@ class commentController extends Controller
             $query->where('comment_text', 'like', '%' . $request->input('comment_text') . '%');
         }
 
-        // Lọc theo comment status
-        if ($request->filled('comment_status')) {
-            $query->where('comment_status', $request->input('comment_status'));
-        }
+//        // Lọc theo comment status
+//        if ($request->filled('comment_status')) {
+//            $query->where('comment_status', $request->input('comment_status'));
+//        }
 
         // Lọc theo comment date từ ngày nào đến ngày nào
-        if ($request->filled('start_date')) {
-            $query->whereDate('comment_date', '>=', $request->input('start_date'));
-        }
-        if ($request->filled('end_date')) {
-            $query->whereDate('comment_date', '<=', $request->input('end_date'));
-        }
+//        if ($request->filled('start_date')) {
+//            $query->whereDate('created_at', '>=', $request->input('start_date'));
+//        }
+//        if ($request->filled('end_date')) {
+//            $query->whereDate('comment_date', '<=', $request->input('end_date'));
+//        }
         $size = $request->input('size', 10);
         $comments = $query
-            ->orderByRaw("CASE WHEN comment_status = 'pending' THEN 0 ELSE 1 END")
-            ->orderBy('comment_date', 'desc')
+            ->orderBy('updated_at', 'desc')
             ->paginate($size)
             ->appends($request->all());
 

@@ -39,15 +39,15 @@
             <input class="form-control" type="text" name="comment_text" placeholder="Comment Text" style="height: 45px; font-size: 0.765625rem; padding: 4px 8px; background-color: #F1F1F1; border-radius: 5px; width: 120px;" />
         </div>
 
-        <!-- Lọc theo comment status -->
-        <div class="input-group input-group-sm" style="margin-right: 5px; margin-bottom: 10px;">
-            <select name="comment_status" class="form-control" style="height: 45px; font-size: 0.765625rem; background-color: #F1F1F1; border-radius: 5px; width: 150px;">
-                <option value="">Select Status</option>
-                <option value="approved">Approved</option>
-                <option value="pending">Pending</option>
-                <option value="rejected">Rejected</option>
-            </select>
-        </div>
+{{--        <!-- Lọc theo comment status -->--}}
+{{--        <div class="input-group input-group-sm" style="margin-right: 5px; margin-bottom: 10px;">--}}
+{{--            <select name="comment_status" class="form-control" style="height: 45px; font-size: 0.765625rem; background-color: #F1F1F1; border-radius: 5px; width: 150px;">--}}
+{{--                <option value="">Select Status</option>--}}
+{{--                <option value="approved">Approved</option>--}}
+{{--                <option value="pending">Pending</option>--}}
+{{--                <option value="rejected">Rejected</option>--}}
+{{--            </select>--}}
+{{--        </div>--}}
 
         <!-- Lọc theo comment date từ ngày nào đến ngày nào -->
         <div class="input-group input-group-sm" style="margin-right: 5px; margin-bottom: 10px;">
@@ -105,7 +105,7 @@
                         <th>Image</th>
                         <th>Category name</th>
                         <th>Comment</th>
-                        <th>Status</th>
+{{--                        <th>Status</th>--}}
                         <th>Date</th>
                         <th></th>
                     </tr>
@@ -131,41 +131,41 @@
                         </td>
                         <td>{{ $comment->photoImage->photo->category->category_name ?? 'No Location' }}</td>
                         <td>{{ $comment->comment_text }}</td>
-                        <td>
-                            @if ($comment->comment_status == 'pending')
-                                <span style="color: orange;">{{ $comment->comment_status }}</span>
-                            @elseif ($comment->comment_status == 'approved')
-                                <span style="color: green;">{{ $comment->comment_status }}</span>
-                            @elseif ($comment->comment_status == 'rejected')
-                                <span style="color: red;">{{ $comment->comment_status }}</span>
-                            @else
-                                <span>{{ $comment->comment_status }}</span>
-                            @endif
-                        </td>
+{{--                        <td>--}}
+{{--                            @if ($comment->comment_status == 'pending')--}}
+{{--                                <span style="color: orange;">{{ $comment->comment_status }}</span>--}}
+{{--                            @elseif ($comment->comment_status == 'approved')--}}
+{{--                                <span style="color: green;">{{ $comment->comment_status }}</span>--}}
+{{--                            @elseif ($comment->comment_status == 'rejected')--}}
+{{--                                <span style="color: red;">{{ $comment->comment_status }}</span>--}}
+{{--                            @else--}}
+{{--                                <span>{{ $comment->comment_status }}</span>--}}
+{{--                            @endif--}}
+{{--                        </td>--}}
                         <td>{{ date('d-m-Y', strtotime($comment->comment_date)) }}</td>
-                        <td class="actions-cell">
-                            <div class="buttons right nowrap">
-                                @if($comment->comment_status == 'pending')
-                                    <form action="{{ route('admin.comment.updateStatus', ['id' => $comment->id, 'status' => 'approved']) }}" method="POST" onsubmit="return confirm('Are you sure you want to approve this comment?');">
-                                        @csrf
-                                        <button class="button small green" type="submit">
-                                            <span class="icon"><i class="mdi mdi-check"></i></span>
-                                            Approve
-                                        </button>
-                                    </form>
+{{--                        <td class="actions-cell">--}}
+{{--                            <div class="buttons right nowrap">--}}
+{{--                                @if($comment->comment_status == 'pending')--}}
+{{--                                    <form action="{{ route('admin.comment.updateStatus', ['id' => $comment->id, 'status' => 'approved']) }}" method="POST" onsubmit="return confirm('Are you sure you want to approve this comment?');">--}}
+{{--                                        @csrf--}}
+{{--                                        <button class="button small green" type="submit">--}}
+{{--                                            <span class="icon"><i class="mdi mdi-check"></i></span>--}}
+{{--                                            Approve--}}
+{{--                                        </button>--}}
+{{--                                    </form>--}}
 
-                                    <form action="{{ route('admin.comment.updateStatus', ['id' => $comment->id, 'status' => 'rejected']) }}" method="POST" onsubmit="return confirm('Are you sure you want to reject this comment?');">
-                                        @csrf
-                                        <button class="button small red" type="submit">
-                                            <span class="icon"><i class="mdi mdi-close"></i></span>
-                                            Reject
-                                        </button>
-                                    </form>
-                                @else
-                                    <!-- Nếu comment đã được approved hoặc rejected thì không hiển thị nút nữa -->
-                                @endif
-                            </div>
-                        </td>
+{{--                                    <form action="{{ route('admin.comment.updateStatus', ['id' => $comment->id, 'status' => 'rejected']) }}" method="POST" onsubmit="return confirm('Are you sure you want to reject this comment?');">--}}
+{{--                                        @csrf--}}
+{{--                                        <button class="button small red" type="submit">--}}
+{{--                                            <span class="icon"><i class="mdi mdi-close"></i></span>--}}
+{{--                                            Reject--}}
+{{--                                        </button>--}}
+{{--                                    </form>--}}
+{{--                                @else--}}
+{{--                                    <!-- Nếu comment đã được approved hoặc rejected thì không hiển thị nút nữa -->--}}
+{{--                                @endif--}}
+{{--                            </div>--}}
+{{--                        </td>--}}
                     </tr>
                     @endforeach
                     </tbody>

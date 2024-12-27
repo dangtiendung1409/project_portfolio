@@ -30,8 +30,7 @@ class dashboardController extends Controller
 
         // list comment pending
         $comments = Comment::with(['photoImage.photo', 'user'])
-            ->where('comment_status', 'pending')
-            ->orderBy('comment_date', 'desc')
+            ->orderBy('updated_at', 'desc')
             ->paginate(10);
 
         return view('admin/dashboard', compact(
