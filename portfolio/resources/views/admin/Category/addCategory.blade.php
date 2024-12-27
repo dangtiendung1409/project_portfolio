@@ -1,4 +1,4 @@
-@extends('admin/layout')
+@extends('admin.layout')
 @section('content')
     <section class="is-title-bar">
         <div class="flex flex-col md:flex-row items-center justify-between space-y-6 md:space-y-0">
@@ -6,21 +6,13 @@
                 <li>Admin</li>
                 <li>Add Category</li>
             </ul>
-            <a href="https://justboil.me/" onclick="alert('Coming soon'); return false" target="_blank" class="button blue">
+            <a href="https://justboil.me/" target="_blank" class="button blue">
                 <span class="icon"><i class="mdi mdi-credit-card-outline"></i></span>
                 <span>Premium Demo</span>
             </a>
         </div>
     </section>
 
-    <section class="is-hero-bar">
-        <div class="flex flex-col md:flex-row items-center justify-between space-y-6 md:space-y-0">
-            <h1 class="title">
-                Forms
-            </h1>
-            <button class="button light">Button</button>
-        </div>
-    </section>
     @if (session('successMessage') || session('errorMessage'))
         <div id="alertsContainer">
             @if (session('successMessage'))
@@ -37,23 +29,24 @@
             @endif
         </div>
     @endif
+
     <section class="section main-section">
         <div class="card mb-6">
             <header class="card-header">
                 <p class="card-header-title">
                     <span class="icon"><i class="mdi mdi-ballot"></i></span>
-                    Forms
+                    Add Category
                 </p>
             </header>
             <div class="card-content">
-                <form action="{{url('admin/category/store')}}" method="post">
+                <form action="{{ url('admin/category/store') }}" method="post" enctype="multipart/form-data">
                     @csrf
                     <div class="field">
-                        <label class="label">Category name</label>
+                        <label class="label">Category Name</label>
                         <div class="field-body">
                             <div class="field">
                                 <div class="control icons-left">
-                                    <input class="input" name="category_name" type="text" placeholder="Name">
+                                    <input class="input @error('category_name') is-danger @enderror" name="category_name" type="text" placeholder="Name" value="{{ old('category_name') }}">
                                     <span class="icon left"><i class="mdi mdi-account"></i></span>
                                 </div>
                                 @error('category_name')
@@ -62,6 +55,24 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="field">
+                        <label class="label">Image</label>
+                        <div class="field-body">
+                            <div class="field">
+                                <div class="control">
+                                    <input class="input @error('image') is-danger @enderror" type="file" name="image" id="imageInput">
+                                </div>
+                                <div id="imagePreview" style="margin-top: 10px;">
+                                    <!-- Preview ảnh sẽ hiển thị ở đây -->
+                                </div>
+                                @error('image')
+                                <p class="help is-danger">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
                     <hr>
 
                     <div class="field grouped">
@@ -80,4 +91,24 @@
             </div>
         </div>
     </section>
+
+    {{-- Script to preview image --}}
+    <script>
+        document.getElementById('imageInput').addEventListener('change', function(event) {
+            const input = event.target;
+            const previewContainer = document.getElementById('imagePreview');
+            previewContainer.innerHTML = ''; // Xóa preview cũ nếu có
+
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.style.maxWidth = '500px';
+                    previewContainer.appendChild(img);
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        });
+    </script>
 @endsection

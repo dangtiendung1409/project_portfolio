@@ -6,7 +6,7 @@
                 <li>Admin</li>
                 <li>Category</li>
             </ul>
-            <a href="https://justboil.me/"  target="_blank" class="button blue">
+            <a href="https://justboil.me/" target="_blank" class="button blue">
                 <span class="icon"><i class="mdi mdi-credit-card-outline"></i></span>
                 <span>Premium Demo</span>
             </a>
@@ -16,7 +16,7 @@
     <section class="is-hero-bar">
         <div class="flex flex-col md:flex-row items-center justify-between space-y-6 md:space-y-0"></div>
         <div class="col-sm-2">
-            <a class="btn btn-add" href="/admin/category/create"  title="Thêm">
+            <a class="btn btn-add" href="/admin/category/create" title="Thêm">
                 <i class="fas fa-plus"></i>
                 Add Category
             </a>
@@ -39,7 +39,6 @@
         </div>
     @endif
     <section class="section main-section">
-
         <div class="card has-table">
             <header class="card-header">
                 <p class="card-header-title">
@@ -53,7 +52,6 @@
                         <option value="50" {{ request('size') == 50 ? 'selected' : '' }}>50</option>
                         <option value="100" {{ request('size') == 100 ? 'selected' : '' }}>100</option>
                     </select>
-
                     <input type="hidden" name="page" value="{{ request('page', 1) }}">
                 </form>
             </header>
@@ -63,63 +61,76 @@
                         No category have been approved
                     </div>
                 @else
-                <table>
-                    <thead>
-                    <tr>
-                        <th class="checkbox-cell">
-                            <label class="checkbox">
-                                <input type="checkbox">
-                                <span class="check"></span>
-                            </label>
-                        </th>
-                        <th>Id</th>
-                        <th>Category Name</th>
-                        <th></th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    @foreach($categories as $category)
-                    <tr>
-                        <td class="checkbox-cell">
-                            <label class="checkbox">
-                                <input type="checkbox">
-                                <span class="check"></span>
-                            </label>
-                        </td>
-                        <td>{{$category->id}}</td>
-                        <td>{{ $category->category_name }}</td>
-                        <td class="actions-cell">
-                            <div class="buttons right nowrap">
-                                <a href="{{ url('/admin/category/' . 'edit/'. $category->id ) }}" class="button small green">
-                                    <span class="icon"><i class="mdi mdi-pencil"></i></span>
-                                </a>
-                                <form action="{{ url('/admin/category/delete/'.$category->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this category?');" style="display:inline-block;">
-                                    @csrf
-                                    <button class="button small red" type="submit">
-                                        <span class="icon"><i class="mdi mdi-trash-can"></i></span>
-                                    </button>
-                                </form>
+                    <table>
+                        <thead>
+                        <tr>
+                            <th class="checkbox-cell">
+                                <label class="checkbox">
+                                    <input type="checkbox">
+                                    <span class="check"></span>
+                                </label>
+                            </th>
+                            <th>Id</th>
+                            <th>Category Name</th>
+                            <th>Image</th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @foreach($categories as $category)
+                            <tr>
+                                <td class="checkbox-cell">
+                                    <label class="checkbox">
+                                        <input type="checkbox">
+                                        <span class="check"></span>
+                                    </label>
+                                </td>
+                                <td>{{$category->id}}</td>
+                                <td>{{ $category->category_name }}</td>
+                                <td>
+                                    @if($category->image)
+                                        <img src="{{ asset('' . $category->image) }}" alt="{{ $category->category_name }}" width="250" height="250" style="cursor: pointer; margin-bottom: 10px;" onclick="showModal(this)">
+                                    @else
+                                        No Image
+                                    @endif
+                                </td>
+                                <td class="actions-cell">
+                                    <div class="buttons right nowrap">
+                                        <a href="{{ url('/admin/category/' . 'edit/'. $category->id ) }}" class="button small green">
+                                            <span class="icon"><i class="mdi mdi-pencil"></i></span>
+                                        </a>
+                                        <form action="{{ url('/admin/category/delete/'.$category->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this category?');" style="display:inline-block;">
+                                            @csrf
+                                            <button class="button small red" type="submit">
+                                                <span class="icon"><i class="mdi mdi-trash-can"></i></span>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                        </tbody>
+                    </table>
+                    <div class="table-pagination">
+                        <div class="flex items-center justify-between">
+                            <div class="buttons">
+                                @foreach ($categories->getUrlRange(1, $categories->lastPage()) as $page => $url)
+                                    <a href="{{ $url }}" class="button {{ $categories->currentPage() == $page ? 'active' : '' }}">
+                                        {{ $page }}
+                                    </a>
+                                @endforeach
                             </div>
-                        </td>
-
-                    </tr>
-                    @endforeach
-                    </tbody>
-                </table>
-                <div class="table-pagination">
-                    <div class="flex items-center justify-between">
-                        <div class="buttons">
-                            @foreach ($categories->getUrlRange(1, $categories->lastPage()) as $page => $url)
-                                <a href="{{ $url }}" class="button {{ $categories->currentPage() == $page ? 'active' : '' }}">
-                                    {{ $page }}
-                                </a>
-                            @endforeach
+                            <small>Page {{ $categories->currentPage() }} of {{ $categories->lastPage() }}</small>
                         </div>
-                        <small>Page {{ $categories->currentPage() }} of {{ $categories->lastPage() }}</small>
                     </div>
-                </div>
                 @endif
             </div>
         </div>
     </section>
+    <!-- The Modal -->
+    <div id="myModal" class="modal">
+        <span class="close">&times;</span>
+        <img class="modal-content" id="imgModal">
+        <div id="caption"></div>
+    </div>
 @endsection
