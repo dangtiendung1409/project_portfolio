@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Faker\Factory as Faker;
 
 class LikeSeeder extends Seeder
 {
@@ -12,13 +13,19 @@ class LikeSeeder extends Seeder
      */
     public function run(): void
     {
-        $likes = [
-            ['user_id' => 1, 'photo_image_id' => 1, 'like_date' => now()],
-            ['user_id' => 2, 'photo_image_id' => 2, 'like_date' => now()],
-        ];
+        $faker = Faker::create();
 
-        foreach ($likes as $like) {
-            DB::table('likes')->insert($like);
+
+        $userIds = DB::table('users')->pluck('id')->toArray();
+        $photoIds = DB::table('photo_images')->pluck('id')->toArray();
+
+        // Chèn 100 like ngẫu nhiên
+        for ($i = 0; $i < 100; $i++) {
+            DB::table('likes')->insert([
+                'user_id' => $faker->randomElement($userIds),
+                'photo_image_id' => $faker->randomElement($photoIds),
+                'like_date' => now(),
+            ]);
         }
     }
 }

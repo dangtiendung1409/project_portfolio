@@ -69,18 +69,15 @@ export default {
             }
         },
         async toggleLike(item) {
-            const photo_image_id = item.id;
-            console.log('photo_image_id:', photo_image_id); // In ra photo_image_id
-            if (!photo_image_id) {
-                console.error('photo_image_id is missing');
-                return;
-            }
+            const photo_image_id = item.id; // ID của ảnh
+            const photo_user_id = item.photo.user.id; // ID của người sở hữu ảnh
             const likeStore = useLikeStore();
+
             try {
                 if (item.liked) {
-                    await likeStore.unlikePhoto(photo_image_id); // Sử dụng photo_image_id
+                    await likeStore.unlikePhoto(photo_image_id);
                 } else {
-                    await likeStore.likePhoto(photo_image_id); // Sử dụng photo_image_id
+                    await likeStore.likePhoto(photo_image_id, photo_user_id); // Gửi thêm photo_user_id
                 }
                 item.liked = !item.liked; // Đảo ngược trạng thái liked
             } catch (error) {

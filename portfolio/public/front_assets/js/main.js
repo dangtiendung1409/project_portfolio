@@ -82,7 +82,7 @@ function toggleDropdown(id) {
 
 // Đóng dropdown nếu người dùng nhấp ra ngoài
 window.onclick = function(event) {
-    if (!event.target.matches('.user-dropdown img') && !event.target.matches('.fas.fa-ellipsis-h')) {
+    if (!event.target.matches('.fa-bell') && !event.target.matches('.user-dropdown img')) {
         var dropdowns = document.getElementsByClassName("dropdown-content");
         for (var i = 0; i < dropdowns.length; i++) {
             var openDropdown = dropdowns[i];
@@ -92,5 +92,3 @@ window.onclick = function(event) {
         }
     }
 }
-
-

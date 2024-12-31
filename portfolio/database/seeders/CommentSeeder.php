@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Faker\Factory as Faker;
 
 class CommentSeeder extends Seeder
 {
@@ -12,13 +13,21 @@ class CommentSeeder extends Seeder
      */
     public function run(): void
     {
-        $comments = [
-            ['photo_image_id' => 1, 'user_id' => 2, 'comment_text' => 'Amazing photo!', 'created_at' => now(),'updated_at' => now()],
-            ['photo_image_id' => 2, 'user_id' => 1, 'comment_text' => 'Great shot!', 'created_at' => now(),'updated_at' => now()],
-        ];
+        $faker = Faker::create();
 
-        foreach ($comments as $comment) {
-            DB::table('comments')->insert($comment);
+
+        $userIds = DB::table('users')->pluck('id')->toArray();
+        $photoIds = DB::table('photo_images')->pluck('id')->toArray();
+
+        // Chèn 100 comment ngẫu nhiên
+        for ($i = 0; $i < 100; $i++) {
+            DB::table('comments')->insert([
+                'photo_image_id' => $faker->randomElement($photoIds),
+                'user_id' => $faker->randomElement($userIds),
+                'comment_text' => $faker->sentence(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
         }
     }
 }

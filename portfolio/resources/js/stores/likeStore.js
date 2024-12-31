@@ -21,17 +21,24 @@ export const useLikeStore = defineStore('likeStore', {
                 throw error;
             }
         },
-        async likePhoto(photoImageId) {
+        async likePhoto(photoImageId, photoUserId) {
             try {
-                const response = await axios.post(getUrlList().likePhoto, { photo_image_id: photoImageId }, {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem('token')}`
+                const response = await axios.post(
+                    getUrlList().likePhoto,
+                    {
+                        photo_image_id: photoImageId,
+                        photo_user_id: photoUserId,
+                    },
+                    {
+                        headers: {
+                            Authorization: `Bearer ${localStorage.getItem('token')}`
+                        }
                     }
-                });
+                );
                 this.likedPhotos.push(photoImageId);
                 return response.data;
             } catch (error) {
-                console.error('Failed to like photo:', error.response.data);
+                console.error('Failed to like photo:', error.response?.data || error.message);
                 throw error;
             }
         },

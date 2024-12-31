@@ -51,7 +51,28 @@
                     <router-link :to="'/register'" class="btn-custom signup-btn">Sign up</router-link>
                 </div>
                 <i v-if="isLoggedIn" class="fa-regular fa-envelope" style="font-size: 24px;"></i>
-                <i v-if="isLoggedIn" class="fa-regular fa-bell" style="font-size: 24px;"></i>
+                <div class="notification-wrapper">
+                    <i v-if="isLoggedIn" class="fa-regular fa-bell" style="font-size: 24px;" @click="toggleDropdown('notificationDropdown')">
+                        <!-- Badge for unread notifications -->
+                        <span v-if="unreadCount > 0" class="notification-dot"></span>
+                    </i>
+                    <div id="notificationDropdown" class="notification-dropdown">
+                        <div class="notification-header">Notifications</div>
+                        <div v-for="(notification, index) in displayedNotifications" :key="notification.id"
+                             :class="['notification-item', { 'unread': !notification.read }]">
+                            <img :src="`/${notification.image}`" alt="User" class="notification-image">
+                            <div class="notification-content">
+                                <p class="notification-message" @click="navigateToPhoto(notification.photoToken, notification.id)">
+                                    {{ notification.message }}
+                                </p>
+                                <small class="notification-time">{{ notification.time }}</small>
+                            </div>
+                        </div>
+                        <div v-if="showSeeMore" class="see-more" @click="showAllNotifications">
+                            View all notifications
+                        </div>
+                    </div>
+                </div>
             </div>
             <button v-if="isLoggedIn" class="upload-button">
                 <i class="fa-solid fa-arrow-up"></i> Upload
@@ -93,23 +114,38 @@ import jwt_decode from 'jwt-decode';
 import axios from 'axios';
 import getUrlList from "../provider.js";
 import { useUserStore } from '@/stores/userStore';
+import { useNotificationStore } from '@/stores/notificationStore';
 import { mapState } from 'pinia';
 export default {
     name: 'Layout',
     data() {
         return {
             isLoggedIn: false,
+            showAll: false,
         };
     },
     computed: {
         ...mapState(useUserStore, ['user']),
         userProfilePicture() {
             return this.user.profile_picture;
-        }
+        },
+        ...mapState(useNotificationStore, ['notifications', 'unreadCount']),
+        displayedNotifications() {
+            // Hiển thị 7 thông báo đầu tiên hoặc tất cả thông báo nếu showAll là true
+            return this.showAll ? this.notifications : this.notifications.slice(0, 7);
+        },
+        showSeeMore() {
+            // Hiển thị nút "Xem thêm" nếu có nhiều hơn 7 thông báo và chưa hiển thị tất cả
+            return this.notifications.length > 7 && !this.showAll;
+        },
     },
     mounted() {
         // Kiểm tra và thiết lập trạng thái đăng nhập
         this.checkLoginStatus();
+        if (this.isLoggedIn) {
+            const notificationStore = useNotificationStore();
+            notificationStore.fetchNotifications();
+        }
         this.loadExternalScripts();
     },
     methods: {
@@ -183,6 +219,21 @@ export default {
                 console.error('Logout failed:', error);
             }
         },
+        async navigateToPhoto(photoToken, notificationId) {
+            if (notificationId) {
+                const notificationStore = useNotificationStore();
+                await notificationStore.markNotificationAsRead(notificationId); // This should now work
+            }
+
+            if (photoToken) {
+                this.$router.push({ name: 'PhotoDetail', params: { token: photoToken } });
+            } else {
+                alert('Photo token is missing or invalid.');
+            }
+        },
+        showAllNotifications() {
+            this.showAll = true;
+        },
         toggleDropdown(dropdownId) {
             const dropdown = document.getElementById(dropdownId);
             if (dropdown) {
@@ -222,6 +273,101 @@ export default {
 .dropdown-content {
     top: 40px;
     right: -110px;
+}
+
+.notification-wrapper .notification-dropdown {
+    display: none;
+    position: absolute;
+    background-color: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 10px 0;
+    z-index: 10;
+    width: 300px;
+    top: 70px;
+    right: 70px;
+    overflow-y: auto;
+    max-height: 600px;
+}
+.notification-header {
+    text-align: center;
+    font-size: 17px;
+    background-color: rgb(255, 255, 255);
+    padding: 13px 0px;
+    height: 52px;
+    color: rgb(34, 34, 34);
+    font-weight: bold;
+    position: sticky;
+    z-index: 1;
+    top: -12px;
+}
+
+.notification-dot {
+    position: absolute;
+    top: 38px;
+    right: 153px;
+    width: 8px;
+    height: 8px;
+    background-color: #ff0000;
+    border-radius: 50%;
+    z-index: 1;
+}
+.notification-wrapper .notification-dropdown.show {
+    display: block;
+}
+
+.notification-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #f1f1f1;
+    transition: background-color 0.3s;
+}
+.notification-item.unread {
+    background-color: #e7f3ff;
+}
+.notification-item:last-child {
+    border-bottom: none;
+}
+
+.notification-item:hover {
+    background-color: #f9f9f9;
+}
+.see-more {
+    text-align: center;
+    padding: 7px;
+    cursor: pointer;
+    transition: 0.5s;
+    height: 40px;
+    background-color: rgb(255, 255, 255);
+    box-shadow: rgba(0, 0, 0, 0.16) 0px -1px 4px;
+    font-size: 14px;
+    margin-bottom: -8px;
+    color: rgb(8, 112, 209);
+}
+
+.notification-image {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 10px;
+}
+
+.notification-content {
+    flex: 1;
+}
+
+.notification-message {
+    font-size: 14px;
+    font-weight: 500;
+    margin: 0;
+    color: #333;
+}
+
+.notification-time {
+    font-size: 12px;
+    color: #777;
 }
 
 .btn-custom {

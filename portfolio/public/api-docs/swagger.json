@@ -15,6 +15,10 @@
     {
       "name": "HomePage",
       "description": "HomePage Data Operations"
+    },
+    {
+       "name": "AccountUser",
+       "description": "AccountUser Data Operations"
     }
 
   ],
@@ -447,8 +451,95 @@
                   }
               }
           }
+      },
+      "/change-password": {
+          "post": {
+              "tags": ["AccountUser"],
+              "summary": "Change User Password",
+              "operationId": "changePassword",
+              "produces": ["application/json"],
+              "parameters": [
+                  {
+                      "name": "Authorization",
+                      "in": "header",
+                      "description": "Bearer token for authentication",
+                      "required": true,
+                      "type": "string"
+                  },
+                  {
+                      "name": "current_password",
+                      "in": "formData",
+                      "description": "Current password of the user",
+                      "required": true,
+                      "type": "string"
+                  },
+                  {
+                      "name": "new_password",
+                      "in": "formData",
+                      "description": "New password of the user",
+                      "required": true,
+                      "type": "string"
+                  },
+                  {
+                      "name": "new_password_confirmation",
+                      "in": "formData",
+                      "description": "New password confirmation",
+                      "required": true,
+                      "type": "string"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "Password changed successfully"
+                  },
+                  "400": {
+                      "description": "Current password is incorrect"
+                  },
+                  "422": {
+                      "description": "Validation error"
+                  },
+                  "500": {
+                      "description": "Internal server error"
+                  }
+              }
+          }
+      },
+      "/notifications": {
+          "get": {
+              "tags": ["Notification"],
+              "summary": "Get all notifications for the current user",
+              "operationId": "getUserNotifications",
+              "produces": ["application/json"],
+              "parameters": [
+                  {
+                      "name": "Authorization",
+                      "in": "header",
+                      "description": "Bearer token for authentication",
+                      "required": true,
+                      "type": "string"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "Notifications retrieved successfully",
+                      "schema": {
+                          "type": "array",
+                          "items": {
+                              "$ref": "#/definitions/Notification"
+                          }
+                      }
+                  },
+                  "401": {
+                      "description": "Unauthorized"
+                  },
+                  "500": {
+                      "description": "Internal server error"
+                  }
+              }
+          }
       }
-  },
+},
+
   "securityDefinitions": {
     "APIKeyHeader": {
       "type": "apiKey",

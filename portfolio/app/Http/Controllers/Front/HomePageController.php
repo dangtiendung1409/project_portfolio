@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Front;
 
 use App\Http\Controllers\Controller;
 use App\Models\Like;
+use App\Models\Notification;
 use App\Models\PhotoImages;
 use App\Models\User;
 use Illuminate\Support\Facades\Validator;
@@ -14,13 +15,11 @@ use Illuminate\Support\Facades\Auth;
 
 class HomePageController extends Controller
 {
-    // Home Page
     public function getImages()
     {
         $images = PhotoImages::with(['photo.category', 'photo.user'])->get();
         return response()->json($images);
     }
-
     public function getFollows() {
         // Lấy tất cả users cùng với 4 ảnh đầu tiên từ tất cả các photo của họ
         $follows = User::with(['photos.images' => function ($query) {
@@ -43,19 +42,44 @@ class HomePageController extends Controller
     }
     public function likePhoto(Request $request)
     {
-        $user = Auth::user();
+        $user = Auth::user(); // Người đang đăng nhập
         $photoImageId = $request->input('photo_image_id');
+        $photoUserId = $request->input('photo_user_id'); // Nhận photo_user_id từ API
+
+        // Nếu không có photo_user_id, tìm user_id từ bảng photos
+        if (!$photoUserId) {
+            $photo = PhotoImages::find($photoImageId);
+            if (!$photo || !$photo->photo) {
+                return response()->json(['message' => 'Photo not found'], 404);
+            }
+            $photoUserId = $photo->photo->user_id;
+        }
 
         // Kiểm tra xem like đã tồn tại chưa
         $like = Like::where('user_id', $user->id)->where('photo_image_id', $photoImageId)->first();
 
         if (!$like) {
             // Tạo like mới
-            Like::create([
+            $like = Like::create([
                 'user_id' => $user->id,
                 'photo_image_id' => $photoImageId,
                 'like_date' => now(),
             ]);
+
+            // Chỉ tạo thông báo nếu photoUserId khác với user hiện tại
+            if ($photoUserId !== $user->id) {
+                Notification::create([
+                    'user_id' => $user->id,
+                    'recipient_id' => $photoUserId, // Người nhận thông báo (chủ sở hữu bức ảnh)
+                    'like_id' => $like->id,
+                    'comment_id' => null,
+                    'photo_image_id' => $photoImageId,
+                    'type' => 0,
+                    'content' => "{$user->username} liked your photo.",
+                    'is_read' => false,
+                    'notification_date' => now(),
+                ]);
+            }
         }
 
         return response()->json(['message' => 'Photo liked successfully'], 200);
@@ -66,129 +90,47 @@ class HomePageController extends Controller
         $user = Auth::user();
         $photoImageId = $request->input('photo_image_id');
 
-        // Xóa like
-        Like::where('user_id', $user->id)->where('photo_image_id', $photoImageId)->delete();
+        // Lấy bản ghi like
+        $like = Like::where('user_id', $user->id)->where('photo_image_id', $photoImageId)->first();
+
+        if ($like) {
+            // Thu hồi thông báo liên quan trước
+            Notification::where('like_id', $like->id)->delete();
+
+            // Xóa like
+            $like->delete();
+        }
 
         return response()->json(['message' => 'Photo unliked successfully'], 200);
     }
-    // photo details
-    public function getPhotoDetail(Request $request, $token)
+    public function getUserNotifications()
     {
-        $photoImage = PhotoImages::with([
-            'photo.user',
-            'photo.category',
-        ])->where('photo_token', $token)->first();
-
-        if (!$photoImage) {
-            return response()->json(['message' => 'Photo not found'], 404);
-        }
-
-        return response()->json([
-            'data' => $photoImage,
-        ], 200);
-    }
-    // Account user
-    public function getLikedPhotos(Request $request)
-    {
-        // Lấy user_id từ token đã xác thực
         $user = Auth::user();
-        $likedPhotos = Like::where('user_id', $user->id)
-            ->with([
-                'photoImage.photo.user',
-            ])
-            ->orderBy('like_date', 'desc')
+
+        $notifications = Notification::where('recipient_id', $user->id)
+        ->with(['user', 'like', 'comment', 'photoImage'])
+            ->orderBy('notification_date', 'desc')
             ->get();
 
-        return response()->json([
-            'data' => $likedPhotos
-        ]);
+        return response()->json($notifications);
     }
-    public function updateProfile(Request $request)
+    public function markNotificationAsRead(Request $request)
     {
-        $user = Auth::user();
+        $notificationId = $request->input('notification_id');
 
-        // Validate dữ liệu
-        $validator = Validator::make($request->all(), [
-            'username' => 'sometimes|string|max:255',
-            'email' => 'sometimes|email|max:255|unique:users,email,' . $user->id,
-            'bio' => 'sometimes|string|nullable',
-            'profile_picture' => 'sometimes|file|mimes:jpeg,png|max:1024', // Chỉ file JPEG/PNG < 1MB
-        ]);
+        // Tìm thông báo theo ID
+        $notification = Notification::find($notificationId);
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+        if (!$notification) {
+            return response()->json(['message' => 'Notification not found'], 404);
         }
 
-        // Cập nhật thông tin user chỉ khi có thay đổi
-        $updated = false;
+        // Cập nhật trạng thái is_read
+        $notification->is_read = 1;
+        $notification->save();
 
-        if ($request->filled('username') && $request->username !== $user->username) {
-            $user->username = $request->username;
-            $updated = true;
-        }
-
-        if ($request->filled('email') && $request->email !== $user->email) {
-            $user->email = $request->email;
-            $updated = true;
-        }
-
-        if ($request->filled('bio') && $request->bio !== $user->bio) {
-            $user->bio = $request->bio;
-            $updated = true;
-        }
-
-        // Xử lý upload ảnh vào public/images/avatars
-        if ($request->hasFile('profile_picture')) {
-            $file = $request->file('profile_picture');
-            $filename = time() . '_' . $file->getClientOriginalName();
-
-            // Lưu ảnh vào public/images/avatars
-            $file->move(public_path('images/avatars'), $filename);
-
-            // Xóa ảnh cũ nếu có
-            if ($user->profile_picture && file_exists(public_path($user->profile_picture))) {
-                unlink(public_path($user->profile_picture));
-            }
-
-            // Cập nhật đường dẫn ảnh vào database
-            $user->profile_picture = 'images/avatars/' . $filename;
-            $updated = true;
-        }
-
-        // Chỉ save khi có thay đổi
-        if ($updated) {
-            $user->save();
-            return response()->json([
-                'message' => 'Profile updated successfully!',
-                'user' => $user
-            ], 200);
-        }
-
-        return response()->json(['message' => 'No changes made.'], 200);
+        return response()->json(['message' => 'Notification marked as read']);
     }
-    public function changePassword(Request $request)
-    {
-        $user = Auth::user();
 
-        // Validate dữ liệu
-        $validator = Validator::make($request->all(), [
-            'current_password' => 'required',
-            'new_password' => 'required|string|min:5|confirmed',
-        ]);
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
-        // Kiểm tra mật khẩu hiện tại
-        if (!Hash::check($request->current_password, $user->password)) {
-            return response()->json(['message' => 'Current password is incorrect'], 400);
-        }
-
-        // Cập nhật mật khẩu mới
-        $user->password = Hash::make($request->new_password);
-        $user->save();
-
-        return response()->json(['message' => 'Password changed successfully'], 200);
-    }
 }

@@ -4,6 +4,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Front\HomePageController;
 use App\Http\Controllers\Auth\AuthUserController;
+use App\Http\Controllers\Front\AccountUserController;
+use App\Http\Controllers\Front\PhotoDetailController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -23,16 +25,21 @@ Route::post('/logout', [AuthUserController::class, 'logout']);
 
 Route::get('/getPhotoData', [HomePageController::class, 'getImages']);
 Route::get('/getFollowData', [HomePageController::class, 'getFollows']);
-Route::get('/getPhotoDetail/{token}', [HomePageController::class, 'getPhotoDetail']);
+Route::get('/getPhotoDetail/{token}', [PhotoDetailController::class, 'getPhotoDetail']);
 
 
 Route::middleware('auth:api')->group(function () {
     // Acount user
-    Route::post('/update-profile', [HomePageController::class, 'updateProfile']);
-    Route::post('/change-password', [HomePageController::class, 'changePassword']);
-    Route::get('/user', [AuthUserController::class, 'getUser']);
-    Route::get('/liked-photos', [HomePageController::class, 'getLikedPhotos']);
+    Route::post('/update-profile', [AccountUserController::class, 'updateProfile']);
+    Route::post('/change-password', [AccountUserController::class, 'changePassword']);
+    Route::get('/liked-photos', [AccountUserController::class, 'getLikedPhotos']);
+
     // Home Page
     Route::post('/like-photo', [HomePageController::class, 'likePhoto']);
     Route::post('/unlike-photo', [HomePageController::class, 'unlikePhoto']);
+    Route::get('/notifications', [HomePageController::class, 'getUserNotifications']);
+    Route::post('/notifications/mark-as-read', [HomePageController::class, 'markNotificationAsRead']);
+
+    // Auth user
+    Route::get('/user', [AuthUserController::class, 'getUser']);
 });

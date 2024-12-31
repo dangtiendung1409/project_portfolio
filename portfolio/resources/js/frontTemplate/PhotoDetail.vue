@@ -282,6 +282,14 @@ export default {
             },
         };
     },
+    watch: {
+        '$route.params.token': {
+            immediate: true,
+            handler(newToken) {
+                this.fetchPhotoDetail(newToken);
+            },
+        },
+    },
     methods: {
         async fetchPhotoDetail(token) {
             try {

@@ -7,6 +7,8 @@ const baseUrl = 'http://127.0.0.1:8000/api';
           getFollowData : ''+baseUrl+'/getFollowData',
           likePhoto: `${baseUrl}/like-photo`,
           unlikePhoto: `${baseUrl}/unlike-photo`,
+          getUserNotifications: `${baseUrl}/notifications`,
+          markNotificationAsRead: `${baseUrl}/notifications/mark-as-read`,
 
           // auth user
           login : ''+baseUrl+'/login',

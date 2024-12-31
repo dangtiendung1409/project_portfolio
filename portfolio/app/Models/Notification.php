@@ -11,6 +11,7 @@ class Notification extends Model
 
     protected $fillable = [
         'user_id',
+        'recipient_id',
         'like_id',
         'comment_id',
         'photo_image_id',
@@ -29,7 +30,13 @@ class Notification extends Model
     {
         return $this->belongsTo(User::class);
     }
-
+    /**
+     * Mối quan hệ với người dùng nhận thông báo.
+     */
+    public function recipient()
+    {
+        return $this->belongsTo(User::class, 'recipient_id');
+    }
     /**
      * Mối quan hệ với like liên quan.
      */
@@ -53,4 +60,5 @@ class Notification extends Model
     {
         return $this->belongsTo(PhotoImages::class);
     }
+    public $timestamps = false;
 }
