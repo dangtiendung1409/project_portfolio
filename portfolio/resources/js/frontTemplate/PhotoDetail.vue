@@ -353,3 +353,10 @@ export default {
 };
 </script>
 <style src="../public/front_assets/css/details.css"></style>
+<style scoped>
+.icon-btn {
+    background: none;
+    cursor: pointer;
+    font-size: 20px; /* Icon size */
+}
+</style>

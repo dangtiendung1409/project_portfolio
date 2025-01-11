@@ -253,13 +253,6 @@
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.icon-btn {
-    border: none; /* Remove button borders */
-    background: none; /* Remove background */
-    cursor: pointer;
-    font-size: 20px; /* Icon size */
-}
-
 .text-muted {
     color: #6c757d;
 }
