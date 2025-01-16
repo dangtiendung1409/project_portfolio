@@ -130,8 +130,8 @@
                             <div class="info-container">
                                 <!-- Header with Icons in a Separate Div -->
                                 <div class="icon-wrapper">
-                                    <button class="btn icon-btn">
-                                        <i class="fa-regular fa-heart"></i>
+                                    <button class="btn icon-btn" @click="toggleLike(photoDetail)">
+                                        <i :class="['fa-heart', photoDetail.liked ? 'fas liked' : 'far']"></i>
                                     </button>
                                     <button class="btn icon-btn">
                                         <i class="fa-solid fa-share-nodes"></i>
@@ -254,6 +254,7 @@
 import axios from "axios";
 import Layout from "./Layout.vue";
 import getUrlList from "../provider.js";
+import { useLikeStore } from '@/stores/likeStore';
 
 export default {
     name: "PhotoDetail",
@@ -279,6 +280,7 @@ export default {
                     }
                 },
                 image_url: "",
+                liked: false // trạng thái liked của ảnh chi tiết
             },
         };
     },
@@ -295,6 +297,7 @@ export default {
             try {
                 const response = await axios.get(`${getUrlList().getPhotoDetail}/${token}`);
                 this.photoDetail = response.data.data;
+                this.updateLikedState(); // Cập nhật trạng thái liked sau khi lấy chi tiết ảnh
             } catch (error) {
                 console.error("Error fetching photo details:", error);
             }
@@ -345,10 +348,31 @@ export default {
                 return `${days} day${days > 1 ? 's' : ''} ago`;
             }
         },
+        async toggleLike(item) {
+            const photo_image_id = item.photo.id; // ID của ảnh
+            const photo_user_id = item.photo.user.id; // ID của người sở hữu ảnh
+            const likeStore = useLikeStore();
+
+            try {
+                if (item.liked) {
+                    await likeStore.unlikePhoto(photo_image_id);
+                } else {
+                    await likeStore.likePhoto(photo_image_id, photo_user_id); // Gửi thêm photo_user_id
+                }
+                item.liked = !item.liked; // Đảo ngược trạng thái liked
+            } catch (error) {
+                console.error('Failed to toggle like:', error);
+            }
+        },
+        updateLikedState() {
+            const likeStore = useLikeStore();
+            this.photoDetail.liked = likeStore.likedPhotos.includes(this.photoDetail.photo.id); // Cập nhật trạng thái liked của ảnh chi tiết
+        },
     },
-    created() {
-        const token = this.$route.params.token;
-        this.fetchPhotoDetail(token);
+    async mounted() {
+        const likeStore = useLikeStore();
+        await likeStore.fetchLikedPhotos(); // Lấy danh sách các ảnh đã được like từ store
+        this.updateLikedState();
     },
 };
 </script>
@@ -358,5 +382,8 @@ export default {
     background: none;
     cursor: pointer;
     font-size: 20px; /* Icon size */
+}
+.icon-btn .fa-heart.liked {
+    color: #ff5a5f; /* Màu khi đã like */
 }
 </style>
