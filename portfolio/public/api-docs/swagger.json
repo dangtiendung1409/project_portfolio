@@ -310,6 +310,135 @@
               }
           }
       },
+      "/galleries": {
+          "get": {
+              "tags": ["AccountUser"],
+              "summary": "Get all galleries of the authenticated user",
+              "operationId": "getUserGalleries",
+              "produces": ["application/json"],
+              "parameters": [
+                  {
+                      "name": "Authorization",
+                      "in": "header",
+                      "description": "Bearer token for authentication",
+                      "required": true,
+                      "type": "string"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "Galleries retrieved successfully",
+                      "schema": {
+                          "type": "array",
+                          "items": {
+                              "type": "object",
+                              "properties": {
+                                  "id": { "type": "integer" },
+                                  "galleries_name": { "type": "string" },
+                                  "galleries_description": { "type": "string" },
+                                  "visibility": { "type": "integer" },
+                                  "user_id": { "type": "integer" },
+                                  "created_at": { "type": "string", "format": "date-time" },
+                                  "updated_at": { "type": "string", "format": "date-time" }
+                              }
+                          }
+                      }
+                  },
+                  "500": {
+                      "description": "Internal server error"
+                  }
+              }
+          }
+      },
+      "/add-gallery": {
+          "post": {
+              "tags": ["AccountUser"],
+              "summary": "Add a new gallery",
+              "operationId": "addGallery",
+              "produces": ["application/json"],
+              "parameters": [
+                  {
+                      "name": "Authorization",
+                      "in": "header",
+                      "description": "Bearer token for authentication",
+                      "required": true,
+                      "type": "string"
+                  },
+                  {
+                      "name": "title",
+                      "in": "formData",
+                      "description": "Title of the gallery",
+                      "required": true,
+                      "type": "string"
+                  },
+                  {
+                      "name": "description",
+                      "in": "formData",
+                      "description": "Description of the gallery",
+                      "required": false,
+                      "type": "string"
+                  },
+                  {
+                      "name": "visibility",
+                      "in": "formData",
+                      "description": "Visibility of the gallery (0 for private, 1 for public)",
+                      "required": true,
+                      "type": "integer",
+                      "enum": [0, 1]
+                  }
+              ],
+              "responses": {
+                  "201": {
+                      "description": "Gallery created successfully",
+                      "schema": {
+                          "type": "object",
+                          "properties": {
+                              "message": {
+                                  "type": "string"
+                              },
+                              "gallery": {
+                                  "type": "object",
+                                  "properties": {
+                                      "id": {
+                                          "type": "integer"
+                                      },
+                                      "galleries_name": {
+                                          "type": "string"
+                                      },
+                                      "galleries_description": {
+                                          "type": "string"
+                                      },
+                                      "visibility": {
+                                          "type": "integer"
+                                      },
+                                      "user_id": {
+                                          "type": "integer"
+                                      },
+                                      "created_at": {
+                                          "type": "string",
+                                          "format": "date-time"
+                                      },
+                                      "updated_at": {
+                                          "type": "string",
+                                          "format": "date-time"
+                                      }
+                                  }
+                              }
+                          }
+                      }
+                  },
+                  "400": {
+                      "description": "Validation error"
+                  },
+                  "422": {
+                      "description": "Validation error (e.g., invalid visibility value)"
+                  },
+                  "500": {
+                      "description": "Internal server error"
+                  }
+              }
+          }
+      },
       "/liked-photos": {
           "get": {
               "tags": [

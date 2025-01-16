@@ -15,6 +15,7 @@ return new class extends Migration
             $table->foreignId('galleries_id')->constrained('galleries')->onDelete('cascade');
             $table->foreignId('photo_image_id')->constrained('photo_images')->onDelete('cascade');
             $table->primary(['galleries_id', 'photo_image_id']);
+            $table->timestamps();
         });
     }
 

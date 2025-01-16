@@ -21,6 +21,8 @@ const baseUrl = 'http://127.0.0.1:8000/api';
           getLikedPhotos: '' + baseUrl + '/liked-photos',
           updateProfile: baseUrl + '/update-profile',
           changePassword: baseUrl + '/change-password',
+          getGallery: baseUrl + '/galleries',
+          addGallery: baseUrl + '/add-gallery',
 
           // photo details
           getPhotoDetail : ''+baseUrl+'/getPhotoDetail',

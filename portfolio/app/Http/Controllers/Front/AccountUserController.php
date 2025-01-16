@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Front;
 
 use App\Http\Controllers\Controller;
+use App\Models\Gallery;
 use App\Models\Like;
 use App\Models\Notification;
 use App\Models\PhotoImages;
@@ -29,6 +30,54 @@ class AccountUserController extends Controller
         return response()->json([
             'data' => $likedPhotos
         ]);
+    }
+    public function getAllGalleries(Request $request)
+    {
+        // Lấy thông tin người dùng từ token xác thực
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        // Lấy gallery của user đang đăng nhập
+        $galleries = Gallery::with(['photoImages.photo.user'])
+            ->where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'data' => $galleries,
+            'message' => 'Galleries fetched successfully!',
+        ], 200);
+    }
+    public function addGallery(Request $request)
+    {
+        $user = Auth::user();
+
+        // Validate dữ liệu
+        $validator = Validator::make($request->all(), [
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'visibility' => 'required|in:0,1',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        // Tạo gallery mới
+        $gallery = new Gallery();
+        $gallery->galleries_name = $request->title;
+        $gallery->galleries_description = $request->description;
+        $gallery->visibility = $request->visibility;
+        $gallery->user_id = $user->id;
+        $gallery->save();
+
+        return response()->json([
+            'message' => 'Gallery created successfully!',
+            'gallery' => $gallery
+        ], 201);
     }
     public function updateProfile(Request $request)
     {

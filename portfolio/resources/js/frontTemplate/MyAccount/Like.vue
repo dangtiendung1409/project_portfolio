@@ -183,6 +183,11 @@ main {
     color: whitesmoke;
     background-color: #1890ff;
 }
+.photo-image {
+     height: 200px;
+     width: 250px;
+     object-fit: cover;
+ }
 
 /* Thêm CSS cho trạng thái active */
 .icon-dots2 .fa-ellipsis-h.active {

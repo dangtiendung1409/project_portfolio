@@ -33,6 +33,9 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/update-profile', [AccountUserController::class, 'updateProfile']);
     Route::post('/change-password', [AccountUserController::class, 'changePassword']);
     Route::get('/liked-photos', [AccountUserController::class, 'getLikedPhotos']);
+    Route::post('/add-gallery', [AccountUserController::class, 'addGallery']);
+    Route::get('/galleries', [AccountUserController::class, 'getAllGalleries']);
+
 
     // Home Page
     Route::post('/like-photo', [HomePageController::class, 'likePhoto']);

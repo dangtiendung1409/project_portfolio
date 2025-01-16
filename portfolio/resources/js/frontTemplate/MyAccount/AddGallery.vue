@@ -33,13 +33,19 @@
                         <button type="submit" class="btn-create">Create</button>
                     </div>
                 </form>
+                <div v-if="errorMessage" class="error-message">
+                    {{ errorMessage }}
+                </div>
             </div>
         </template>
     </Layout>
 </template>
 
 <script>
+import axios from 'axios';
+import getUrlList from '../../provider.js';
 import Layout from '../Layout.vue';
+import { notification } from 'ant-design-vue';
 
 export default {
     name: 'AddGallery',
@@ -51,18 +57,49 @@ export default {
             title: '',
             description: '',
             visibility: 'public',
+            errorMessage: ''
         };
     },
     methods: {
-        handleSubmit() {
-            console.log('Gallery Created:', {
-                title: this.title,
-                description: this.description,
-                visibility: this.visibility,
-            });
+        async handleSubmit() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                console.error('No token found');
+                return;
+            }
+
+            // Chuyển đổi giá trị visibility
+            const visibilityValue = this.visibility === 'public' ? 0 : 1;
+
+            try {
+                const response = await axios.post(getUrlList().addGallery, {
+                    title: this.title,
+                    description: this.description,
+                    visibility: visibilityValue,
+                }, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+
+                console.log('Gallery Created:', response.data);
+                // Display success message
+                notification.success({
+                    message: 'Success',
+                    description: 'add gallery successfully!',
+                    placement: 'topRight',
+                    duration: 3,
+                });
+                this.$router.push('/myGallery'); // Redirect to the desired page
+            } catch (error) {
+                console.error('Error adding gallery:', error);
+                if (error.response && error.response.data && error.response.data.errors) {
+                    this.errorMessage = Object.values(error.response.data.errors).flat().join(', ');
+                } else {
+                    this.errorMessage = 'An error occurred while adding the gallery.';
+                }
+            }
         },
         cancel() {
-            this.$router.push('/'); // Redirect to the desired page
+            this.$router.push('/myGallery'); // Redirect to the desired page
         },
     },
 };
@@ -184,5 +221,10 @@ textarea {
 
 .btn-cancel:hover {
     background-color: rgba(0, 123, 255, 0.1); /* Nền sáng lên khi hover */
+}
+
+.error-message {
+    color: red;
+    margin-top: 10px;
 }
 </style>

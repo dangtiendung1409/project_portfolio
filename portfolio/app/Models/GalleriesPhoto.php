@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class GalleriesPhoto extends Model
 {
     use HasFactory;
-    public $timestamps = false;
 
     protected $fillable = ['galleries_id', 'photo_image_id'];
 }
