@@ -350,6 +350,78 @@
               }
           }
       },
+      "/gallery-details/{galleries_code}": {
+          "get": {
+              "tags": ["AccountUser"],
+              "summary": "Get details of a specific gallery by galleries_code",
+              "operationId": "getGalleryDetails",
+              "produces": ["application/json"],
+              "parameters": [
+                  {
+                      "name": "Authorization",
+                      "in": "header",
+                      "description": "Bearer token for authentication",
+                      "required": true,
+                      "type": "string"
+                  },
+                  {
+                      "name": "galleries_code",
+                      "in": "path",
+                      "description": "Unique identifier for the gallery",
+                      "required": true,
+                      "type": "string"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "Gallery details retrieved successfully",
+                      "schema": {
+                          "type": "object",
+                          "properties": {
+                              "data": {
+                                  "type": "object",
+                                  "properties": {
+                                      "id": { "type": "integer" },
+                                      "galleries_name": { "type": "string" },
+                                      "galleries_description": { "type": "string" },
+                                      "visibility": { "type": "integer" },
+                                      "user_id": { "type": "integer" },
+                                      "photoImages": {
+                                          "type": "array",
+                                          "items": {
+                                              "type": "object",
+                                              "properties": {
+                                                  "photo_id": { "type": "integer" },
+                                                  "photo_url": { "type": "string" },
+                                                  "caption": { "type": "string" }
+                                              }
+                                          }
+                                      },
+                                      "user": {
+                                          "type": "object",
+                                          "properties": {
+                                              "id": { "type": "integer" },
+                                              "username": { "type": "string" },
+                                              "profile_picture": { "type": "string" }
+                                          }
+                                      },
+                                      "created_at": { "type": "string", "format": "date-time" },
+                                      "updated_at": { "type": "string", "format": "date-time" }
+                                  }
+                              },
+                              "message": { "type": "string" }
+                          }
+                      }
+                  },
+                  "404": {
+                      "description": "Gallery not found or access denied"
+                  },
+                  "500": {
+                      "description": "Internal server error"
+                  }
+              }
+          }
+      },
       "/add-gallery": {
           "post": {
               "tags": ["AccountUser"],

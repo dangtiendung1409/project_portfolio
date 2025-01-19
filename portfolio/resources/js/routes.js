@@ -5,6 +5,7 @@ import MyAccount from "./frontTemplate/MyAccount/MyAccount.vue";
 import ChangePassword from "./frontTemplate/MyAccount/ChangePassword.vue";
 import Like from "./frontTemplate/MyAccount/Like.vue";
 import MyGallery from "./frontTemplate/MyAccount/MyGallery.vue";
+import GalleryDetails from "./frontTemplate/MyAccount/GalleryDetails.vue";
 import AddGallery from "./frontTemplate/MyAccount/AddGallery.vue";
 import PhotoDetail from "./frontTemplate/PhotoDetail.vue";
 import Login from "./frontTemplate/Login.vue";
@@ -15,6 +16,7 @@ const routes = [
     { name: 'PhotoDetail', path: '/photoDetail/:token', component: PhotoDetail },
     { name: 'MyPhoto', path: '/myPhotos', component: MyPhoto, meta: { requiresAuth: true } },
     { name: 'MyGallery', path: '/myGallery', component: MyGallery, meta: { requiresAuth: true } },
+    { name: 'GalleryDetails',  path: '/galleryDetails/:galleries_code', component: GalleryDetails, meta: { requiresAuth: true } },
     { name: 'AddGallery', path: '/addGallery', component: AddGallery, meta: { requiresAuth: true } },
     { name: 'Like', path: '/like', component: Like, meta: { requiresAuth: true } },
     { name: 'MyAccount', path: '/myAccount', component: MyAccount, meta: { requiresAuth: true } },

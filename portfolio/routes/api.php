@@ -35,7 +35,7 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/liked-photos', [AccountUserController::class, 'getLikedPhotos']);
     Route::post('/add-gallery', [AccountUserController::class, 'addGallery']);
     Route::get('/galleries', [AccountUserController::class, 'getAllGalleries']);
-
+    Route::get('/gallery-details/{galleries_code}', [AccountUserController::class, 'getGalleryDetails']);
 
     // Home Page
     Route::post('/like-photo', [HomePageController::class, 'likePhoto']);

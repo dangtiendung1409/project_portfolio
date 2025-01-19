@@ -2,7 +2,9 @@
     <Layout>
         <template v-slot:content="slotProps">
             <div class="gallery-header">
-                <button class="back-button" @click="cancel">←</button>
+                <button class="back-button" @click="cancel">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
                 <span class="title-header">Create Gallery</span>
             </div>
             <div class="add-gallery-container">
@@ -117,7 +119,7 @@ export default {
 .back-button {
     background: none;
     border: none;
-    font-size: 28px;
+    font-size: 20px;
     cursor: pointer;
     margin-top: 90px;
 }

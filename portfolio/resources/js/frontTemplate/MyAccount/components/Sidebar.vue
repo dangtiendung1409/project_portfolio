@@ -2,7 +2,14 @@
 <template>
     <aside class="sidebar">
         <div class="user-info">
-            <img class="avatar" :src="user.profile_picture || '/images/imageUserDefault.png'" alt="User Avatar" />
+            <img
+                class="avatar"
+                :src="user.profile_picture
+        ? `http://127.0.0.1:8000/images/avatars/${user.profile_picture.split('/').pop()}`
+        : 'http://127.0.0.1:8000/images/avatars/imageUserDefault.png'"
+                alt="User Avatar"
+            />
+
             <div class="user-details">
                 <h2 class="username">{{ user.username }}</h2>
             </div>
@@ -42,6 +49,7 @@ export default {
     created() {
         this.fetchUserData();
     },
+
     methods: {
         isActive(path) {
             return this.$route.path === path;

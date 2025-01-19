@@ -395,4 +395,8 @@ export default {
 .signup-btn {
     font-weight: bold;
 }
+footer {
+    padding: 30px 0; /* Khoảng cách trên và dưới */
+    text-align: center;
+}
 </style>

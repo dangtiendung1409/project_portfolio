@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 
 class AccountUserController extends Controller
@@ -41,7 +42,7 @@ class AccountUserController extends Controller
         }
 
         // Lấy gallery của user đang đăng nhập
-        $galleries = Gallery::with(['photoImages.photo.user'])
+        $galleries = Gallery::with(['photoImages.photo' , 'user'])
             ->where('user_id', $user->id)
             ->orderBy('created_at', 'desc')
             ->get();
@@ -51,6 +52,30 @@ class AccountUserController extends Controller
             'message' => 'Galleries fetched successfully!',
         ], 200);
     }
+    public function getGalleryDetails($galleries_code)
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        // Tìm gallery theo galleries_code
+        $gallery = Gallery::with(['photoImages.photo', 'user'])
+            ->where('galleries_code', $galleries_code)
+            ->first();
+
+        // Kiểm tra nếu không tìm thấy gallery
+        if (!$gallery) {
+            return response()->json(['message' => 'Gallery not found or access denied'], 404);
+        }
+
+        return response()->json([
+            'data' => $gallery,
+            'message' => 'Gallery details fetched successfully!',
+        ], 200);
+    }
+
     public function addGallery(Request $request)
     {
         $user = Auth::user();
@@ -72,6 +97,7 @@ class AccountUserController extends Controller
         $gallery->galleries_description = $request->description;
         $gallery->visibility = $request->visibility;
         $gallery->user_id = $user->id;
+        $gallery->galleries_code = (string) Str::uuid();
         $gallery->save();
 
         return response()->json([

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Gallery extends Model
 {
     use HasFactory;
-    protected $fillable = ['galleries_name', 'galleries_description', 'user_id','visibility'];
+    protected $fillable = ['galleries_name', 'galleries_description', 'user_id','visibility','galleries_code'];
 
     public function user()
     {
