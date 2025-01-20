@@ -27,8 +27,10 @@
                                 </select>
                             </div>
                         </div>
+
                         <div class="featured-galleries mb-4">
                             <div class="galleries-grid">
+                                <!-- Gallery cards -->
                                 <div class="gallery-card create-gallery-card">
                                     <div class="icon-container">
                                         <i class="fa-regular fa-square-plus"></i>
@@ -41,16 +43,27 @@
                                     </div>
                                 </div>
 
-                                <div class="gallery-card" v-for="gallery in galleries"
-                                     :key="gallery.id"
-                                     :data-visibility="gallery.visibility"
-                                     @click="goToGalleryDetails(gallery.galleries_code)"
+                                <div
+                                    class="gallery-card"
+                                    v-for="gallery in galleries"
+                                    :key="gallery.id"
+                                    :data-visibility="gallery.visibility"
+                                    @click="goToGalleryDetails(gallery.galleries_code)"
                                 >
                                     <div class="gallery-info">
                                         <h4>{{ gallery.galleries_name }}</h4>
                                         <div class="image-count">
-                                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M15.5333 0H0.466667C0.2 0 0 0.2 0 0.466667V10.2V15.5333C0 15.8 0.2 16 0.466667 16H15.5333C15.8 16 16 15.8 16 15.5333V13.4V0.466667C16 0.2 15.8 0 15.5333 0ZM15.0667 0.933333V12.2667L10.5333 7.66667C10.4667 7.6 10.3333 7.53333 10.2 7.53333C10.0667 7.53333 9.93333 7.6 9.86667 7.66667L8.53333 9L5.8 6.2C5.6 6 5.33333 6 5.13333 6.13333L0.933333 9.26667V0.933333H15.0667ZM15.0667 15.0667H0.933333V10.4667L3.8 8.33333L5.86667 10.4C5.93333 10.4667 6.06667 10.5333 6.2 10.5333C6.33333 10.5333 6.46667 10.4667 6.53333 10.4C6.73333 10.2 6.73333 9.93333 6.53333 9.73333L4.53333 7.73333L5.4 7.06667L8.26667 9.93333L9.6 11.2667C9.66667 11.3333 9.8 11.4 9.93333 11.4C10.0667 11.4 10.2 11.3333 10.2667 11.2667C10.4667 11.0667 10.4667 10.8 10.2667 10.6L9.26667 9.6L10.2667 8.6L15.1333 13.5333V15.0667H15.0667Z" fill="white"></path>
+                                            <svg
+                                                width="16"
+                                                height="16"
+                                                viewBox="0 0 16 16"
+                                                fill="none"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                            >
+                                                <path
+                                                    d="M15.5333 0H0.466667C0.2 0 0 0.2 0 0.466667V10.2V15.5333C0 15.8 0.2 16 0.466667 16H15.5333C15.8 16 16 15.8 16 15.5333V13.4V0.466667C16 0.2 15.8 0 15.5333 0ZM15.0667 0.933333V12.2667L10.5333 7.66667C10.4667 7.6 10.3333 7.53333 10.2 7.53333C10.0667 7.53333 9.93333 7.6 9.86667 7.66667L8.53333 9L5.8 6.2C5.6 6 5.33333 6 5.13333 6.13333L0.933333 9.26667V0.933333H15.0667ZM15.0667 15.0667H0.933333V10.4667L3.8 8.33333L5.86667 10.4C5.93333 10.4667 6.06667 10.5333 6.2 10.5333C6.33333 10.5333 6.46667 10.4667 6.53333 10.4C6.73333 10.2 6.73333 9.93333 6.53333 9.73333L4.53333 7.73333L5.4 7.06667L8.26667 9.93333L9.6 11.2667C9.66667 11.3333 9.8 11.4 9.93333 11.4C10.0667 11.4 10.2 11.3333 10.2667 11.2667C10.4667 11.0667 10.4667 10.8 10.2667 10.6L9.26667 9.6L10.2667 8.6L15.1333 13.5333V15.0667H15.0667Z"
+                                                    fill="white"
+                                                ></path>
                                             </svg>
                                             <span>{{ gallery.photo_images.length }}</span>
                                         </div>
@@ -88,13 +101,27 @@
                                             <button class="btn-favorite">
                                                 <i :class="gallery.visibility === 0 ? 'fa-regular fa-eye' : 'fa-solid fa-lock'"></i>
                                             </button>
-                                            <button class="btn-options">
+                                            <button
+                                                class="btn-options"
+                                                @click.stop="toggleDropdown('dropdown-' + gallery.id, $event)"
+                                                :class="{'active': activeDropdown === 'dropdown-' + gallery.id}"
+                                            >
                                                 <i class="fa-solid fa-ellipsis"></i>
                                             </button>
                                         </div>
                                     </div>
-                                </div>
+                                    <div v-if="activeDropdown === 'dropdown-' + gallery.id" class="dropdown-content show" style="bottom: 39px; margin-left: 30px" @click.stop>
+                                        <ul>
+                                            <li @click="goToEditGallery(gallery.galleries_code)">
+                                                <i class="fas fa-edit"></i> Edit Gallery
+                                            </li>
+                                            <li @click="showDeleteConfirm(gallery)">
+                                                <i class="fas fa-trash-alt"></i> Delete Gallery
+                                            </li>
 
+                                        </ul>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </main>
@@ -105,20 +132,34 @@
 </template>
 
 <script>
+import { Modal } from 'ant-design-vue';
+import { notification } from 'ant-design-vue';
+import { ExclamationCircleOutlined } from '@ant-design/icons-vue';
 import Layout from '../Layout.vue';
 import { useGalleryStore } from '../../stores/galleryStore.js';
 import Sidebar from './components/Sidebar.vue';
 import '@assets/css/account.css';
+import { h } from 'vue';
+import axios from 'axios';
+import getUrlList from "../../provider.js";
+
 export default {
     name: 'MyGallery',
     components: {
         Layout,
-        Sidebar
+        Sidebar,
+        Modal,
+    },
+    data() {
+        return {
+            activeDropdown: null,
+            galleryToDelete: null, // Lưu trữ gallery cần xóa
+        };
     },
     computed: {
         galleries() {
             const store = useGalleryStore();
-            return store.galleries; // Lấy dữ liệu galleries từ store
+            return store.galleries; // Lấy danh sách galleries từ store
         }
     },
     mounted() {
@@ -132,6 +173,60 @@ export default {
         goToAddGallery() {
             this.$router.push('/addGallery');
         },
+        goToEditGallery(galleries_code) {
+            this.$router.push(`/editGallery/${galleries_code}`);
+        },
+        toggleDropdown(id) {
+            this.activeDropdown = this.activeDropdown === id ? null : id;
+        },
+        showDeleteConfirm(gallery) {
+            this.galleryToDelete = gallery;
+            Modal.confirm({
+                title: 'Are you sure delete this gallery?',
+                icon: h(ExclamationCircleOutlined),
+                content: 'Once deleted, the photos in the gallery will be deleted, this action cannot be undone',
+                onOk: this.deleteGallery,
+                onCancel() {},
+            });
+        },
+        deleteGallery() {
+            console.log('Gallery to delete:', this.galleryToDelete); // Xem đối tượng gallery
+
+            if (this.galleryToDelete && this.galleryToDelete.galleries_code) {
+                const url = getUrlList().deleteGallery; // Lấy URL từ getUrlList()
+                const galleriesCode = this.galleryToDelete.galleries_code;
+
+                console.log('Deleting gallery with code:', galleriesCode); // Kiểm tra giá trị galleries_code
+
+                axios
+                    .delete(`${url}/${galleriesCode}`, {
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        }
+                    })
+                    .then(response => {
+                        console.log('Gallery deleted successfully:', response);
+                        this.galleryToDelete = null;
+
+                        // Cập nhật lại danh sách galleries trong store bằng cách loại bỏ gallery đã xóa
+                        const store = useGalleryStore();
+                        store.galleries = store.galleries.filter(gallery => gallery.galleries_code !== galleriesCode);
+                        // Hiển thị thông báo thành công
+                        notification.success({
+                            message: 'Success',
+                            description: 'Gallery deleted successfully!',
+                        });
+                    })
+                    .catch(error => {
+                        console.log('Error deleting gallery:', error);
+                        this.galleryToDelete = null;
+                    });
+            } else {
+                console.log('Gallery code is missing or invalid.');
+            }
+        }
+
+
     }
 };
 </script>
@@ -304,5 +399,61 @@ main {
     cursor: pointer;
     font-size: 20px;
     margin-left: 10px;
+}
+.btn-options.active i {
+    color: whitesmoke;
+    background-color: #1890ff;
+    border-radius: 50%;
+    padding: 5px;
+}
+.create-gallery-button:focus,
+.btn-options:focus {
+    outline: none;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    padding: 5px 10px;
+    z-index: 1;
+}
+
+/* Hiển thị dropdown khi được kích hoạt */
+.dropdown-content.show {
+    display: block;
+}
+
+.dropdown-content ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+
+}
+
+.dropdown-content li {
+    padding: 15px 15px 15px 25px;
+    display: flex;
+    align-items: center;
+    color: #222222;
+    white-space: nowrap;
+}
+
+.dropdown-content li:hover {
+    color: whitesmoke; /* Màu chữ khi hover */
+    background-color: #1890ff; /* Màu nền khi hover */
+}
+
+.dropdown-content li i {
+    margin-right: 8px;
+}
+
+.dropdown-content li:hover i {
+    color: whitesmoke;
+    background-color: #1890ff;
 }
 </style>

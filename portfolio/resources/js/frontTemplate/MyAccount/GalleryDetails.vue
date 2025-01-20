@@ -13,7 +13,7 @@
                                 <h1 class="gallery-title">{{ gallery.galleries_name }}</h1>
                                 <div class="user-info">
                                     <span class="gallery-user">{{ gallery.galleries_description }}</span>
-                                    <button class="edit-button">
+                                    <button class="edit-button" @click="goToEditGallery(gallery.galleries_code)">
                                         <i class="fa-solid fa-pencil"></i>
                                     </button>
                                 </div>
@@ -59,6 +59,9 @@ export default {
     methods: {
         goBack() {
             this.$router.push('/myGallery');
+        },
+        goToEditGallery(galleries_code) {
+            this.$router.push(`/editGallery/${galleries_code}`);
         },
         async fetchGalleryDetails(galleries_code) {
             try {

@@ -33,7 +33,10 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/update-profile', [AccountUserController::class, 'updateProfile']);
     Route::post('/change-password', [AccountUserController::class, 'changePassword']);
     Route::get('/liked-photos', [AccountUserController::class, 'getLikedPhotos']);
+
     Route::post('/add-gallery', [AccountUserController::class, 'addGallery']);
+    Route::post('/update-gallery/{galleries_code}', [AccountUserController::class, 'updateGallery']);
+    Route::delete('/delete-gallery/{galleries_code}', [AccountUserController::class, 'deleteGallery']);
     Route::get('/galleries', [AccountUserController::class, 'getAllGalleries']);
     Route::get('/gallery-details/{galleries_code}', [AccountUserController::class, 'getGalleryDetails']);
 

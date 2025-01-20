@@ -24,6 +24,8 @@ const baseUrl = 'http://127.0.0.1:8000/api';
           getGallery: `${baseUrl}/galleries`,
           getGalleryDetails: `${baseUrl}/gallery-details`,
           addGallery: `${baseUrl}/add-gallery`,
+          editGallery: `${baseUrl}/update-gallery`,
+          deleteGallery: `${baseUrl}/delete-gallery`,
 
           // photo details
           getPhotoDetail : `${baseUrl}/getPhotoDetail`,

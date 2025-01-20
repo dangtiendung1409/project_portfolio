@@ -19,4 +19,13 @@ class Gallery extends Model
     {
         return $this->belongsToMany(PhotoImages::class, 'galleries_photos', 'galleries_id', 'photo_image_id');
     }
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function ($gallery) {
+            // Xóa ảnh trong bảng galleries_photos
+            $gallery->photoImages()->detach();
+        });
+    }
 }

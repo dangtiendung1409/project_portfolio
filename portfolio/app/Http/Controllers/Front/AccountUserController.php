@@ -17,6 +17,7 @@ use Illuminate\Support\Str;
 
 class AccountUserController extends Controller
 {
+    // like photo
     public function getLikedPhotos(Request $request)
     {
         // Lấy user_id từ token đã xác thực
@@ -32,6 +33,7 @@ class AccountUserController extends Controller
             'data' => $likedPhotos
         ]);
     }
+    // gallery
     public function getAllGalleries(Request $request)
     {
         // Lấy thông tin người dùng từ token xác thực
@@ -75,7 +77,6 @@ class AccountUserController extends Controller
             'message' => 'Gallery details fetched successfully!',
         ], 200);
     }
-
     public function addGallery(Request $request)
     {
         $user = Auth::user();
@@ -105,6 +106,81 @@ class AccountUserController extends Controller
             'gallery' => $gallery
         ], 201);
     }
+    public function updateGallery(Request $request, $galleries_code)
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        // Tìm gallery theo galleries_code
+        $gallery = Gallery::where('galleries_code', $galleries_code)->first();
+
+        if (!$gallery) {
+            return response()->json(['message' => 'Gallery not found or access denied'], 404);
+        }
+
+        // Validate dữ liệu
+        $validator = Validator::make($request->all(), [
+            'title' => 'sometimes|string|max:255',
+            'description' => 'nullable|string',
+            'visibility' => 'sometimes|in:0,1',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        // Cập nhật thông tin gallery
+        if ($request->filled('title') && $request->title !== $gallery->galleries_name) {
+            $gallery->galleries_name = $request->title;
+        }
+
+        if ($request->filled('description') && $request->description !== $gallery->galleries_description) {
+            $gallery->galleries_description = $request->description;
+        }
+
+        if ($request->filled('visibility')) {
+            $gallery->visibility = $request->visibility;
+        }
+
+        // Lưu lại các thay đổi
+        $gallery->save();
+
+        return response()->json([
+            'message' => 'Gallery updated successfully!',
+            'gallery' => $gallery
+        ], 200);
+    }
+    public function deleteGallery(Request $request, $galleries_code)
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        // Tìm gallery theo galleries_code
+        $gallery = Gallery::where('galleries_code', $galleries_code)->first();
+
+        if (!$gallery) {
+            return response()->json(['message' => 'Gallery not found or access denied'], 404);
+        }
+
+        if ($gallery->user_id !== $user->id) {
+            return response()->json(['message' => 'You do not have permission to delete this gallery'], 403);
+        }
+
+        // Xóa gallery (trigger event `deleting`)
+        $gallery->delete();
+
+        return response()->json([
+            'message' => 'Gallery deleted successfully!',
+        ], 200);
+    }
+
+    // profile
     public function updateProfile(Request $request)
     {
         $user = Auth::user();
@@ -168,6 +244,8 @@ class AccountUserController extends Controller
 
         return response()->json(['message' => 'No changes made.'], 200);
     }
+
+    //change password
     public function changePassword(Request $request)
     {
         $user = Auth::user();

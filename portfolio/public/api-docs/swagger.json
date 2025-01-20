@@ -511,6 +511,157 @@
               }
           }
       },
+      "/update-gallery/{galleries_code}": {
+          "post": {
+              "tags": ["AccountUser"],
+              "summary": "Update an existing gallery",
+              "operationId": "updateGallery",
+              "produces": ["application/json"],
+              "parameters": [
+                  {
+                      "name": "Authorization",
+                      "in": "header",
+                      "description": "Bearer token for authentication",
+                      "required": true,
+                      "type": "string"
+                  },
+                  {
+                      "name": "galleries_code",
+                      "in": "path",
+                      "description": "Unique code of the gallery to be updated",
+                      "required": true,
+                      "type": "string"
+                  },
+                  {
+                      "name": "title",
+                      "in": "formData",
+                      "description": "Title of the gallery",
+                      "required": false,
+                      "type": "string"
+                  },
+                  {
+                      "name": "description",
+                      "in": "formData",
+                      "description": "Description of the gallery",
+                      "required": false,
+                      "type": "string"
+                  },
+                  {
+                      "name": "visibility",
+                      "in": "formData",
+                      "description": "Visibility of the gallery (0 for private, 1 for public)",
+                      "required": false,
+                      "type": "integer",
+                      "enum": [0, 1]
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "Gallery updated successfully",
+                      "schema": {
+                          "type": "object",
+                          "properties": {
+                              "message": {
+                                  "type": "string"
+                              },
+                              "gallery": {
+                                  "type": "object",
+                                  "properties": {
+                                      "galleries_code": {
+                                          "type": "string"
+                                      },
+                                      "galleries_name": {
+                                          "type": "string"
+                                      },
+                                      "galleries_description": {
+                                          "type": "string"
+                                      },
+                                      "visibility": {
+                                          "type": "integer"
+                                      },
+                                      "user_id": {
+                                          "type": "integer"
+                                      },
+                                      "created_at": {
+                                          "type": "string",
+                                          "format": "date-time"
+                                      },
+                                      "updated_at": {
+                                          "type": "string",
+                                          "format": "date-time"
+                                      }
+                                  }
+                              }
+                          }
+                      }
+                  },
+                  "400": {
+                      "description": "Validation error"
+                  },
+                  "401": {
+                      "description": "Unauthorized"
+                  },
+                  "404": {
+                      "description": "Gallery not found or access denied"
+                  },
+                  "422": {
+                      "description": "Validation error (e.g., invalid visibility value)"
+                  },
+                  "500": {
+                      "description": "Internal server error"
+                  }
+              }
+          }
+      },
+      "/delete-gallery/{galleries_code}": {
+          "delete": {
+              "tags": ["AccountUser"],
+              "summary": "Delete a gallery",
+              "operationId": "deleteGallery",
+              "produces": ["application/json"],
+              "parameters": [
+                  {
+                      "name": "Authorization",
+                      "in": "header",
+                      "description": "Bearer token for authentication",
+                      "required": true,
+                      "type": "string"
+                  },
+                  {
+                      "name": "galleries_code",
+                      "in": "path",
+                      "description": "Unique code of the gallery to be deleted",
+                      "required": true,
+                      "type": "string"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "Gallery deleted successfully",
+                      "schema": {
+                          "type": "object",
+                          "properties": {
+                              "message": {
+                                  "type": "string"
+                              }
+                          }
+                      }
+                  },
+                  "401": {
+                      "description": "Unauthorized"
+                  },
+                  "403": {
+                      "description": "You do not have permission to delete this gallery"
+                  },
+                  "404": {
+                      "description": "Gallery not found or access denied"
+                  },
+                  "500": {
+                      "description": "Internal server error"
+                  }
+              }
+          }
+      },
       "/liked-photos": {
           "get": {
               "tags": [
