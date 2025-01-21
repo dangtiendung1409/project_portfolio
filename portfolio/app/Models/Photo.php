@@ -15,13 +15,33 @@ class Photo extends Model
         'description',
         'upload_date',
         'location',
+        'image_url',
+        'photo_status',
         'user_id',
         'category_id',
+        'photo_token',
         'privacy_status',
     ];
-    public function images()
+    public function notifications()
     {
-        return $this->hasMany(PhotoImages::class, 'photo_id');
+        return $this->hasMany(Notification::class, 'photo_id');
+    }
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    }
+    public function reports()
+    {
+        return $this->hasMany(Report::class, 'photo_id');
+    }
+
+    public function likes()
+    {
+        return $this->hasMany(Like::class);
+    }
+    public function galleries()
+    {
+        return $this->belongsToMany(Gallery::class, 'galleries_photos', 'photo_id', 'galleries_id');
     }
     public function user()
     {

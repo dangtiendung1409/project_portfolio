@@ -14,7 +14,7 @@ class Notification extends Model
         'recipient_id',
         'like_id',
         'comment_id',
-        'photo_image_id',
+        'photo_id',
         'type',
         'content',
         'is_read',
@@ -56,9 +56,9 @@ class Notification extends Model
     /**
      * Mối quan hệ với photo image liên quan.
      */
-    public function photoImage()
+    public function photo()
     {
-        return $this->belongsTo(PhotoImages::class);
+        return $this->belongsTo(Photo::class);
     }
     public $timestamps = false;
 }

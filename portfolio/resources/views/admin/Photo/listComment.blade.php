@@ -47,6 +47,7 @@
                             </label>
                         </th>
                         <th>User name</th>
+                        <th>Email</th>
                         <th>Comment text</th>
                         <th>Comment date</th>
                     </tr>
@@ -61,6 +62,7 @@
                                 </label>
                             </td>
                             <td>{{ $comment->user->username }}</td>
+                            <td>{{ $comment->user->email }}</td>
                             <td>{{ $comment->comment_text }}</td>
                             <td>{{ date('d-m-Y', strtotime($comment->comment_date)) }}</td>
                         </tr>

@@ -34,7 +34,7 @@
             <div class="card-content">
                 @if($photoRejected->isEmpty())
                     <div class="notification is-warning" style="text-align: center; color: red; font-size: 20px;">
-                        No photos were rejected
+                        There are no photo rejected pending
                     </div>
                 @else
                     <table>
@@ -55,57 +55,97 @@
                             <th>category name</th>
                             <th>upload date</th>
                             <th>privacy_status</th>
-                            <th></th>
+                            <th>action</th>
                         </tr>
                         </thead>
                         <tbody>
                         @foreach($photoRejected as $photo)
-                            @php
-                                $rejectedImages = $photo->images->filter(function($image) {
-                                    return $image->photo_status == 'rejected';
-                                });
-                            @endphp
-
-                            @if($rejectedImages->isNotEmpty())
-                                <tr>
-                                    <td class="checkbox-cell">
-                                        <label class="checkbox">
-                                            <input type="checkbox">
-                                            <span class="check"></span>
-                                        </label>
-                                    </td>
-                                    <td>{{ $photo->id }}</td>
-                                    <td>{{ $photo->title }}</td>
-                                    <td>{{ $photo->description }}</td>
-                                    <td>
-                                        @foreach($rejectedImages as $image)
-                                            <img src="{{ asset($image->image_url) }}" width="450" height="450" style="cursor: pointer; margin-bottom: 10px;" onclick="showModal(this)">
-                                        @endforeach
-                                    </td>
-                                    <td>{{ $photo->location }}</td>
-                                    <td>{{ $photo->user->username }}</td>
-                                    <td>{{ $photo->category->category_name }}</td>
-                                    <td>{{ date('d-m-Y', strtotime($photo->upload_date)) }}</td>
-                                    <td class="{{ $photo->privacy_status === 'private' ? 'text-private' : 'text-public' }}">
-                                        {{ $photo->privacy_status }}
-                                    </td>
-                                </tr>
-                            @endif
+                            <tr>
+                                <td class="checkbox-cell">
+                                    <label class="checkbox">
+                                        <input type="checkbox">
+                                        <span class="check"></span>
+                                    </label>
+                                </td>
+                                <td>{{ $photo->id }}</td>
+                                <td>{{ $photo->title }}</td>
+                                <td>{{ $photo->description }}</td>
+                                <td>
+                                    @if($photo->image_url)
+                                        <img src="{{ asset($photo->image_url) }}" width="150" height="150" style="cursor: pointer; margin-bottom: 10px;" onclick="showModal(this)">
+                                    @endif
+                                </td>
+                                <td>{{ $photo->location }}</td>
+                                <td>{{ $photo->user->username }}</td>
+                                <td>{{ $photo->category->category_name }}</td>
+                                <td>{{ date('d-m-Y', strtotime($photo->upload_date)) }}</td>
+                                <td>
+                                    <span style="color: {{ $photo->privacy_status == 0 ? 'green' : 'red' }}; font-weight: bold;">
+                                         {{ $photo->privacy_status == 0 ? 'Public' : 'Private' }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="{{ url('/admin/photo/details/' . $photo->id) }}" class="button small green">
+                                        <span class="icon"><i class="mdi mdi-eye"></i></span>
+                                    </a>
+                                </td>
+                            </tr>
                         @endforeach
                         </tbody>
                     </table>
                     <div class="table-pagination">
                         <div class="flex items-center justify-between">
                             <div class="buttons">
-                                @foreach ($photoRejected->getUrlRange(1, $photoRejected->lastPage()) as $page => $url)
-                                    <a href="{{ $url }}" class="button {{ $photoRejected->currentPage() == $page ? 'active' : '' }}">
-                                        {{ $page }}
-                                    </a>
-                                @endforeach
+                                <!-- Link tới trang đầu tiên -->
+                                <a href="{{ $photoRejected->url(1) }}" class="button {{ ($photoRejected->currentPage() == 1 && $photoRejected->lastPage() > 1) ? ' disabled' : '' }}">
+                                    <i class="mdi mdi-arrow-left-bold"></i>
+                                </a>
+
+                                <!-- Link tới trang trước -->
+                                <a href="{{ $photoRejected->previousPageUrl() }}" class="button {{ ($photoRejected->currentPage() == 1) ? ' disabled' : '' }}">
+                                    <i class="mdi mdi-chevron-left"></i>
+                                </a>
+
+                                @if ($photoRejected->lastPage() > 1)
+                                    <!-- Hiển thị trang đầu tiên -->
+                                    <a href="{{ $photoRejected->url(1) }}" class="button {{ ($photoRejected->currentPage() == 1) ? ' active' : '' }}">1</a>
+
+                                    @if ($photoRejected->currentPage() > 3)
+                                        <span class="button disabled">...</span>
+                                    @endif
+
+                                    <!-- Hiển thị các liên kết trang -->
+                                    @for ($i = max(2, $photoRejected->currentPage() - 1); $i <= min($photoRejected->currentPage() + 1, $photoRejected->lastPage() - 1); $i++)
+                                        <a href="{{ $photoRejected->url($i) }}" class="button {{ ($photoRejected->currentPage() == $i) ? ' active' : '' }}">{{ $i }}</a>
+                                    @endfor
+
+                                    @if ($photoRejected->currentPage() < $photoRejected->lastPage() - 2)
+                                        <span class="button disabled">...</span>
+                                    @endif
+
+                                    <!-- Hiển thị trang cuối cùng -->
+                                    <a href="{{ $photoRejected->url($photoRejected->lastPage()) }}" class="button {{ ($photoRejected->currentPage() == $photoRejected->lastPage()) ? ' active' : '' }}">{{ $photoRejected->lastPage() }}</a>
+                                @else
+                                    <!-- Nếu chỉ có 1 trang thì hiển thị trang đầu tiên -->
+                                    <a href="{{ $photoRejected->url(1) }}" class="button active">1</a>
+                                @endif
+
+                                <!-- Link tới trang kế tiếp -->
+                                <a href="{{ $photoRejected->nextPageUrl() }}" class="button {{ ($photoRejected->currentPage() == $photoRejected->lastPage()) ? ' disabled' : '' }}">
+                                    <i class="mdi mdi-chevron-right"></i>
+                                </a>
+
+                                <!-- Link tới trang cuối cùng -->
+                                <a href="{{ $photoRejected->url($photoRejected->lastPage()) }}" class="button {{ ($photoRejected->currentPage() == $photoRejected->lastPage()) ? ' disabled' : '' }}">
+                                    <i class="mdi mdi-arrow-right-bold"></i>
+                                </a>
                             </div>
+
+                            <!-- Hiển thị thông tin phân trang -->
                             <small>Page {{ $photoRejected->currentPage() }} of {{ $photoRejected->lastPage() }}</small>
                         </div>
                     </div>
+
                 @endif
             </div>
         </div>

@@ -8,17 +8,15 @@ Route::get('/dashboard',[\App\Http\Controllers\Admin\dashboardController::class,
 
 //photo management
 Route::get('/photo',[\App\Http\Controllers\Admin\photoController::class,'index']);
-
-// list comment photo
-Route::get('/photo/comment/{photo_image_id}', [\App\Http\Controllers\Admin\PhotoController::class, 'showComment'])
+Route::get('/photo/details/{id}', [\App\Http\Controllers\Admin\photoController::class, 'showDetails'])
+    ->name('photo.details');
+Route::get('/photo/comment/{photo_id}', [\App\Http\Controllers\Admin\PhotoController::class, 'showComment'])
     ->name('photo.showComment');
-
 //photo pending
 Route::get('/photoPending',[\App\Http\Controllers\Admin\photoController::class,'photoPending'])
     ->name('admin.photoPending');
 Route::post('/photo/updateStatus/{id}/{status}', [\App\Http\Controllers\Admin\photoController::class, 'updateStatus'])
     ->name('admin.photoPending.updateStatus');
-
 //photo rejected
 Route::get('/photoRejected',[\App\Http\Controllers\Admin\photoController::class,'photoRejected']);
 // add photo
@@ -29,12 +27,6 @@ Route::get('/photo/edit/{id}', [\App\Http\Controllers\Admin\photoController::cla
 Route::post('/photo/update/{id}', [\App\Http\Controllers\Admin\photoController::class, 'update']);
 // Delete photo
 Route::post('/photo/delete/{id}', [\App\Http\Controllers\Admin\photoController::class, 'destroy']);
-
-// comment photo management
-Route::get('/listComment', [\App\Http\Controllers\Admin\commentController::class, 'listComment'])
-    ->name('admin.comment.listComment');
-Route::post('/comment/updateStatus/{id}/{status}', [\App\Http\Controllers\Admin\commentController::class, 'updateStatus'])
-    ->name('admin.comment.updateStatus');
 
 
 //category management

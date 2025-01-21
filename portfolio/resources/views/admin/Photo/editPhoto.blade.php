@@ -32,9 +32,8 @@
                     <!-- Title -->
                     <div class="field">
                         <label class="label">Title</label>
-                        <div class="control icons-left">
+                        <div class="control">
                             <input class="input" type="text" name="title" value="{{ $photo->title }}" >
-                            <span class="icon left"><i class="mdi mdi-title"></i></span>
                         </div>
                         @error('title')
                         <p class="help is-danger">{{ $message }}</p>
@@ -51,24 +50,23 @@
 
                     <!-- Upload New Image -->
                     <div class="field">
-                        <label class="label">Upload New Images</label>
+                        <label class="label">Upload New Image</label>
                         <div class="file has-name">
                             <label class="file-label">
-                                <input class="file-input" type="file" name="images[]" multiple onchange="displayThumbnails(this);">
+                                <input class="file-input" type="file" id="photo-image" name="image" accept="image/*">
                             </label>
                         </div>
-                        @error('images')
+                        @error('image')
                         <p class="help is-danger">{{ $message }}</p>
                         @enderror
                     </div>
 
                     <!-- Thumbnails -->
-                    <div id="thumbnailsContainer">
-                        @foreach($photo->images as $image)
-                            <img src="{{ asset($image->image_url) }}" alt="Thumbnail image" />
-                        @endforeach
+                    <div id="thumbnailContainer">
+                        @if ($photo->image_url)
+                            <img src="{{ asset($photo->image_url) }}" alt="Current image" />
+                        @endif
                     </div>
-
 
                     <!-- Location -->
                     <div class="field">
@@ -102,8 +100,8 @@
                         <div class="control">
                             <div class="select">
                                 <select name="privacy_status">
-                                    <option value="public" @if($photo->privacy_status == 'public') selected @endif>Public</option>
-                                    <option value="private" @if($photo->privacy_status == 'private') selected @endif>Private</option>
+                                    <option value="public" @if($photo->privacy_status == '0') selected @endif>Public</option>
+                                    <option value="private" @if($photo->privacy_status == '1') selected @endif>Private</option>
                                 </select>
                             </div>
                         </div>
@@ -154,19 +152,24 @@
                                 Update Photo
                             </button>
                         </div>
+                        <div class="control">
+                            <a type="reset" href="/admin/photo" style="background-color: black; color: white;display: inline-block;padding: 10px 20px;border: none;border-radius: 5px;cursor: pointer;transition: background-color 0.3s ease;" class="button">
+                                Back
+                            </a>
+                        </div>
                     </div>
                 </form>
             </div>
         </div>
     </section>
     <style>
-        #thumbnailsContainer {
+        #thumbnailContainer {
             display: flex;
             flex-wrap: wrap;
             gap: 10px; /* Khoảng cách giữa các ảnh */
         }
 
-        #thumbnailsContainer img {
+        #thumbnailContainer img {
             max-width: 100px; /* Kích thước tối đa cho mỗi ảnh */
             height: auto; /* Chiều cao tự động */
             border: 1px solid #ccc; /* Viền cho ảnh */
@@ -228,24 +231,33 @@
             }
         }
     </script>
+
     <script>
-        function displayThumbnails(input) {
-            const container = document.getElementById('thumbnailsContainer');
-            container.innerHTML = ''; // Xóa tất cả thumbnail hiện tại
+        document.getElementById('photo-image').addEventListener('change', function(event) {
+            const imagePreview = document.getElementById('thumbnailContainer');
+            imagePreview.innerHTML = ''; // Xóa nội dung cũ
 
-            if (input.files) {
-                Array.from(input.files).forEach(file => {
-                    const reader = new FileReader();
-                    reader.onload = function (e) {
-                        const img = document.createElement('img');
-                        img.src = e.target.result;
-                        container.appendChild(img); // Thêm ảnh vào container
-                    };
-                    reader.readAsDataURL(file);
-                });
+            const files = event.target.files;
+            if (files.length > 4) {
+                alert('You can only upload a maximum of 4 images');
+                event.target.value = ''; // Xóa các file đã chọn
+                return;
             }
-        }
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.style.maxWidth = '100px'; // Đặt kích thước ảnh
+                    img.style.margin = '5px';
+                    imagePreview.appendChild(img);
+                };
+
+                reader.readAsDataURL(file);
+            }
+        });
     </script>
-
-
 @endsection

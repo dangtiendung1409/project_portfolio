@@ -63,7 +63,7 @@ class AccountUserController extends Controller
         }
 
         // Tìm gallery theo galleries_code
-        $gallery = Gallery::with(['photoImages.photo', 'user'])
+        $gallery = Gallery::with(['photoImages.photo.user', 'user'])
             ->where('galleries_code', $galleries_code)
             ->first();
 

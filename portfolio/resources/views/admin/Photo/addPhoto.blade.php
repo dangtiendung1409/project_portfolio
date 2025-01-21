@@ -56,10 +56,10 @@
                         <label class="label">Upload Image</label>
                         <div class="file has-name">
                             <label class="file-label">
-                                <input class="file-input" type="file" name="images[]" onchange="displayThumbnail(this);" multiple>
+                                <input class="file-input" type="file" name="image" onchange="displayThumbnail(this);">
                             </label>
                         </div>
-                        @error('images')
+                        @error('image')
                         <p class="help is-danger">{{ $message }}</p>
                         @enderror
                     </div>
@@ -102,8 +102,8 @@
                         <div class="control">
                             <div class="select">
                                 <select name="privacy_status" >
-                                    <option value="public">Public</option>
-                                    <option value="private">Private</option>
+                                    <option value="0">Public</option>
+                                    <option value="1">Private</option>
                                 </select>
                             </div>
                         </div>
@@ -152,9 +152,9 @@
                             </button>
                         </div>
                         <div class="control">
-                            <button type="reset" class="button red">
-                                Reset
-                            </button>
+                            <a type="reset" href="/admin/photo" style="background-color: black; color: white;display: inline-block;padding: 10px 20px;border: none;border-radius: 5px;cursor: pointer;transition: background-color 0.3s ease;" class="button">
+                                Back
+                            </a>
                         </div>
                     </div>
                 </form>
@@ -220,24 +220,22 @@
         document.addEventListener('DOMContentLoaded', function () {
             // Đặt hàm displayThumbnail ở đây
             function displayThumbnail(input) {
+                console.log(input.files); // Add this line to check if files are being selected
                 const container = document.getElementById('thumbnail-container');
-                container.innerHTML = '';  // Xóa nội dung cũ
+                container.innerHTML = '';  // Clear previous thumbnails
 
-                if (input.files) {
-                    Array.from(input.files).forEach(file => {
-                        const reader = new FileReader();
-                        reader.onload = function (e) {
-                            // Tạo phần tử hình ảnh
-                            const img = document.createElement('img');
-                            img.src = e.target.result;  // Đường dẫn của hình ảnh
-                            img.style.width = '100px';  // Đặt kích thước cho hình ảnh
-                            img.style.height = 'auto';   // Để chiều cao tự động
-                            img.style.border = '1px solid #ccc';  // Thêm viền nếu cần
-                            img.style.borderRadius = '4px';  // Bo góc nếu cần
-                            container.appendChild(img);  // Thêm hình ảnh vào container
-                        };
-                        reader.readAsDataURL(file);  // Đọc file như URL
-                    });
+                if (input.files && input.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.style.width = '200px';
+                        img.style.height = 'auto';
+                        img.style.border = '1px solid #ccc';
+                        img.style.borderRadius = '4px';
+                        container.appendChild(img);
+                    };
+                    reader.readAsDataURL(input.files[0]);  // Read the file as a Data URL
                 }
             }
 
@@ -249,6 +247,7 @@
                 };
             }
         });
+
     </script>
 
 @endsection

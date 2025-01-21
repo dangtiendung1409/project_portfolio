@@ -9,5 +9,5 @@ class GalleriesPhoto extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['galleries_id', 'photo_image_id'];
+    protected $fillable = ['galleries_id', 'photo_id'];
 }

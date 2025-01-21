@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('recipient_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('like_id')->nullable()->constrained('likes');
             $table->foreignId('comment_id')->nullable()->constrained('comments');
-            $table->foreignId('photo_image_id')->nullable()->constrained('photo_images');
+            $table->foreignId('photo_id')->nullable()->constrained('photos');
             $table->unsignedTinyInteger('type');
             $table->text('content');
             $table->boolean('is_read')->default(false);

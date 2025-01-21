@@ -9,7 +9,7 @@ class Report extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'photo_image_id',
+        'photo_id',
         'reporter_id',
         'violator_id',
         'report_reason',
@@ -20,9 +20,9 @@ class Report extends Model
 
     protected $dates = ['report_date'];
 
-    public function photoImage()
+    public function photo()
     {
-        return $this->belongsTo(PhotoImages::class, 'photo_image_id');
+        return $this->belongsTo(Photo::class, 'photo_id');
     }
 
     public function reporter()
@@ -34,4 +34,5 @@ class Report extends Model
     {
         return $this->belongsTo(User::class, 'violator_id');
     }
+    public $timestamps = false;
 }

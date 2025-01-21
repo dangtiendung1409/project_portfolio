@@ -98,60 +98,61 @@
                             <th>category name</th>
                             <th>upload date</th>
                             <th>privacy_status</th>
-                            <th></th>
+                            <th>update status</th>
+                            <th>action</th>
                         </tr>
                         </thead>
                         <tbody>
                         @foreach($photoPending as $photo)
-                            @php
-                                // Lọc ảnh có trạng thái pending
-                                $pendingImages = $photo->images->filter(function($image) {
-                                    return $image->photo_status == 'pending';
-                                });
-                            @endphp
+                            <tr>
+                                <td class="checkbox-cell">
+                                    <label class="checkbox">
+                                        <input type="checkbox">
+                                        <span class="check"></span>
+                                    </label>
+                                </td>
+                                <td>{{ $photo->id }}</td>
+                                <td>{{ $photo->title }}</td>
+                                <td>{{ $photo->description }}</td>
+                                <td>
+                                    @if($photo->image_url)
+                                        <img src="{{ asset($photo->image_url) }}" width="150" height="150" style="cursor: pointer; margin-bottom: 10px;" onclick="showModal(this)">
+                                    @endif
+                                </td>
+                                <td>{{ $photo->location }}</td>
+                                <td>{{ $photo->user->username }}</td>
+                                <td>{{ $photo->category->category_name }}</td>
+                                <td>{{ date('d-m-Y', strtotime($photo->upload_date)) }}</td>
+                                <td>
+                                    <span style="color: {{ $photo->privacy_status == 0 ? 'green' : 'red' }}; font-weight: bold;">
+                                         {{ $photo->privacy_status == 0 ? 'Public' : 'Private' }}
+                                    </span>
+                                </td>
+                                <td class="actions-cell">
+                                    <div class="buttons right nowrap">
+                                        <!-- Nút approve -->
+                                        <form action="{{ route('admin.photoPending.updateStatus', ['id' => $photo->id, 'status' => 'approved']) }}" method="POST" onsubmit="return confirm('Are you sure you want to update status approve?');" style="display:inline-block;">
+                                            @csrf
+                                            <button type="submit" class="button small green">
+                                                <span class="icon"><i class="mdi mdi-check"></i></span> Approve
+                                            </button>
+                                        </form>
 
-                            @foreach($pendingImages as $image)
-                                <tr>
-                                    <td class="checkbox-cell">
-                                        <label class="checkbox">
-                                            <input type="checkbox">
-                                            <span class="check"></span>
-                                        </label>
-                                    </td>
-                                    <td>{{ $photo->id }}</td>
-                                    <td>{{ $photo->title }}</td>
-                                    <td>{{ $photo->description }}</td>
-                                    <td>
-                                        <img src="{{ asset($image->image_url) }}" width="450" height="450" style="cursor: pointer; margin-bottom: 10px;" onclick="showModal(this)">
-                                    </td>
-                                    <td>{{ $photo->location }}</td>
-                                    <td>{{ $photo->user->username }}</td>
-                                    <td>{{ $photo->category->category_name }}</td>
-                                    <td>{{ date('d-m-Y', strtotime($photo->upload_date)) }}</td>
-                                    <td class="{{ $photo->privacy_status === 'private' ? 'text-private' : 'text-public' }}">
-                                        {{ $photo->privacy_status }}
-                                    </td>
-                                    <td class="actions-cell">
-                                        <div class="buttons right nowrap">
-                                            <!-- Nút approve -->
-                                            <form action="{{ route('admin.photoPending.updateStatus', ['id' => $photo->id, 'status' => 'approved']) }}" method="POST" onsubmit="return confirm('Are you sure you want to update status approve?');" style="display:inline-block;">
-                                                @csrf
-                                                <button type="submit" class="button small green">
-                                                    <span class="icon"><i class="mdi mdi-check"></i></span> Approve
-                                                </button>
-                                            </form>
-
-                                            <!-- Nút reject -->
-                                            <form action="{{ route('admin.photoPending.updateStatus', ['id' => $photo->id, 'status' => 'rejected']) }}" method="POST" onsubmit="return confirm('Are you sure you want to update status reject?');" style="display:inline-block;">
-                                                @csrf
-                                                <button type="submit" class="button small red">
-                                                    <span class="icon"><i class="mdi mdi-close"></i></span> Reject
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endforeach
+                                        <!-- Nút reject -->
+                                        <form action="{{ route('admin.photoPending.updateStatus', ['id' => $photo->id, 'status' => 'rejected']) }}" method="POST" onsubmit="return confirm('Are you sure you want to update status reject?');" style="display:inline-block;">
+                                            @csrf
+                                            <button type="submit" class="button small red">
+                                                <span class="icon"><i class="mdi mdi-close"></i></span> Reject
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                                <td>
+                                    <a href="{{ url('/admin/photo/details/' . $photo->id) }}" class="button small green">
+                                        <span class="icon"><i class="mdi mdi-eye"></i></span>
+                                    </a>
+                                </td>
+                            </tr>
                         @endforeach
                         </tbody>
                     </table>
@@ -298,111 +299,6 @@
                     </div>
 
                 @endif
-            </div>
-        </div>
-        {{--comment pending--}}
-        <div class="card has-table">
-            <header class="card-header">
-                <p class="card-header-title">
-                    <span class="icon"><i class="mdi mdi-account-multiple"></i></span>
-                    List Comment
-                </p>
-                <a href="#" class="card-header-icon">
-                    <span class="icon"><i class="mdi mdi-reload"></i></span>
-                </a>
-            </header>
-            <div class="card-content">
-                <table>
-                    <thead>
-                    <tr>
-                        <th class="checkbox-cell">
-                            <label class="checkbox">
-                                <input type="checkbox">
-                                <span class="check"></span>
-                            </label>
-                        </th>
-                        <th>ID</th>
-                        <th>Photo ID</th>
-                        <th>User name</th>
-                        <th>Image</th>
-                        <th>Category name</th>
-                        <th>Comment</th>
-                        <th>Date</th>
-                        <th></th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    @foreach ($comments as $comment)
-                        <tr>
-                            <td class="checkbox-cell">
-                                <label class="checkbox">
-                                    <input type="checkbox">
-                                    <span class="check"></span>
-                                </label>
-                            </td>
-                            <td>{{ $comment->id }}</td>
-                            <td>{{ $comment->photoImage->photo->id ?? 'No id' }}</td>
-                            <td>{{ $comment->user->username ?? 'Unknown' }}</td>
-                            <td>
-                                @if ($comment->photoImage)
-                                    <img src="{{ $comment->photoImage->image_url }}" width="450" height="450" style="cursor: pointer; margin-bottom: 10px;" onclick="showModal(this)">
-                                @else
-                                    No Image
-                                @endif
-                            </td>
-                            <td>{{ $comment->photoImage->photo->category->category_name ?? 'No Location' }}</td>
-                            <td>{{ $comment->comment_text }}</td>
-{{--                            <td>--}}
-{{--                                @if ($comment->comment_status == 'pending')--}}
-{{--                                    <span style="color: orange;">{{ $comment->comment_status }}</span>--}}
-{{--                                @elseif ($comment->comment_status == 'approved')--}}
-{{--                                    <span style="color: green;">{{ $comment->comment_status }}</span>--}}
-{{--                                @elseif ($comment->comment_status == 'rejected')--}}
-{{--                                    <span style="color: red;">{{ $comment->comment_status }}</span>--}}
-{{--                                @else--}}
-{{--                                    <span>{{ $comment->comment_status }}</span>--}}
-{{--                                @endif--}}
-{{--                            </td>--}}
-                            <td>{{ date('d-m-Y', strtotime($comment->comment_date)) }}</td>
-{{--                            <td class="actions-cell">--}}
-{{--                                <div class="buttons right nowrap">--}}
-{{--                                    @if($comment->comment_status == 'pending')--}}
-{{--                                        <form action="{{ route('admin.comment.updateStatus', ['id' => $comment->id, 'status' => 'approved']) }}" method="POST" onsubmit="return confirm('Are you sure you want to approve this comment?');">--}}
-{{--                                            @csrf--}}
-{{--                                            <button class="button small green" type="submit">--}}
-{{--                                                <span class="icon"><i class="mdi mdi-check"></i></span>--}}
-{{--                                                Approve--}}
-{{--                                            </button>--}}
-{{--                                        </form>--}}
-
-{{--                                        <form action="{{ route('admin.comment.updateStatus', ['id' => $comment->id, 'status' => 'rejected']) }}" method="POST" onsubmit="return confirm('Are you sure you want to reject this comment?');">--}}
-{{--                                            @csrf--}}
-{{--                                            <button class="button small red" type="submit">--}}
-{{--                                                <span class="icon"><i class="mdi mdi-close"></i></span>--}}
-{{--                                                Reject--}}
-{{--                                            </button>--}}
-{{--                                        </form>--}}
-{{--                                    @else--}}
-{{--                                        <!-- Nếu comment đã được approved hoặc rejected thì không hiển thị nút nữa -->--}}
-{{--                                    @endif--}}
-{{--                                </div>--}}
-{{--                            </td>--}}
-                        </tr>
-                    @endforeach
-                    </tbody>
-                </table>
-                <div class="table-pagination">
-                    <div class="flex items-center justify-between">
-                        <div class="buttons">
-                            @foreach ($comments->getUrlRange(1, $comments->lastPage()) as $page => $url)
-                                <a href="{{ $url }}" class="button {{ $comments->currentPage() == $page ? 'active' : '' }}">
-                                    {{ $page }}
-                                </a>
-                            @endforeach
-                        </div>
-                        <small>Page {{ $comments->currentPage() }} of {{ $comments->lastPage() }}</small>
-                    </div>
-                </div>
             </div>
         </div>
     </section>

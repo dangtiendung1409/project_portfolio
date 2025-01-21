@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Comment;
 use App\Models\Photo;
-use App\Models\PhotoImages;
+use Illuminate\Support\Str;
 use App\Models\Tag;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
@@ -18,6 +18,9 @@ class photoController extends Controller
         $query = Photo::query();
         $categories = Category::all();
 
+        // Chỉ lấy ra các ảnh có photo_status là approved
+        $query->where('photo_status', 'approved');
+
         // Lọc theo title
         if ($request->filled('title')) {
             $query->where('title', 'like', '%' . $request->input('title') . '%');
@@ -26,13 +29,6 @@ class photoController extends Controller
         // Lọc theo location
         if ($request->filled('location')) {
             $query->where('location', 'like', '%' . $request->input('location') . '%');
-        }
-
-        // Lọc theo user name
-        if ($request->filled('user_name')) {
-            $query->whereHas('user', function ($q) use ($request) {
-                $q->where('username', 'like', '%' . $request->input('user_name') . '%');
-            });
         }
 
         // Lọc theo category
@@ -52,18 +48,27 @@ class photoController extends Controller
         if ($request->filled('privacy_status')) {
             $query->where('privacy_status', $request->input('privacy_status'));
         }
+
+        // Số lượng bản ghi trên mỗi trang
         $size = $request->input('size', 20);
-        $photos = $query->with(['images' => function ($query) {
-            $query->where('photo_status', 'approved');
-        }])->paginate($size)->appends($request->all());
+
+        // Paginate dữ liệu
+        $photos = $query->paginate($size)->appends($request->all());
 
         return view('admin/Photo.photo', compact('photos', 'categories'));
     }
+    public function showDetails($id)
+    {
+        $photo = Photo::with(['category', 'tags','user'])->findOrFail($id);
+        return view('admin.Photo.detailsPhoto', compact('photo'));
+    }
 
-    public function showComment($photo_image_id,Request $request){
-        $size = $request->input('size', 20); $size = $request->input('size', 20);
-        $comments = Comment::where('photo_image_id', $photo_image_id)
-            ->where('comment_status', 'approved')
+
+    public function showComment($photo_id,Request $request){
+        $size = $request->input('size', 20);
+
+        // Lấy các bình luận có photo_id
+        $comments = Comment::where('photo_id', $photo_id)
             ->paginate($size);
 
         return view('admin/photo.listComment', compact('comments'));
@@ -78,18 +83,32 @@ class photoController extends Controller
         return view('admin/Photo.addPhoto', compact('categories','tags','successMessage', 'errorMessage'));
     }
 
+
     public function store(Request $request)
     {
         $request->validate([
             'title' => 'required|max:255',
-            'images' => 'array|max:3',
-            'images.*' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',// Đảm bảo rằng có ít nhất một ảnh được upload
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',  // Chỉ cho phép upload 1 ảnh
             'category_id' => 'required|exists:categories,id',
             'privacy_status' => 'required'
         ]);
 
         try {
-            // Lưu thông tin chính của ảnh
+            // Xử lý upload ảnh
+            $imageUrl = null;
+            if ($request->hasFile('image')) {
+                $image = $request->file('image');
+                $imageName = time() . '_' . uniqid() . '.' . $image->extension();
+                $image->move(public_path('images/photos'), $imageName);
+
+                // Lưu URL ảnh
+                $imageUrl = 'images/photos/' . $imageName;
+            }
+
+            // Tạo photo_token dưới dạng UUID
+            $photoToken = Str::uuid();  // Tạo UUID tự động cho photo_token
+
+            // Lưu thông tin chính của ảnh, bao gồm cả image_url và photo_token
             $photo = Photo::create([
                 'title' => $request->input('title'),
                 'description' => $request->input('description'),
@@ -98,22 +117,10 @@ class photoController extends Controller
                 'photo_status' => 'approved',
                 'privacy_status' => $request->input('privacy_status'),
                 'user_id' => 3,  // Thay đổi user_id theo nhu cầu của bạn
-                'category_id' => $request->input('category_id')
+                'category_id' => $request->input('category_id'),
+                'image_url' => $imageUrl,  // Lưu URL ảnh vào cơ sở dữ liệu
+                'photo_token' => $photoToken  // Lưu UUID vào cơ sở dữ liệu
             ]);
-
-            // Xử lý upload nhiều ảnh
-            if ($request->hasFile('images')) {
-                foreach ($request->file('images') as $image) {
-                    $imageName = time() . '_' . uniqid() . '.' . $image->extension();
-                    $image->move(public_path('images/photos'), $imageName);
-
-                    // Lưu thông tin ảnh mới vào bảng photo_images
-                    $photo->images()->create([
-                        'photo_status' => 'approved',
-                        'image_url' => 'images/photos/' . $imageName,
-                    ]);
-                }
-            }
 
             // Xử lý tags
             $tags = explode(',', $request->input('tags')); // Lấy danh sách các tag đã chọn
@@ -132,9 +139,9 @@ class photoController extends Controller
                 }
             }
 
-            Session::flash('successMessage', 'Photos added successfully!');
+            Session::flash('successMessage', 'Photo added successfully!');
         } catch (\Exception $e) {
-            Session::flash('errorMessage', 'Error adding the photos: ' . $e->getMessage());
+            Session::flash('errorMessage', 'Error adding the photo: ' . $e->getMessage());
         }
 
         return redirect('/admin/photo');
@@ -157,8 +164,7 @@ class photoController extends Controller
             'title' => 'required|max:255',
             'category_id' => 'required|exists:categories,id',
             'privacy_status' => 'required',
-            'images' => 'array|max:3',
-            'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048', // Chỉ cho phép 1 ảnh
         ]);
 
         try {
@@ -166,60 +172,50 @@ class photoController extends Controller
             $photo->title = $request->input('title');
             $photo->description = $request->input('description');
             $photo->location = $request->input('location');
-            $photo->privacy_status = $request->input('privacy_status');
+            $photo->privacy_status = (int) $request->input('privacy_status'); // Chuyển đổi về số nguyên
             $photo->category_id = $request->input('category_id');
 
-            // Kiểm tra có ảnh mới hay không
-            if ($request->hasFile('images')) {
-                // Xóa các ảnh cũ
-                foreach ($photo->images as $image) {
-                    if (file_exists(public_path($image->image_url))) {
-                        unlink(public_path($image->image_url));
-                    }
-                    $image->delete(); // Xóa ảnh trong cơ sở dữ liệu
+            // Kiểm tra nếu có ảnh mới
+            if ($request->hasFile('image')) {
+                // Xóa ảnh cũ trong cơ sở dữ liệu (nếu có)
+                if ($photo->image_url && file_exists(public_path($photo->image_url))) {
+                    unlink(public_path($photo->image_url)); // Xóa ảnh cũ
                 }
 
-                // Xử lý upload nhiều ảnh mới
-                foreach ($request->file('images') as $image) {
-                    $imageName = time() . '_' . uniqid() . '.' . $image->extension();
-                    $image->move(public_path('images/photos'), $imageName);
+                // Xử lý upload ảnh mới
+                $image = $request->file('image');
+                $imageName = time() . '_' . uniqid() . '.' . $image->extension();
+                $image->move(public_path('images/photos'), $imageName);
 
-                    // Lưu thông tin ảnh mới vào bảng photo_images
-                    $photo->images()->create([
-                        'photo_status' => 'approved',
-                        'image_url' => 'images/photos/' . $imageName,
-                    ]);
-                }
+                // Cập nhật ảnh mới
+                $photo->image_url = 'images/photos/' . $imageName;
             }
 
             // Cập nhật tags
             $photo->tags()->detach(); // Xóa tất cả các tag hiện tại
 
-            $tags = explode(',', $request->input('tags'));
+            // Xử lý tags từ form
+            $tags = explode(',', $request->input('tags', ''));
             foreach ($tags as $tagName) {
                 $tagName = trim($tagName); // Loại bỏ khoảng trắng
 
-                // Kiểm tra xem tag đã tồn tại hay chưa
-                $tag = Tag::where('tag_name', $tagName)->first();
-                if ($tag) {
-                    // Nếu tag đã tồn tại, lấy ID và attach vào bảng trung gian
+                if (!empty($tagName)) {
+                    // Kiểm tra xem tag đã tồn tại chưa
+                    $tag = Tag::firstOrCreate(['tag_name' => $tagName]);
+
+                    // Gắn tag vào ảnh
                     $photo->tags()->attach($tag->id);
-                } else {
-                    // Nếu tag chưa tồn tại, thêm vào bảng tag và attach vào bảng trung gian
-                    $newTag = Tag::create(['tag_name' => $tagName]);
-                    $photo->tags()->attach($newTag->id);
                 }
             }
 
             $photo->save(); // Lưu các thay đổi vào database
-            Session::flash('successMessage', 'Photos updated successfully!');
+            Session::flash('successMessage', 'Photo updated successfully!');
         } catch (\Exception $e) {
-            Session::flash('errorMessage', 'Error updating the photos: ' . $e->getMessage());
+            Session::flash('errorMessage', 'Error updating the photo: ' . $e->getMessage());
         }
 
         return redirect('/admin/photo');
     }
-
 
 
     public function destroy($id)
@@ -227,15 +223,14 @@ class photoController extends Controller
         $photo = Photo::findOrFail($id);
 
         try {
-            // Xóa mềm các bản ghi liên quan trong bảng photo_images
-            $photo->images()->delete();
-
             // Xóa mềm bản ghi trong bảng photos
             $photo->delete();
 
-            Session::flash('successMessage', 'Photo and its images deleted successfully!');
+            // Thông báo thành công
+            Session::flash('successMessage', 'Photo deleted successfully!');
         } catch (\Exception $e) {
-            Session::flash('errorMessage', 'Error deleting the photo and its images.');
+            // Thông báo lỗi
+            Session::flash('errorMessage', 'Error deleting the photo: ' . $e->getMessage());
         }
 
         return redirect('/admin/photo'); // Quay về trang quản lý ảnh
@@ -246,30 +241,31 @@ class photoController extends Controller
     public function photoPending(Request $request)
     {
         $size = $request->input('size', 20);
-        $photoPending = Photo::whereHas('images', function($query) {
-            $query->where('photo_status', 'pending');
-        })->with(['images' => function ($query) {
-            $query->where('photo_status', 'pending');
-        }])->paginate($size);
+
+        // Lấy các ảnh có trạng thái 'pending'
+        $photoPending = Photo::where('photo_status', 'pending')
+        ->paginate($size);
 
         // Lấy thông điệp từ session
         $successMessage = Session::get('successMessage');
         $errorMessage = Session::get('errorMessage');
 
+        // Trả về view với dữ liệu ảnh và thông điệp
         return view('admin/Photo.photoPending', compact('photoPending', 'errorMessage', 'successMessage'));
     }
+
 
     public function updateStatus($id, $status)
     {
         // Tìm ảnh theo ID từ bảng photo_images
-        $photoImage = PhotoImages::findOrFail($id);
+        $photoImage = Photo::findOrFail($id);
 
         // Cập nhật trạng thái của ảnh
         $photoImage->photo_status = $status;
         $photoImage->save();
 
         // Đặt thông báo thành công vào session
-        Session::flash('successMessage', "Photo status updated to {$status} successfully!");
+        Session::flash('successMessage', "Photo status updated successfully!");
 
         // Redirect lại trang quản lý ảnh pending
         return redirect()->back();
@@ -280,11 +276,10 @@ class photoController extends Controller
     public function photoRejected(Request $request)
     {
         $size = $request->input('size', 20);
-        $photoRejected = Photo::whereHas('images', function($query) {
-            $query->where('photo_status', 'rejected');
-        })->with(['images' => function ($query) {
-            $query->where('photo_status', 'rejected');
-        }])->paginate($size);
+
+        // Lấy các ảnh có trạng thái 'pending'
+        $photoRejected = Photo::where('photo_status', 'rejected')
+            ->paginate($size);
 
         // Lấy thông điệp từ session
         $successMessage = Session::get('successMessage');

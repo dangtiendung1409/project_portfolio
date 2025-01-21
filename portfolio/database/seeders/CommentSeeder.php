@@ -17,12 +17,12 @@ class CommentSeeder extends Seeder
 
 
         $userIds = DB::table('users')->pluck('id')->toArray();
-        $photoIds = DB::table('photo_images')->pluck('id')->toArray();
+        $photoIds = DB::table('photos')->pluck('id')->toArray();
 
         // Chèn 100 comment ngẫu nhiên
         for ($i = 0; $i < 100; $i++) {
             DB::table('comments')->insert([
-                'photo_image_id' => $faker->randomElement($photoIds),
+                'photo_id' => $faker->randomElement($photoIds),
                 'user_id' => $faker->randomElement($userIds),
                 'comment_text' => $faker->sentence(),
                 'created_at' => now(),

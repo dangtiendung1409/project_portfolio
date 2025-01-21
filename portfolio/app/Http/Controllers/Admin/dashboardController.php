@@ -14,23 +14,21 @@ use Illuminate\Http\Request;
 class dashboardController extends Controller
 {
     public function dashboard() {
-        $approvedPhotosCount = PhotoImages::where('photo_status', 'approved')->count();
+        // Đếm số ảnh được phê duyệt
+        $approvedPhotosCount = Photo::where('photo_status', 'approved')->count();
+
+        // Đếm tổng số người dùng
         $totalUser = User::count();
+
+        // Đếm tổng số danh mục
         $totalCategories = Category::count();
 
-        // list photo pending
-        $photoPending = Photo::whereHas('images', function($query) {
-            $query->where('photo_status', 'pending');
-        })->with(['images' => function ($query) {
-            $query->where('photo_status', 'pending');
-        }])->paginate(10);
+        // Lấy danh sách ảnh đang chờ phê duyệt
+        $photoPending = Photo::where('photo_status', 'pending')->paginate(10);
 
-        // list report pending
-        $reports = Report::where('status', 'pending')->with(['reporter', 'violator', 'photoImage'])->paginate(10);
-
-        // list comment pending
-        $comments = Comment::with(['photoImage.photo', 'user'])
-            ->orderBy('updated_at', 'desc')
+        // Lấy danh sách báo cáo đang chờ xử lý
+        $reports = Report::where('status', 'pending')
+            ->with(['reporter', 'violator', 'photo'])
             ->paginate(10);
 
         return view('admin/dashboard', compact(
@@ -38,7 +36,6 @@ class dashboardController extends Controller
             'totalUser',
             'totalCategories',
             'photoPending',
-            'comments',
             'reports'
         ));
     }

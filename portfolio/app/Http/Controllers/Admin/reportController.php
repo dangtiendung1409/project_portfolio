@@ -46,7 +46,7 @@ class reportController extends Controller
         }
 
         $size = $request->input('size', 10);
-        $reports = $query->with(['violator', 'reporter', 'photoImage'])->paginate($size)->appends($request->all());
+        $reports = $query->with(['violator', 'reporter', 'photo'])->paginate($size)->appends($request->all());
 
         return view('admin/Report.reportPending', compact('reports'));
     }
@@ -56,7 +56,7 @@ class reportController extends Controller
     public function reportResolved(Request $request)
     {
         $size = $request->input('size', 10);
-        $reports = Report::where('status', 'resolved')->with(['reporter', 'violator', 'photoImage'])->paginate($size);
+        $reports = Report::where('status', 'resolved')->with(['reporter', 'violator', 'photo'])->paginate($size);
         return view('Admin/Report.reportResolved', compact('reports'));
     }
 

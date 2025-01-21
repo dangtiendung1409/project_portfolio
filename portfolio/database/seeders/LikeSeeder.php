@@ -17,13 +17,13 @@ class LikeSeeder extends Seeder
 
 
         $userIds = DB::table('users')->pluck('id')->toArray();
-        $photoIds = DB::table('photo_images')->pluck('id')->toArray();
+        $photoIds = DB::table('photos')->pluck('id')->toArray();
 
         // Chèn 100 like ngẫu nhiên
         for ($i = 0; $i < 100; $i++) {
             DB::table('likes')->insert([
                 'user_id' => $faker->randomElement($userIds),
-                'photo_image_id' => $faker->randomElement($photoIds),
+                'photo_id' => $faker->randomElement($photoIds),
                 'like_date' => now(),
             ]);
         }

@@ -64,13 +64,6 @@
                     </li>
                 </ul>
             </li>
-
-            <li>
-                <a href="/admin/listComment">
-                    <span class="icon"><i class="mdi mdi-comment"></i></span>
-                    <span class="menu-item-label">Comment management</span>
-                </a>
-            </li>
             <li>
                 <a href="/admin/category">
                     <span class="icon"><i class="mdi mdi-format-list-bulleted"></i></span>

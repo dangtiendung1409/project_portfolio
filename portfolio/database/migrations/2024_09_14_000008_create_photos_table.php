@@ -17,8 +17,10 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->dateTime('upload_date');
             $table->string('location', 255)->nullable();
-            $table->string('privacy_status', 50);
-
+            $table->boolean('privacy_status');
+            $table->string('photo_status', 50);
+            $table->string('image_url', 255);
+            $table->char('photo_token', 36)->unique();
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('category_id');
 
