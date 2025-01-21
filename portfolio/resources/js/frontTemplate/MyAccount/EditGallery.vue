@@ -24,7 +24,7 @@
                                 <input
                                     type="radio"
                                     id="public"
-                                    value="1"
+                                    value="0"
                                     v-model="form.visibility"
                                 />
                                 <label for="public">Visible to everyone</label>
@@ -33,7 +33,7 @@
                                 <input
                                     type="radio"
                                     id="private"
-                                    value="0"
+                                    value="1"
                                     v-model="form.visibility"
                                 />
                                 <label for="private">Only visible to me</label>

@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Front;
 use App\Http\Controllers\Controller;
 use App\Models\Like;
 use App\Models\Notification;
-use App\Models\PhotoImages;
+use App\Models\Photo;
 use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
@@ -17,7 +17,7 @@ class HomePageController extends Controller
 {
     public function getImages()
     {
-        $images = PhotoImages::with(['photo.category', 'photo.user'])->get();
+        $images = Photo::with(['category', 'user'])->get();
         return response()->json($images);
     }
     public function getFollows() {
@@ -43,12 +43,12 @@ class HomePageController extends Controller
     public function likePhoto(Request $request)
     {
         $user = Auth::user(); // Người đang đăng nhập
-        $photoImageId = $request->input('photo_image_id');
+        $photoId = $request->input('photo_id');
         $photoUserId = $request->input('photo_user_id'); // Nhận photo_user_id từ API
 
         // Nếu không có photo_user_id, tìm user_id từ bảng photos
         if (!$photoUserId) {
-            $photo = PhotoImages::find($photoImageId);
+            $photo = Photo::find($photoId);
             if (!$photo || !$photo->photo) {
                 return response()->json(['message' => 'Photo not found'], 404);
             }
@@ -56,13 +56,13 @@ class HomePageController extends Controller
         }
 
         // Kiểm tra xem like đã tồn tại chưa
-        $like = Like::where('user_id', $user->id)->where('photo_image_id', $photoImageId)->first();
+        $like = Like::where('user_id', $user->id)->where('photo_id', $photoId)->first();
 
         if (!$like) {
             // Tạo like mới
             $like = Like::create([
                 'user_id' => $user->id,
-                'photo_image_id' => $photoImageId,
+                'photo_id' => $photoId,
                 'like_date' => now(),
             ]);
 
@@ -73,7 +73,7 @@ class HomePageController extends Controller
                     'recipient_id' => $photoUserId, // Người nhận thông báo (chủ sở hữu bức ảnh)
                     'like_id' => $like->id,
                     'comment_id' => null,
-                    'photo_image_id' => $photoImageId,
+                    'photo_id' => $photoId,
                     'type' => 0,
                     'content' => "{$user->username} liked your photo.",
                     'is_read' => false,
@@ -88,10 +88,10 @@ class HomePageController extends Controller
     public function unlikePhoto(Request $request)
     {
         $user = Auth::user();
-        $photoImageId = $request->input('photo_image_id');
+        $photoId = $request->input('photo_id');
 
         // Lấy bản ghi like
-        $like = Like::where('user_id', $user->id)->where('photo_image_id', $photoImageId)->first();
+        $like = Like::where('user_id', $user->id)->where('photo_id', $photoId)->first();
 
         if ($like) {
             // Thu hồi thông báo liên quan trước
@@ -108,7 +108,7 @@ class HomePageController extends Controller
         $user = Auth::user();
 
         $notifications = Notification::where('recipient_id', $user->id)
-        ->with(['user', 'like', 'comment', 'photoImage'])
+        ->with(['user', 'like', 'comment', 'photo'])
             ->orderBy('notification_date', 'desc')
             ->get();
 

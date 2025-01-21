@@ -31,7 +31,7 @@ export const useNotificationStore = defineStore('notificationStore', {
                     }).replace('about ', ''),
                     read: notification.is_read === 1,
                     type: notification.type,
-                    photoToken: notification.photo_image?.photo_token || null,
+                    photoToken: notification.photo.photo_token || null,
                 }));
 
                 this.unreadCount = this.notifications.filter(notification => !notification.read).length;

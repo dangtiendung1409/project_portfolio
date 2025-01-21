@@ -15,9 +15,9 @@ class Gallery extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function photoImages()
+    public function photo()
     {
-        return $this->belongsToMany(PhotoImages::class, 'galleries_photos', 'galleries_id', 'photo_image_id');
+        return $this->belongsToMany(Photo::class, 'galleries_photos', 'galleries_id', 'photo_id');
     }
     protected static function boot()
     {
@@ -25,7 +25,7 @@ class Gallery extends Model
 
         static::deleting(function ($gallery) {
             // Xóa ảnh trong bảng galleries_photos
-            $gallery->photoImages()->detach();
+            $gallery->photo()->detach();
         });
     }
 }

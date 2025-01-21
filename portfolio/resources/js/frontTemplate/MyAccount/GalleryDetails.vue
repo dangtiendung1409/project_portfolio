@@ -20,10 +20,10 @@
                             </div>
                             <div class="gallery-image-container" v-if="gallery">
                                 <div class="gallery-images">
-                                    <img v-for="photo in gallery.photo_images"
+                                    <img v-for="photo in gallery.photo"
                                          :key="photo.id"
                                          :src="photo.image_url"
-                                         :alt="photo.photo.title" />
+                                         :alt="photo.title" />
                                 </div>
                             </div>
                         </div>

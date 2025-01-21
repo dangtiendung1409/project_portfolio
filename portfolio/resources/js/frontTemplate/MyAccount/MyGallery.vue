@@ -65,28 +65,28 @@
                                                     fill="white"
                                                 ></path>
                                             </svg>
-                                            <span>{{ gallery.photo_images.length }}</span>
+                                            <span>{{ gallery.photo.length }}</span>
                                         </div>
                                     </div>
-                                    <div class="gallery-images" :class="{ empty: gallery.photo_images.length === 0 }">
-                                        <template v-if="gallery.photo_images.length === 0">
+                                    <div class="gallery-images" :class="{ empty: gallery.photo.length === 0 }">
+                                        <template v-if="gallery.photo.length === 0">
                                             <i class="fa-regular fa-image"></i>
                                             <p>Gallery is empty</p>
                                         </template>
-                                        <template v-else-if="gallery.photo_images.length === 1">
+                                        <template v-else-if="gallery.photo.length === 1">
                                             <div class="gallery-images single-image">
                                                 <img
-                                                    :src="gallery.photo_images[0].image_url"
-                                                    :alt="gallery.photo_images[0].photo.title"
+                                                    :src="gallery.photo[0].image_url"
+                                                    :alt="gallery.photo[0].title"
                                                 />
                                             </div>
                                         </template>
                                         <template v-else>
                                             <img
-                                                v-for="(photo, index) in gallery.photo_images.slice(0, 4)"
+                                                v-for="(photo, index) in gallery.photo.slice(0, 4)"
                                                 :key="photo.id"
                                                 :src="photo.image_url"
-                                                :alt="photo.photo.title"
+                                                :alt="photo.title"
                                             />
                                         </template>
                                     </div>

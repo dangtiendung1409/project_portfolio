@@ -7,8 +7,8 @@
                 </router-link>
                 <div class="work-info">
                     <div class="user-info2">
-                        <img class="user-image2" :src="item.photo.user.profile_picture || '/images/userDefault.png'" style="width: 30px; height: 30px">
-                        <span class="user-name2">{{ item.photo.user.username }}</span>
+                        <img class="user-image2" :src="item.user.profile_picture || '/images/userDefault.png'" style="width: 30px; height: 30px">
+                        <span class="user-name2">{{ item.user.username }}</span>
                         <span class="icon-heart2" @click="toggleLike(item)">
                            <i :class="['fas', 'fa-heart', { 'liked': item.liked }]"></i>
                         </span>
@@ -69,15 +69,15 @@ export default {
             }
         },
         async toggleLike(item) {
-            const photo_image_id = item.id; // ID của ảnh
-            const photo_user_id = item.photo.user.id; // ID của người sở hữu ảnh
+            const photo_id = item.id; // ID của ảnh
+            const photo_user_id = item.user.id; // ID của người sở hữu ảnh
             const likeStore = useLikeStore();
 
             try {
                 if (item.liked) {
-                    await likeStore.unlikePhoto(photo_image_id);
+                    await likeStore.unlikePhoto(photo_id);
                 } else {
-                    await likeStore.likePhoto(photo_image_id, photo_user_id); // Gửi thêm photo_user_id
+                    await likeStore.likePhoto(photo_id, photo_user_id); // Gửi thêm photo_user_id
                 }
                 item.liked = !item.liked; // Đảo ngược trạng thái liked
             } catch (error) {

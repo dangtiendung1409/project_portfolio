@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Gallery;
 use App\Models\Like;
 use App\Models\Notification;
-use App\Models\PhotoImages;
 use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
@@ -24,7 +23,7 @@ class AccountUserController extends Controller
         $user = Auth::user();
         $likedPhotos = Like::where('user_id', $user->id)
             ->with([
-                'photoImage.photo.user',
+                'photo.user',
             ])
             ->orderBy('like_date', 'desc')
             ->get();
@@ -44,7 +43,7 @@ class AccountUserController extends Controller
         }
 
         // Lấy gallery của user đang đăng nhập
-        $galleries = Gallery::with(['photoImages.photo' , 'user'])
+        $galleries = Gallery::with(['photo' , 'user'])
             ->where('user_id', $user->id)
             ->orderBy('created_at', 'desc')
             ->get();
@@ -63,7 +62,7 @@ class AccountUserController extends Controller
         }
 
         // Tìm gallery theo galleries_code
-        $gallery = Gallery::with(['photoImages.photo.user', 'user'])
+        $gallery = Gallery::with(['photo.user', 'user'])
             ->where('galleries_code', $galleries_code)
             ->first();
 

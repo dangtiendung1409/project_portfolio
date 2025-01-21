@@ -31,22 +31,29 @@
                         <div class="photo-gallery">
                             <div v-for="like in likedPhotos" :key="like.id" class="photo-item">
                                 <div class="photo-overlay">
-                                    <router-link :to="{ name: 'PhotoDetail', params: { token: like.photo_image.photo_token } }">
-                                    <img :src="like.photo_image.image_url" alt="photo" class="photo-image" />
+                                    <router-link :to="{ name: 'PhotoDetail', params: { token: like.photoToken } }">
+                                        <img :src="like.imageUrl" alt="photo" class="photo-image" />
                                     </router-link>
                                     <div class="photo-details">
                                         <img
-                                            :src="like.photo_image.photo.user.profile_picture || '/images/imageUserDefault.png'"
+                                            :src="like.userAvatar"
                                             alt="User Avatar"
                                             class="user-avatar"
                                         />
-                                        <span class="user-name2">{{ like.photo_image.photo.user.username }}</span>
+                                        <span class="user-name2">{{ like.username }}</span>
                                         <span class="icon-heart2"><i class="fas fa-heart"></i></span>
                                         <span class="icon-dots2">
-                           <i :class="['fas', 'fa-ellipsis-h', { 'active': activeDropdown === 'dotsDropdown-' + like.id }]" @click="toggleDropdown('dotsDropdown-' + like.id)"></i>
-                       </span>
+                    <i
+                        :class="['fas', 'fa-ellipsis-h', { 'active': activeDropdown === 'dotsDropdown-' + like.id }]"
+                        @click="toggleDropdown('dotsDropdown-' + like.id)"
+                    ></i>
+                </span>
                                     </div>
-                                    <div v-if="activeDropdown === 'dotsDropdown-' + like.id" class="dropdown-content show" style="right: 25px">
+                                    <div
+                                        v-if="activeDropdown === 'dotsDropdown-' + like.id"
+                                        class="dropdown-content show"
+                                        style="right: 25px"
+                                    >
                                         <ul>
                                             <li><i class="fa-regular fa-square-plus"></i> Add to Gallery</li>
                                             <li><i class="fas fa-user-slash"></i> Block User</li>
@@ -57,6 +64,7 @@
                                 </div>
                             </div>
                         </div>
+
                     </main>
                 </div>
             </div>
@@ -106,12 +114,18 @@ export default {
                     headers: { Authorization: `Bearer ${token}` },
                 });
 
-                // Gán dữ liệu trả về từ API
-                this.likedPhotos = response.data.data;
+                // Ánh xạ dữ liệu trả về từ API
+                this.likedPhotos = response.data.data.map((like) => ({
+                    id: like.id,
+                    photoToken: like.photo?.photo_token || null,
+                    imageUrl: like.photo?.image_url || '/images/default-photo.png',
+                    username: like.photo?.user?.username || 'Unknown User',
+                    userAvatar: like.photo?.user?.profile_picture || '/images/imageUserDefault.png',
+                }));
             } catch (error) {
                 console.error('Error fetching liked photos:', error);
             }
-        },
+        }
     },
 };
 </script>

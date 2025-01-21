@@ -145,11 +145,11 @@
                                 </div>
                                 <!-- Details Section -->
                                 <div class="details-wrapper">
-                                    <h3 class="h3">{{ photoDetail.photo.title }}</h3>
-                                    <p class="text-muted">{{ photoDetail.photo.description }}</p>
+                                    <h3 class="h3">{{ photoDetail.title }}</h3>
+                                    <p class="text-muted">{{ photoDetail.description }}</p>
                                     <ul class="list-unstyled">
-                                        <li><i class="fa-solid fa-location-dot"></i> {{ photoDetail.photo.location }}</li>
-                                        <li><i class="fa-solid fa-calendar-days"></i>  {{ formatDate(photoDetail.photo.upload_date) }}</li>
+                                        <li><i class="fa-solid fa-location-dot"></i> {{ photoDetail.location }}</li>
+                                        <li><i class="fa-solid fa-calendar-days"></i>  {{ formatDate(photoDetail.upload_date) }}</li>
                                         <li>
                                             <i class="fa-regular fa-heart"></i>
                                             400 <span>Likes</span>
@@ -157,18 +157,18 @@
                                         </li>
                                         <li><i class="fa-regular fa-eye"></i> 27.5K <span>Impressions</span> </li>
                                         <li>
-                                            <i class="fa-solid fa-arrow-up"></i> {{ getTimeAgo(photoDetail.photo.upload_date) }}
+                                            <i class="fa-solid fa-arrow-up"></i> {{ getTimeAgo(photoDetail.upload_date) }}
                                         </li>
                                     </ul>
                                 </div>
 
                                 <div class="user-profile-wrapper">
-                                    <img :src="photoDetail.photo.user.profile_picture ? 'http://127.0.0.1:8000/' +
-                                    photoDetail.photo.user.profile_picture : '/images/imageUserDefault.png'"
+                                    <img :src="photoDetail.user.profile_picture ? 'http://127.0.0.1:8000/' +
+                                    photoDetail.user.profile_picture : '/images/imageUserDefault.png'"
                                          alt="User Avatar" class="user-avatar-details" />
                                     <div class="user-info-follow">
-                                        <h3 class="user-name">{{ photoDetail.photo.user.username }}</h3>
-                                        <p class="user-bio">{{ photoDetail.photo.user.bio }}</p>
+                                        <h3 class="user-name">{{ photoDetail.user.username }}</h3>
+                                        <p class="user-bio">{{ photoDetail.user.bio }}</p>
                                         <button class="btn-follow">Follow</button>
                                     </div>
                                 </div>
@@ -213,7 +213,7 @@
                                 <div class="categories-section">
                                     <h5 class="categories-header">
                                         <span>Category:</span>
-                                        <strong>{{ photoDetail.photo.category.category_name }}</strong>
+                                        <strong>{{ photoDetail.category.category_name }}</strong>
                                     </h5>
                                     <div class="categories-wrapper">
                                         <span class="category-tag">Horizontal</span>
@@ -265,11 +265,12 @@ export default {
         return {
             isHovered: false,
             photoDetail: {
-                photo: {
                     title: "",
                     description: "",
                     location: "",
                     upload_date:"",
+                    image_url: "",
+                    liked: false ,
                     user: {
                         username: "",
                         profile_picture: "",
@@ -277,10 +278,7 @@ export default {
                     },
                     category: {
                         category_name: "",
-                    }
-                },
-                image_url: "",
-                liked: false // trạng thái liked của ảnh chi tiết
+                    },
             },
         };
     },
@@ -349,15 +347,15 @@ export default {
             }
         },
         async toggleLike(item) {
-            const photo_image_id = item.photo.id; // ID của ảnh
-            const photo_user_id = item.photo.user.id; // ID của người sở hữu ảnh
+            const photo_id = item.id; // ID của ảnh
+            const photo_user_id = item.user.id; // ID của người sở hữu ảnh
             const likeStore = useLikeStore();
 
             try {
                 if (item.liked) {
-                    await likeStore.unlikePhoto(photo_image_id);
+                    await likeStore.unlikePhoto(photo_id);
                 } else {
-                    await likeStore.likePhoto(photo_image_id, photo_user_id); // Gửi thêm photo_user_id
+                    await likeStore.likePhoto(photo_id, photo_user_id); // Gửi thêm photo_user_id
                 }
                 item.liked = !item.liked; // Đảo ngược trạng thái liked
             } catch (error) {
@@ -366,7 +364,7 @@ export default {
         },
         updateLikedState() {
             const likeStore = useLikeStore();
-            this.photoDetail.liked = likeStore.likedPhotos.includes(this.photoDetail.photo.id); // Cập nhật trạng thái liked của ảnh chi tiết
+            this.photoDetail.liked = likeStore.likedPhotos.includes(this.photoDetail.id); // Cập nhật trạng thái liked của ảnh chi tiết
         },
     },
     async mounted() {

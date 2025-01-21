@@ -22,8 +22,9 @@ class Like extends Model
 
     public function photo()
     {
-        return $this->belongsTo(PhotoImages::class, 'photo_id');
+        return $this->belongsTo(Photo::class, 'photo_id');
     }
+
     public function notifications()
     {
         return $this->hasMany(Notification::class, 'like_id');

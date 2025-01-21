@@ -15,18 +15,18 @@ export const useLikeStore = defineStore('likeStore', {
                         Authorization: `Bearer ${localStorage.getItem('token')}`
                     }
                 });
-                this.likedPhotos = response.data.data.map(like => like.photo_image_id);
+                this.likedPhotos = response.data.data.map(like => like.photo_id);
             } catch (error) {
                 console.error('Failed to fetch liked photos:', error.response.data);
                 throw error;
             }
         },
-        async likePhoto(photoImageId, photoUserId) {
+        async likePhoto(photoId, photoUserId) {
             try {
                 const response = await axios.post(
                     getUrlList().likePhoto,
                     {
-                        photo_image_id: photoImageId,
+                        photo_id: photoId,
                         photo_user_id: photoUserId,
                     },
                     {
@@ -35,21 +35,21 @@ export const useLikeStore = defineStore('likeStore', {
                         }
                     }
                 );
-                this.likedPhotos.push(photoImageId);
+                this.likedPhotos.push(photoId);
                 return response.data;
             } catch (error) {
                 console.error('Failed to like photo:', error.response?.data || error.message);
                 throw error;
             }
         },
-        async unlikePhoto(photoImageId) {
+        async unlikePhoto(photoId) {
             try {
-                const response = await axios.post(getUrlList().unlikePhoto, { photo_image_id: photoImageId }, {
+                const response = await axios.post(getUrlList().unlikePhoto, { photo_id: photoId }, {
                     headers: {
                         Authorization: `Bearer ${localStorage.getItem('token')}`
                     }
                 });
-                this.likedPhotos = this.likedPhotos.filter(id => id !== photoImageId);
+                this.likedPhotos = this.likedPhotos.filter(id => id !== photoId);
                 return response.data;
             } catch (error) {
                 console.error('Failed to unlike photo:', error.response.data);
