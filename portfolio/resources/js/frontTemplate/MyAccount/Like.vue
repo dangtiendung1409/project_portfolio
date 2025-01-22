@@ -41,24 +41,27 @@
                                             class="user-avatar"
                                         />
                                         <span class="user-name2">{{ like.username }}</span>
-                                        <span class="icon-heart2"><i class="fas fa-heart"></i></span>
-                                        <span class="icon-dots2">
-                    <i
-                        :class="['fas', 'fa-ellipsis-h', { 'active': activeDropdown === 'dotsDropdown-' + like.id }]"
-                        @click="toggleDropdown('dotsDropdown-' + like.id)"
-                    ></i>
-                </span>
+                                        <span class="icon-heart2" @click="showDeleteLikeConfirm(like)">
+                                          <i class="fa-solid fa-trash-can"></i>
+                                        </span>
+
+                                        <button
+                                            class="btn-options"
+                                            @click.stop="toggleDropdown('dropdown-' + like.id, $event)"
+                                            :class="{'active': activeDropdown === 'dropdown-' + like.id}"
+                                        >
+                                            <i class="fa-solid fa-ellipsis"></i>
+                                        </button>
                                     </div>
-                                    <div
-                                        v-if="activeDropdown === 'dotsDropdown-' + like.id"
-                                        class="dropdown-content show"
-                                        style="right: 25px"
-                                    >
+                                    <div v-if="activeDropdown === 'dropdown-' + like.id" class="dropdown-content show"  @click.stop>
                                         <ul>
-                                            <li><i class="fa-regular fa-square-plus"></i> Add to Gallery</li>
-                                            <li><i class="fas fa-user-slash"></i> Block User</li>
-                                            <li><i class="fas fa-user-plus"></i> Follow User</li>
-                                            <li><i class="fas fa-flag"></i> Report This Photo</li>
+                                            <li>
+                                                <i class="fa-solid fa-plus"></i> Add to Gallery
+                                            </li>
+                                            <li>
+                                                <i class="fa-solid fa-flag"></i> Report this photo
+                                            </li>
+
                                         </ul>
                                     </div>
                                 </div>
@@ -78,6 +81,9 @@ import getUrlList from '../../provider.js';
 import Layout from '../Layout.vue';
 import Sidebar from './components/Sidebar.vue';
 import '@assets/css/account.css';
+import { Modal, notification } from 'ant-design-vue';
+import { ExclamationCircleOutlined } from '@ant-design/icons-vue';
+import { h } from 'vue';
 
 export default {
     name: 'Like',
@@ -88,7 +94,7 @@ export default {
     data() {
         return {
             likedPhotos: [],
-            activeDropdown: null
+            activeDropdown: null,
         };
     },
     mounted() {
@@ -96,11 +102,7 @@ export default {
     },
     methods: {
         toggleDropdown(id) {
-            if (this.activeDropdown === id) {
-                this.activeDropdown = null;
-            } else {
-                this.activeDropdown = id;
-            }
+            this.activeDropdown = this.activeDropdown === id ? null : id;
         },
         async fetchLikedPhotos() {
             const token = localStorage.getItem('token');
@@ -117,6 +119,7 @@ export default {
                 // Ánh xạ dữ liệu trả về từ API
                 this.likedPhotos = response.data.data.map((like) => ({
                     id: like.id,
+                    photoId: like.photo?.id || null,
                     photoToken: like.photo?.photo_token || null,
                     imageUrl: like.photo?.image_url || '/images/default-photo.png',
                     username: like.photo?.user?.username || 'Unknown User',
@@ -125,7 +128,47 @@ export default {
             } catch (error) {
                 console.error('Error fetching liked photos:', error);
             }
-        }
+        },
+        showDeleteLikeConfirm(like) {
+            Modal.confirm({
+                title: 'Are you sure you want to delete this like?',
+                icon: h(ExclamationCircleOutlined),
+                content: `This action will remove the like from the photo by ${like.username}.`,
+                okText: 'Yes',
+                cancelText: 'No',
+                onOk: () => this.deleteLike(like.photoId),
+            });
+        },
+        async deleteLike(photoId) {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                notification.error({
+                    message: 'Error',
+                    description: 'No token found, please login.',
+                });
+                return;
+            }
+
+            try {
+                const response = await axios.delete(getUrlList().deleteLike(photoId), {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+
+                notification.success({
+                    message: 'Success',
+                    description: response.data.message,
+                });
+
+                // Loại bỏ ảnh đã bị xoá khỏi danh sách likedPhotos
+                this.likedPhotos = this.likedPhotos.filter((item) => item.photoId !== photoId);
+            } catch (error) {
+                console.error('Error deleting like:', error);
+                notification.error({
+                    message: 'Error',
+                    description: error.response?.data?.message || 'Failed to delete like.',
+                });
+            }
+        },
     },
 };
 </script>
@@ -162,11 +205,28 @@ main {
 .icon-heart2:hover {
     color: #ff5a5f;
 }
-.icon-dots2 {
-    position: relative;
-    display: inline-block;
+.btn-options {
+    background: none;
+    border: none;
+    color: gray;
+    cursor: pointer;
+    font-size: 20px;
+    margin-left: 10px;
+}
+.btn-options.active i {
+    color: whitesmoke;
+    background-color: #1890ff;
+    border-radius: 50%;
+    padding: 5px;
+}
+.create-gallery-button:focus,
+.btn-options:focus {
+    outline: none;
 }
 
+.dropdown-content {
+    margin-left: 60px;
+}
 .dropdown-content ul {
     list-style: none;
     padding: 0;

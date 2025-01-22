@@ -19,6 +19,14 @@
     {
        "name": "AccountUser",
        "description": "AccountUser Data Operations"
+    },
+    {
+       "name": "Gallery",
+       "description": "Gallery user"
+    },
+    {
+       "name": "Like",
+       "description": "Like user"
     }
 
   ],
@@ -312,7 +320,7 @@
       },
       "/galleries": {
           "get": {
-              "tags": ["AccountUser"],
+              "tags": ["Gallery"],
               "summary": "Get all galleries of the authenticated user",
               "operationId": "getUserGalleries",
               "produces": ["application/json"],
@@ -352,7 +360,7 @@
       },
       "/gallery-details/{galleries_code}": {
           "get": {
-              "tags": ["AccountUser"],
+              "tags": ["Gallery"],
               "summary": "Get details of a specific gallery by galleries_code",
               "operationId": "getGalleryDetails",
               "produces": ["application/json"],
@@ -424,7 +432,7 @@
       },
       "/gallery/{galleries_code}/photo/{photo_id}": {
           "delete": {
-              "tags": ["AccountUser"],
+              "tags": ["Gallery"],
               "summary": "Delete a photo from a gallery",
               "operationId": "deletePhotoFromGallery",
               "produces": ["application/json"],
@@ -480,7 +488,7 @@
       },
       "/add-gallery": {
           "post": {
-              "tags": ["AccountUser"],
+              "tags": ["Gallery"],
               "summary": "Add a new gallery",
               "operationId": "addGallery",
               "produces": ["application/json"],
@@ -569,7 +577,7 @@
       },
       "/update-gallery/{galleries_code}": {
           "post": {
-              "tags": ["AccountUser"],
+              "tags": ["Gallery"],
               "summary": "Update an existing gallery",
               "operationId": "updateGallery",
               "produces": ["application/json"],
@@ -671,7 +679,7 @@
       },
       "/delete-gallery/{galleries_code}": {
           "delete": {
-              "tags": ["AccountUser"],
+              "tags": ["Gallery"],
               "summary": "Delete a gallery",
               "operationId": "deleteGallery",
               "produces": ["application/json"],
@@ -721,7 +729,7 @@
       "/liked-photos": {
           "get": {
               "tags": [
-                  "AccountUser"
+                  "Like"
               ],
               "summary": "Get photos liked by the user",
               "operationId": "getLikedPhotos",
@@ -797,6 +805,53 @@
               }
           }
       },
+      "/like/{photo_id}": {
+          "delete": {
+              "tags": ["Like"],
+              "summary": "Remove a like from a photo",
+              "operationId": "deleteLike",
+              "produces": ["application/json"],
+              "parameters": [
+                  {
+                      "name": "Authorization",
+                      "in": "header",
+                      "description": "Bearer token for authentication",
+                      "required": true,
+                      "type": "string"
+                  },
+                  {
+                      "name": "photo_id",
+                      "in": "path",
+                      "description": "ID of the photo to remove the like from",
+                      "required": true,
+                      "type": "integer"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "Photo unliked successfully",
+                      "schema": {
+                          "type": "object",
+                          "properties": {
+                              "message": {
+                                  "type": "string"
+                              }
+                          }
+                      }
+                  },
+                  "401": {
+                      "description": "Unauthorized"
+                  },
+                  "404": {
+                      "description": "Like not found"
+                  },
+                  "500": {
+                      "description": "Internal server error"
+                  }
+              }
+          }
+      },
+
       "/update-profile": {
           "post": {
               "tags": ["AccountUser"],

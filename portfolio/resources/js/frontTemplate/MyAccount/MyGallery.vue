@@ -132,8 +132,7 @@
 </template>
 
 <script>
-import { Modal } from 'ant-design-vue';
-import { notification } from 'ant-design-vue';
+import { Modal, notification } from 'ant-design-vue';
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue';
 import Layout from '../Layout.vue';
 import { useGalleryStore } from '../../stores/galleryStore.js';

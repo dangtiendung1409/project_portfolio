@@ -23,6 +23,7 @@ Route::post('/register', [AuthUserController::class, 'register']);
 Route::post('/refresh-token', [AuthUserController::class, 'refreshToken']);
 Route::post('/logout', [AuthUserController::class, 'logout']);
 
+// home page
 Route::get('/getPhotoData', [HomePageController::class, 'getImages']);
 Route::get('/getFollowData', [HomePageController::class, 'getFollows']);
 Route::get('/getPhotoDetail/{token}', [PhotoDetailController::class, 'getPhotoDetail']);
@@ -32,7 +33,12 @@ Route::middleware('auth:api')->group(function () {
     // Acount user
     Route::post('/update-profile', [AccountUserController::class, 'updateProfile']);
     Route::post('/change-password', [AccountUserController::class, 'changePassword']);
+
+    // like
     Route::get('/liked-photos', [AccountUserController::class, 'getLikedPhotos']);
+    Route::delete('/like/{photo_id}', [AccountUserController::class, 'deleteLike']);
+    Route::post('/like-photo', [HomePageController::class, 'likePhoto']);
+    Route::post('/unlike-photo', [HomePageController::class, 'unlikePhoto']);
 
     // gallery
     Route::post('/add-gallery', [AccountUserController::class, 'addGallery']);
@@ -42,9 +48,7 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/gallery-details/{galleries_code}', [AccountUserController::class, 'getGalleryDetails']);
     Route::delete('/gallery/{galleries_code}/photo/{photo_id}', [AccountUserController::class, 'deletePhotoFromGallery']);
 
-    // Home Page
-    Route::post('/like-photo', [HomePageController::class, 'likePhoto']);
-    Route::post('/unlike-photo', [HomePageController::class, 'unlikePhoto']);
+    // notifications
     Route::get('/notifications', [HomePageController::class, 'getUserNotifications']);
     Route::post('/notifications/mark-as-read', [HomePageController::class, 'markNotificationAsRead']);
 

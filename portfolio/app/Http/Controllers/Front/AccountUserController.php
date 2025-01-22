@@ -32,6 +32,32 @@ class AccountUserController extends Controller
             'data' => $likedPhotos
         ]);
     }
+    public function deleteLike(Request $request, $photo_id)
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        // Tìm like dựa trên user_id và photo_id
+        $like = Like::where('user_id', $user->id)->where('photo_id', $photo_id)->first();
+
+        if (!$like) {
+            return response()->json(['message' => 'Like not found'], 404);
+        }
+
+        // Xóa các thông báo liên quan đến like này
+        Notification::where('like_id', $like->id)->delete();
+
+        // Xóa like
+        $like->delete();
+
+        return response()->json([
+            'message' => 'Photo deleted successfully!',
+        ], 200);
+    }
+
     // gallery
     public function getAllGalleries(Request $request)
     {

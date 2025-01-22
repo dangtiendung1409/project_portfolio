@@ -5,8 +5,14 @@ const baseUrl = 'http://127.0.0.1:8000/api';
           // home page
           getPhotoData : `${baseUrl}/getPhotoData`,
           getFollowData : `${baseUrl}/getFollowData`,
+
+          // like
+          getLikedPhotos: `${baseUrl}/liked-photos`,
           likePhoto: `${baseUrl}/like-photo`,
+          deleteLike: (photo_id) => `${baseUrl}/like/${photo_id}`,
           unlikePhoto: `${baseUrl}/unlike-photo`,
+
+          //notifications
           getUserNotifications: `${baseUrl}/notifications`,
           markNotificationAsRead: `${baseUrl}/notifications/mark-as-read`,
 
@@ -18,9 +24,10 @@ const baseUrl = 'http://127.0.0.1:8000/api';
           getUser : `${baseUrl}/user`,
 
           // account user
-          getLikedPhotos: `${baseUrl}/liked-photos`,
           updateProfile: `${baseUrl}/update-profile`,
           changePassword: `${baseUrl}/change-password`,
+
+          // gallery
           getGallery: `${baseUrl}/galleries`,
           getGalleryDetails: `${baseUrl}/gallery-details`,
           addGallery: `${baseUrl}/add-gallery`,
