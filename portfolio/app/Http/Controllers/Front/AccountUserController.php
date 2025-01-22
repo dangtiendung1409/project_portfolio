@@ -76,6 +76,41 @@ class AccountUserController extends Controller
             'message' => 'Gallery details fetched successfully!',
         ], 200);
     }
+    public function deletePhotoFromGallery(Request $request, $galleries_code, $photo_id)
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        // Find the gallery by code
+        $gallery = Gallery::where('galleries_code', $galleries_code)->first();
+
+        if (!$gallery) {
+            return response()->json(['message' => 'Gallery not found or access denied'], 404);
+        }
+
+        // Check if the user owns the gallery
+        if ($gallery->user_id !== $user->id) {
+            return response()->json(['message' => 'You do not have permission to modify this gallery'], 403);
+        }
+
+        // Check if the photo exists in the gallery
+        $photo = $gallery->photo()->where('photo_id', $photo_id)->first();
+
+        if (!$photo) {
+            return response()->json(['message' => 'Photo not found in the gallery'], 404);
+        }
+
+        // Detach the photo from the gallery
+        $gallery->photo()->detach($photo_id);
+
+        return response()->json([
+            'message' => 'Photo removed from gallery successfully!',
+        ], 200);
+    }
+
     public function addGallery(Request $request)
     {
         $user = Auth::user();

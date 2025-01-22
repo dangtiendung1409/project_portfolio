@@ -110,7 +110,7 @@
                                             </button>
                                         </div>
                                     </div>
-                                    <div v-if="activeDropdown === 'dropdown-' + gallery.id" class="dropdown-content show" style="bottom: 39px; margin-left: 30px" @click.stop>
+                                    <div v-if="activeDropdown === 'dropdown-' + gallery.id" class="dropdown-content show" @click.stop>
                                         <ul>
                                             <li @click="goToEditGallery(gallery.galleries_code)">
                                                 <i class="fas fa-edit"></i> Edit Gallery
@@ -289,6 +289,7 @@ main {
     color: #b0b0b0; /* Màu sắc cho văn bản */
 }
 .featured-galleries {
+    overflow-y: auto;
     width: 100%;
 }
 .galleries-grid {
@@ -412,27 +413,15 @@ main {
 }
 
 .dropdown-content {
-    display: none;
-    position: absolute;
-    background-color: #f9f9f9;
-    min-width: 160px;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-    padding: 5px 10px;
-    z-index: 1;
+    margin-top: 350px;
+    margin-left: 60px;
 }
-
-/* Hiển thị dropdown khi được kích hoạt */
-.dropdown-content.show {
-    display: block;
-}
-
 .dropdown-content ul {
     list-style: none;
     padding: 0;
     display: flex;
     flex-direction: column;
     margin: 0;
-
 }
 
 .dropdown-content li {
@@ -441,6 +430,7 @@ main {
     align-items: center;
     color: #222222;
     white-space: nowrap;
+    z-index: 1000;
 }
 
 .dropdown-content li:hover {
@@ -456,4 +446,5 @@ main {
     color: whitesmoke;
     background-color: #1890ff;
 }
+
 </style>

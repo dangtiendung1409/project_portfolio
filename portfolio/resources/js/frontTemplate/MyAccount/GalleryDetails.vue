@@ -20,12 +20,43 @@
                             </div>
                             <div class="gallery-image-container" v-if="gallery">
                                 <div class="gallery-images">
-                                    <img v-for="photo in gallery.photo"
+                                    <div v-for="photo in gallery.photo"
                                          :key="photo.id"
-                                         :src="photo.image_url"
-                                         :alt="photo.title" />
+                                         class="photo-item">
+                                        <div class="photo-overlay">
+                                            <img :src="photo.image_url" :alt="photo.title" class="photo-image" />
+                                            <div class="photo-details">
+                                                <img :src="photo.user.profile_picture || '/images/imageUserDefault.png'" alt="User Avatar" class="user-avatar" />
+                                                <span class="user-name2">{{ photo.user.username || 'Unknown User' }}</span>
+                                                <span class="icon-heart2"><i class="fas fa-heart"></i></span>
+                                                <span class="icon-heart2" @click="showDeletePhotoConfirm(photo)">
+                                                    <i class="fa-solid fa-trash-can"></i>
+                                                </span>
+
+                                                <button
+                                                    class="btn-options"
+                                                    @click.stop="toggleDropdown('dropdown-' + photo.id, $event)"
+                                                    :class="{'active': activeDropdown === 'dropdown-' + photo.id}"
+                                                >
+                                                    <i class="fa-solid fa-ellipsis"></i>
+                                                </button>
+                                            </div>
+                                            <div v-if="activeDropdown === 'dropdown-' + photo.id" class="dropdown-content show"  @click.stop>
+                                                <ul>
+                                                    <li>
+                                                        <i class="fa-solid fa-plus"></i> Add to Gallery
+                                                    </li>
+                                                    <li>
+                                                        <i class="fa-solid fa-flag"></i> Report this photo
+                                                    </li>
+
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
+
                         </div>
                     </main>
                 </div>
@@ -40,7 +71,9 @@ import Sidebar from './components/Sidebar.vue';
 import getUrlList from '../../provider.js';
 import axios from 'axios';
 import '@assets/css/account.css';
-
+import { Modal, notification } from 'ant-design-vue';
+import { ExclamationCircleOutlined } from '@ant-design/icons-vue';
+import { h } from 'vue';
 export default {
     name: 'GalleryDetails',
     components: {
@@ -50,6 +83,7 @@ export default {
     data() {
         return {
             gallery: null,
+            activeDropdown: null,
         };
     },
     mounted() {
@@ -63,6 +97,9 @@ export default {
         goToEditGallery(galleries_code) {
             this.$router.push(`/editGallery/${galleries_code}`);
         },
+        toggleDropdown(id) {
+            this.activeDropdown = this.activeDropdown === id ? null : id;
+        },
         async fetchGalleryDetails(galleries_code) {
             try {
                 const response = await axios.get(`${getUrlList().getGalleryDetails}/${galleries_code}`, {
@@ -74,9 +111,44 @@ export default {
             } catch (error) {
                 console.error('Failed to fetch gallery details:', error);
             }
-        }
-    },
+        },
+        showDeletePhotoConfirm(photo) {
+            Modal.confirm({
+                title: 'Are you sure you want to delete this photo?',
+                content: 'This action cannot be undone.',
+                onOk: () => this.deletePhotoFromGallery(photo),
+                onCancel() {
+                    console.log('Delete canceled');
+                },
+            });
+        },
+        async deletePhotoFromGallery(photo) {
+            try {
+                const galleries_code = this.$route.params.galleries_code;
+                const url = getUrlList().deletePhotoFromGallery(galleries_code, photo.id);
 
+                await axios.delete(url, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    },
+                });
+
+                // Xóa ảnh khỏi danh sách gallery
+                this.gallery.photo = this.gallery.photo.filter(p => p.id !== photo.id);
+
+                notification.success({
+                    message: 'Success',
+                    description: 'Photo removed from gallery successfully!',
+                });
+            } catch (error) {
+                console.error('Error deleting photo:', error);
+                notification.error({
+                    message: 'Error',
+                    description: 'Failed to delete the photo. Please try again.',
+                });
+            }
+        },
+    },
 };
 </script>
 
@@ -159,8 +231,111 @@ main {
 
 .gallery-images img {
     width: 250px; /* Kích thước hình ảnh */
-    height: auto;
+    height: 180px;
     margin: 5px; /* Khoảng cách giữa các hình ảnh */
     border-radius: 8px;
+}
+.photo-item {
+    position: relative;
+    width: 250px;
+    margin: 5px;
+}
+
+.photo-overlay {
+    position: relative;
+    cursor: pointer;
+}
+
+.photo-overlay:hover .photo-details {
+    opacity: 1;
+    visibility: visible;
+}
+
+.photo-details {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    color: white;
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+}
+
+.photo-details .user-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.photo-details .user-name2 {
+    font-size: 14px;
+    color: white;
+    margin-right: auto;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 120px;
+}
+
+.icon-heart2, .icon-dots2 {
+    font-size: 18px;
+    margin-left: 10px;
+}
+.btn-options {
+    background: none;
+    border: none;
+    color: gray;
+    cursor: pointer;
+    font-size: 20px;
+    margin-left: 10px;
+}
+.btn-options.active i {
+    color: whitesmoke;
+    background-color: #1890ff;
+    border-radius: 50%;
+    padding: 5px;
+}
+.create-gallery-button:focus,
+.btn-options:focus {
+    outline: none;
+}
+
+.dropdown-content {
+    margin-left: 60px;
+}
+.dropdown-content ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+}
+
+.dropdown-content li {
+    padding: 15px 15px 15px 25px;
+    display: flex;
+    align-items: center;
+    color: #222222;
+    white-space: nowrap;
+    z-index: 1000;
+}
+
+.dropdown-content li:hover {
+    color: whitesmoke; /* Màu chữ khi hover */
+    background-color: #1890ff; /* Màu nền khi hover */
+}
+
+.dropdown-content li i {
+    margin-right: 8px;
+}
+
+.dropdown-content li:hover i {
+    color: whitesmoke;
+    background-color: #1890ff;
 }
 </style>
