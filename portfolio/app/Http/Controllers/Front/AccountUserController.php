@@ -79,6 +79,28 @@ class AccountUserController extends Controller
             'message' => 'Galleries fetched successfully!',
         ], 200);
     }
+    public function getGalleriesByVisibility(Request $request, $visibility)
+    {
+        // Lấy thông tin người dùng từ token xác thực
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        // Lấy gallery của user đang đăng nhập với visibility cụ thể
+        $galleries = Gallery::with(['photo', 'user'])
+            ->where('user_id', $user->id)
+            ->where('visibility', $visibility)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'data' => $galleries,
+            'message' => "Galleries with visibility $visibility fetched successfully!",
+        ], 200);
+    }
+
     public function getGalleryDetails($galleries_code)
     {
         $user = Auth::user();

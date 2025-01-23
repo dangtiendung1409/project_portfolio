@@ -6,7 +6,7 @@
                 class="avatar"
                 :src="user.profile_picture
         ? `http://127.0.0.1:8000/images/avatars/${user.profile_picture.split('/').pop()}`
-        : 'http://127.0.0.1:8000/images/avatars/imageUserDefault.png'"
+        : 'http://127.0.0.1:8000/images/imageUserDefault.png'"
                 alt="User Avatar"
             />
 

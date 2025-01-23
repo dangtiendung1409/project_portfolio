@@ -18,7 +18,14 @@
                                     </button>
                                 </div>
                             </div>
-                            <div class="gallery-image-container" v-if="gallery">
+                            <div v-if="gallery && gallery.photo.length === 0" class="empty-gallery">
+                                <h2>Add photos to this Gallery</h2>
+                                <p>Curate inspirational photos, or tell a story with your own photos.</p>
+                                <button class="add-photo-button" @click="goToAddPhoto">
+                                    Add Photos
+                                </button>
+                            </div>
+                            <div class="gallery-image-container" v-else-if="gallery">
                                 <div class="gallery-images">
                                     <div v-for="photo in gallery.photo"
                                          :key="photo.id"
@@ -49,14 +56,12 @@
                                                     <li>
                                                         <i class="fa-solid fa-flag"></i> Report this photo
                                                     </li>
-
                                                 </ul>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-
                         </div>
                     </main>
                 </div>
@@ -64,6 +69,7 @@
         </template>
     </Layout>
 </template>
+
 
 <script>
 import Layout from '../Layout.vue';
@@ -148,6 +154,9 @@ export default {
                 });
             }
         },
+        goToAddPhoto() {
+            this.$router.push('/');
+        },
     },
 };
 </script>
@@ -163,6 +172,46 @@ main {
     flex-direction: column;
     overflow: hidden;
 }
+.empty-gallery {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 300px;
+    height: 100%;
+    text-align: center;
+    color: #555;
+}
+
+.empty-gallery h2 {
+    font-size: 24px;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.empty-gallery p {
+    font-size: 16px;
+    margin-bottom: 20px;
+    color: #777;
+    text-align: center;
+    max-width: 500px;
+}
+
+
+.add-photo-button {
+    padding: 10px 20px;
+    background-color: #1890ff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.add-photo-button:hover {
+    background-color: #1677cc;
+}
+
 .my-photo-page {
     display: flex;
     padding: 20px;
@@ -219,10 +268,11 @@ main {
 }
 
 .gallery-image-container {
-    overflow-y: auto; /* Cho phép cuộn dọc */
-    max-height: 650px; /* Chiều cao tối đa của khu vực hình ảnh */
+    overflow-y: auto;
+    max-height: calc(100vh - 100px); /* Điều chỉnh 150px theo thiết kế */
     width: 100%;
 }
+
 
 .gallery-images {
     display: flex; /* Sử dụng flex để xếp hình ảnh theo hàng */

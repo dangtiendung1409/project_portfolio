@@ -27,8 +27,14 @@
                                 </select>
                             </div>
                         </div>
-                        <!-- Horizontal scrollable photo container -->
-                        <div class="photo-gallery">
+                        <div v-if="likedPhotos.length === 0" class="empty-likes">
+                            <h2>Add photos to your likes</h2>
+                            <p>Browse and like photos to curate your own collection.</p>
+                            <button class="add-photo-button" @click="goToAddPhoto">
+                                Add like photos
+                            </button>
+                        </div>
+                        <div v-else class="photo-gallery">
                             <div v-for="like in likedPhotos" :key="like.id" class="photo-item">
                                 <div class="photo-overlay">
                                     <router-link :to="{ name: 'PhotoDetail', params: { token: like.photoToken } }">
@@ -42,38 +48,19 @@
                                         />
                                         <span class="user-name2">{{ like.username }}</span>
                                         <span class="icon-heart2" @click="showDeleteLikeConfirm(like)">
-                                          <i class="fa-solid fa-trash-can"></i>
+                                            <i class="fa-solid fa-trash-can"></i>
                                         </span>
-
-                                        <button
-                                            class="btn-options"
-                                            @click.stop="toggleDropdown('dropdown-' + like.id, $event)"
-                                            :class="{'active': activeDropdown === 'dropdown-' + like.id}"
-                                        >
-                                            <i class="fa-solid fa-ellipsis"></i>
-                                        </button>
-                                    </div>
-                                    <div v-if="activeDropdown === 'dropdown-' + like.id" class="dropdown-content show"  @click.stop>
-                                        <ul>
-                                            <li>
-                                                <i class="fa-solid fa-plus"></i> Add to Gallery
-                                            </li>
-                                            <li>
-                                                <i class="fa-solid fa-flag"></i> Report this photo
-                                            </li>
-
-                                        </ul>
                                     </div>
                                 </div>
                             </div>
                         </div>
-
                     </main>
                 </div>
             </div>
         </template>
     </Layout>
 </template>
+
 
 <script>
 import axios from 'axios';
@@ -169,6 +156,9 @@ export default {
                 });
             }
         },
+        goToAddPhoto() {
+            this.$router.push('/');
+        },
     },
 };
 </script>
@@ -183,6 +173,35 @@ main {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+}
+.empty-likes {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    height: 400px; /* Chiều cao cho vùng trống */
+    color: #777;
+}
+
+.empty-likes h2 {
+    font-size: 24px;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.empty-likes p {
+    font-size: 16px;
+    color: #555;
+}
+.add-photo-button {
+    padding: 10px 20px;
+    background-color: #1890ff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
 }
 .user-name2 {
     font-size: 18px;
