@@ -136,7 +136,7 @@
                                     <button class="btn icon-btn">
                                         <i class="fa-solid fa-share-nodes"></i>
                                     </button>
-                                    <button class="btn icon-btn">
+                                    <button @click="openAddToGalleryModal(photoDetail.id)" class="btn icon-btn">
                                         <i class="fas fa-plus"></i>
                                     </button>
                                     <button class="btn icon-btn">
@@ -247,6 +247,11 @@
                     </div>
                 </div>
             </div>
+            <AddToGalleryModal
+                :is-visible="showAddToGallery"
+                :photo-id="selectedPhotoId"
+                @close="closeAddToGalleryModal"
+            />
         </template>
     </Layout>
 </template>
@@ -255,11 +260,13 @@ import axios from "axios";
 import Layout from "./Layout.vue";
 import getUrlList from "../provider.js";
 import { useLikeStore } from '@/stores/likeStore';
+import AddToGalleryModal from './components/AddToGalleryModal.vue';
 
 export default {
     name: "PhotoDetail",
     components: {
         Layout,
+        AddToGalleryModal,
     },
     data() {
         return {
@@ -280,6 +287,8 @@ export default {
                         category_name: "",
                     },
             },
+            showAddToGallery: false,
+            selectedPhotoId: null,
         };
     },
     watch: {
@@ -365,6 +374,13 @@ export default {
         updateLikedState() {
             const likeStore = useLikeStore();
             this.photoDetail.liked = likeStore.likedPhotos.includes(this.photoDetail.id); // Cập nhật trạng thái liked của ảnh chi tiết
+        },
+        openAddToGalleryModal(photoId) {
+            this.selectedPhotoId = photoId;
+            this.showAddToGallery = true; // Mở modal
+        },
+        closeAddToGalleryModal() {
+            this.showAddToGallery = false; // Đóng modal
         },
     },
     async mounted() {

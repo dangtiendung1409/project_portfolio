@@ -29,12 +29,12 @@ const baseUrl = 'http://127.0.0.1:8000/api';
 
           // gallery
           getGallery: `${baseUrl}/galleries`,
+          addPhotoToGallery: `${baseUrl}/gallery/add-photo`,
           getGalleryDetails: `${baseUrl}/gallery-details`,
           addGallery: `${baseUrl}/add-gallery`,
           editGallery: `${baseUrl}/update-gallery`,
           deleteGallery: `${baseUrl}/delete-gallery`,
           deletePhotoFromGallery: (galleries_code, photo_id) => `${baseUrl}/gallery/${galleries_code}/photo/${photo_id}`,
-          getGalleriesByVisibility: (visibility) => `${baseUrl}/galleries/visibility/${visibility}`,
           // photo details
           getPhotoDetail : `${baseUrl}/getPhotoDetail`,
       }

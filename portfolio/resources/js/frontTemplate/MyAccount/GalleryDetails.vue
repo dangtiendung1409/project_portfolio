@@ -31,11 +31,15 @@
                                          :key="photo.id"
                                          class="photo-item">
                                         <div class="photo-overlay">
-                                            <img :src="photo.image_url" :alt="photo.title" class="photo-image" />
+                                            <router-link :to="{ name: 'PhotoDetail', params: { token: photo.photo_token } }">
+                                                <img :src="photo.image_url" :alt="photo.title" class="photo-image" />
+                                            </router-link>
                                             <div class="photo-details">
                                                 <img :src="photo.user.profile_picture || '/images/imageUserDefault.png'" alt="User Avatar" class="user-avatar" />
                                                 <span class="user-name2">{{ photo.user.username || 'Unknown User' }}</span>
-                                                <span class="icon-heart2"><i class="fas fa-heart"></i></span>
+                                                <span class="icon-heart2" @click="toggleLike(photo)">
+                                                    <i :class="['fas', photo.liked ? 'fa-heart liked' : 'fa-heart']"></i>
+                                                </span>
                                                 <span class="icon-heart2" @click="showDeletePhotoConfirm(photo)">
                                                     <i class="fa-solid fa-trash-can"></i>
                                                 </span>
@@ -50,7 +54,7 @@
                                             </div>
                                             <div v-if="activeDropdown === 'dropdown-' + photo.id" class="dropdown-content show"  @click.stop>
                                                 <ul>
-                                                    <li>
+                                                    <li @click="openAddToGalleryModal(photo.id)">
                                                         <i class="fa-solid fa-plus"></i> Add to Gallery
                                                     </li>
                                                     <li>
@@ -68,33 +72,49 @@
             </div>
         </template>
     </Layout>
+    <AddToGalleryModal
+        :is-visible="showAddToGallery"
+        :photo-id="selectedPhotoId"
+        @close="closeAddToGalleryModal"
+    />
 </template>
-
 
 <script>
 import Layout from '../Layout.vue';
 import Sidebar from './components/Sidebar.vue';
+import AddToGalleryModal from '../components/AddToGalleryModal.vue';
 import getUrlList from '../../provider.js';
 import axios from 'axios';
 import '@assets/css/account.css';
 import { Modal, notification } from 'ant-design-vue';
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue';
 import { h } from 'vue';
+import { useLikeStore } from '@/stores/likeStore';
+
 export default {
     name: 'GalleryDetails',
     components: {
         Layout,
         Sidebar,
+        AddToGalleryModal,
     },
     data() {
         return {
-            gallery: null,
+            gallery: {
+                photo: []
+            },
             activeDropdown: null,
+            showAddToGallery: false,
+            selectedPhotoId: null,
         };
     },
-    mounted() {
+    async mounted() {
+        const likeStore = useLikeStore();
+        await likeStore.fetchLikedPhotos();
+
         const galleries_code = this.$route.params.galleries_code;
-        this.fetchGalleryDetails(galleries_code);
+        await this.fetchGalleryDetails(galleries_code);
+        this.updateLikedState();
     },
     methods: {
         goBack() {
@@ -157,9 +177,44 @@ export default {
         goToAddPhoto() {
             this.$router.push('/');
         },
+        openAddToGalleryModal(photoId) {
+            this.selectedPhotoId = photoId;
+            this.showAddToGallery = true; // Mở modal
+        },
+        closeAddToGalleryModal() {
+            this.showAddToGallery = false; // Đóng modal
+        },
+        async toggleLike(photo) {
+            const photo_id = photo.id;
+            const photo_user_id = photo.user.id;
+            const likeStore = useLikeStore();
+
+            try {
+                console.log(`Liking photo with ID: ${photo_id}`);
+                if (photo.liked) {
+                    await likeStore.unlikePhoto(photo_id);
+                } else {
+                    await likeStore.likePhoto(photo_id, photo_user_id);
+                }
+                photo.liked = !photo.liked;
+            } catch (error) {
+                console.error('Failed to toggle like:', error);
+                notification.error({
+                    message: 'Error',
+                    description: 'Failed to toggle like. Please try again.',
+                });
+            }
+        },
+        updateLikedState() {
+            const likeStore = useLikeStore();
+            this.gallery.photo.forEach(photo => {
+                photo.liked = likeStore.likedPhotos.includes(photo.id);
+            });
+        },
     },
 };
 </script>
+
 
 
 <style scoped>
@@ -171,6 +226,13 @@ main {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+}
+.icon-heart2:hover {
+    cursor: pointer;
+}
+
+.icon-heart2 .fa-heart.liked {
+    color: #ff5a5f; /* Màu khi đã like */
 }
 .empty-gallery {
     display: flex;

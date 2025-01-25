@@ -79,25 +79,55 @@ class AccountUserController extends Controller
             'message' => 'Galleries fetched successfully!',
         ], 200);
     }
-    public function getGalleriesByVisibility(Request $request, $visibility)
+    public function addPhotoToGallery(Request $request)
     {
-        // Lấy thông tin người dùng từ token xác thực
         $user = Auth::user();
 
         if (!$user) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
-        // Lấy gallery của user đang đăng nhập với visibility cụ thể
-        $galleries = Gallery::with(['photo', 'user'])
-            ->where('user_id', $user->id)
-            ->where('visibility', $visibility)
-            ->orderBy('created_at', 'desc')
-            ->get();
+        // Validate dữ liệu
+        $validator = Validator::make($request->all(), [
+            'gallery_id' => 'required|exists:galleries,id',
+            'photo_id' => 'required|exists:photos,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        // Tìm gallery theo gallery_id
+        $gallery = Gallery::where('id', $request->gallery_id)->first();
+
+        if (!$gallery) {
+            return response()->json(['message' => 'Gallery not found or access denied'], 404);
+        }
+
+        // Kiểm tra nếu người dùng sở hữu gallery
+        if ($gallery->user_id !== $user->id) {
+            return response()->json(['message' => 'You do not have permission to modify this gallery'], 403);
+        }
+
+        // Kiểm tra nếu ảnh đã có trong gallery
+        $photoExists = $gallery->photo()->where('photo_id', $request->photo_id)->exists();
+
+        if ($photoExists) {
+            // Xóa ảnh khỏi gallery
+            $gallery->photo()->detach($request->photo_id);
+            $message = 'Photo removed from gallery successfully!';
+        } else {
+            // Thêm ảnh vào gallery với created_at và updated_at
+            $gallery->photo()->attach($request->photo_id, [
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+            $message = 'Photo added to gallery successfully!';
+        }
 
         return response()->json([
-            'data' => $galleries,
-            'message' => "Galleries with visibility $visibility fetched successfully!",
+            'message' => $message,
+            'gallery' => $gallery->load('photo'), // Load lại quan hệ photo để trả về danh sách ảnh cập nhật
         ], 200);
     }
 

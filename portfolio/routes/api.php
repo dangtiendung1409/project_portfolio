@@ -46,8 +46,7 @@ Route::middleware('auth:api')->group(function () {
     Route::delete('/delete-gallery/{galleries_code}', [AccountUserController::class, 'deleteGallery']);
 
     Route::get('/galleries', [AccountUserController::class, 'getAllGalleries']);
-    Route::get('/galleries/visibility/{visibility}', [AccountUserController::class, 'getGalleriesByVisibility']);
-
+    Route::post('/gallery/add-photo', [AccountUserController::class, 'addPhotoToGallery']);
     Route::get('/gallery-details/{galleries_code}', [AccountUserController::class, 'getGalleryDetails']);
     Route::delete('/gallery/{galleries_code}/photo/{photo_id}', [AccountUserController::class, 'deletePhotoFromGallery']);
 

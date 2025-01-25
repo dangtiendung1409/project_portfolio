@@ -50,6 +50,23 @@
                                         <span class="icon-heart2" @click="showDeleteLikeConfirm(like)">
                                             <i class="fa-solid fa-trash-can"></i>
                                         </span>
+                                        <button
+                                            class="btn-options"
+                                            @click.stop="toggleDropdown('dropdown-' + like.id, $event)"
+                                            :class="{'active': activeDropdown === 'dropdown-' + like.id}"
+                                        >
+                                            <i class="fa-solid fa-ellipsis"></i>
+                                        </button>
+                                    </div>
+                                    <div v-if="activeDropdown === 'dropdown-' + like.id" class="dropdown-content show"  @click.stop>
+                                        <ul>
+                                            <li @click="openAddToGalleryModal(like.photoId)">
+                                                <i class="fa-solid fa-plus"></i> Add to Gallery
+                                            </li>
+                                            <li>
+                                                <i class="fa-solid fa-flag"></i> Report this photo
+                                            </li>
+                                        </ul>
                                     </div>
                                 </div>
                             </div>
@@ -59,12 +76,18 @@
             </div>
         </template>
     </Layout>
+    <AddToGalleryModal
+        :is-visible="showAddToGallery"
+        :photo-id="selectedPhotoId"
+        @close="closeAddToGalleryModal"
+    />
 </template>
 
 
 <script>
 import axios from 'axios';
 import getUrlList from '../../provider.js';
+import AddToGalleryModal from '../components/AddToGalleryModal.vue';
 import Layout from '../Layout.vue';
 import Sidebar from './components/Sidebar.vue';
 import '@assets/css/account.css';
@@ -77,11 +100,14 @@ export default {
     components: {
         Layout,
         Sidebar,
+        AddToGalleryModal,
     },
     data() {
         return {
             likedPhotos: [],
             activeDropdown: null,
+            showAddToGallery: false,
+            selectedPhotoId: null,
         };
     },
     mounted() {
@@ -158,6 +184,13 @@ export default {
         },
         goToAddPhoto() {
             this.$router.push('/');
+        },
+        openAddToGalleryModal(photoId) {
+            this.selectedPhotoId = photoId;
+            this.showAddToGallery = true; // Mở modal
+        },
+        closeAddToGalleryModal() {
+            this.showAddToGallery = false; // Đóng modal
         },
     },
 };

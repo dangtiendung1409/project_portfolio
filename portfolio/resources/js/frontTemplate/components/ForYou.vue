@@ -20,7 +20,7 @@
             </div>
             <div v-if="activeDropdown === 'dotsDropdown-' + item.id" class="dropdown-content show" style="right: 25px">
                 <ul>
-                    <li><i class="fa-regular fa-square-plus"></i> Add to Gallery</li>
+                    <li @click="openAddToGalleryModal(item.id)"><i class="fa-regular fa-square-plus"></i> Add to Gallery</li>
                     <li><i class="fas fa-user-slash"></i> Block User</li>
                     <li><i class="fas fa-user-plus"></i> Follow User</li>
                     <li><i class="fas fa-flag"></i> Report This Photo</li>
@@ -28,15 +28,24 @@
             </div>
         </div>
     </div>
+    <AddToGalleryModal
+        :is-visible="showAddToGallery"
+        :photo-id="selectedPhotoId"
+        @close="closeAddToGalleryModal"
+    />
 </template>
 
 <script>
 import lazyDirective from '../../lazy.js';
+import AddToGalleryModal from "../components/AddToGalleryModal.vue";
 import { useLikeStore } from '@/stores/likeStore';
 
 export default {
     directives: {
         lazy: lazyDirective,
+    },
+    components: {
+        AddToGalleryModal,
     },
     props: {
         photos: {
@@ -46,7 +55,9 @@ export default {
     },
     data() {
         return {
-            activeDropdown: null // Biến lưu trữ dropdown đang mở
+            activeDropdown: null, // Biến lưu trữ dropdown đang mở
+            showAddToGallery: false,
+            selectedPhotoId: null,
         };
     },
     async mounted() {
@@ -83,7 +94,14 @@ export default {
             } catch (error) {
                 console.error('Failed to toggle like:', error);
             }
-        }
+        },
+        openAddToGalleryModal(photoId) {
+            this.selectedPhotoId = photoId;
+            this.showAddToGallery = true; // Mở modal
+        },
+        closeAddToGalleryModal() {
+            this.showAddToGallery = false; // Đóng modal
+        },
     },
     watch: {
         photos: {
@@ -187,4 +205,5 @@ export default {
     border-radius: 50%;
     padding: 5px;
 }
+
 </style>
