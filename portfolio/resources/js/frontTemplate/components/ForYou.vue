@@ -20,10 +20,10 @@
             </div>
             <div v-if="activeDropdown === 'dotsDropdown-' + item.id" class="dropdown-content show" style="right: 25px">
                 <ul>
-                    <li @click="openAddToGalleryModal(item.id)"><i class="fa-regular fa-square-plus"></i> Add to Gallery</li>
-                    <li><i class="fas fa-user-slash"></i> Block User</li>
-                    <li><i class="fas fa-user-plus"></i> Follow User</li>
-                    <li><i class="fas fa-flag"></i> Report This Photo</li>
+                    <li @click="handleClick('addToGallery', item.id)"><i class="fa-regular fa-square-plus"></i> Add to Gallery</li>
+                    <li @click="handleClick('blockUser', item.id)"><i class="fas fa-user-slash"></i> Block User</li>
+                    <li @click="handleClick('followUser', item.id)"><i class="fas fa-user-plus"></i> Follow User</li>
+                    <li @click="handleClick('reportPhoto', item.id)"><i class="fas fa-flag"></i> Report This Photo</li>
                 </ul>
             </div>
         </div>
@@ -39,7 +39,7 @@
 import lazyDirective from '../../lazy.js';
 import AddToGalleryModal from "../components/AddToGalleryModal.vue";
 import { useLikeStore } from '@/stores/likeStore';
-
+import { useAuthStore } from '@/stores/authStore';
 export default {
     directives: {
         lazy: lazyDirective,
@@ -66,6 +66,37 @@ export default {
         this.updateLikedState();
     },
     methods: {
+        async checkLogin() {
+            const authStore = useAuthStore();
+            await authStore.checkLoginStatus();
+            if (!authStore.isLoggedIn) {
+                this.$router.push({ name: 'Login' });
+                return false;
+            }
+            return true;
+        },
+        async handleClick(action, itemId) {
+            if (!await this.checkLogin()) {
+                return; // Nếu chưa đăng nhập, dừng thực hiện các hành động khác
+            }
+
+            switch (action) {
+                case 'addToGallery':
+                    this.openAddToGalleryModal(itemId);
+                    break;
+                case 'blockUser':
+                    this.blockUser(itemId);
+                    break;
+                case 'followUser':
+                    this.followUser(itemId);
+                    break;
+                case 'reportPhoto':
+                    this.reportPhoto(itemId);
+                    break;
+                default:
+                    console.error('Unknown action:', action);
+            }
+        },
         updateLikedState() {
             const likeStore = useLikeStore();
             this.photos.forEach(photo => {
@@ -80,6 +111,10 @@ export default {
             }
         },
         async toggleLike(item) {
+            if (!await this.checkLogin()) {
+                return;
+            }
+
             const photo_id = item.id; // ID của ảnh
             const photo_user_id = item.user.id; // ID của người sở hữu ảnh
             const likeStore = useLikeStore();

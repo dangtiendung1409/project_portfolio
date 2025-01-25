@@ -1,4 +1,3 @@
-
 <template>
     <nav class="navbar">
         <div class="navbar-left">
@@ -109,27 +108,27 @@
     </footer>
     <div id="scripts"></div>
 </template>
+
 <script>
-import jwt_decode from 'jwt-decode';
-import axios from 'axios';
-import getUrlList from "../provider.js";
 import { useUserStore } from '@/stores/userStore';
+import { useAuthStore } from '@/stores/authStore';
 import { useNotificationStore } from '@/stores/notificationStore';
 import { mapState } from 'pinia';
+
 export default {
     name: 'Layout',
     data() {
         return {
-            isLoggedIn: false,
             showAll: false,
         };
     },
     computed: {
+        ...mapState(useAuthStore, ['isLoggedIn']),
         ...mapState(useUserStore, ['user']),
-        userProfilePicture() {
-            return this.user.profile_picture;
-        },
         ...mapState(useNotificationStore, ['notifications', 'unreadCount']),
+        userProfilePicture() {
+            return this.user ? this.user.profile_picture : '';
+        },
         displayedNotifications() {
             // Hiển thị 7 thông báo đầu tiên hoặc tất cả thông báo nếu showAll là true
             return this.showAll ? this.notifications : this.notifications.slice(0, 7);
@@ -139,86 +138,18 @@ export default {
             return this.notifications.length > 7 && !this.showAll;
         },
     },
-    mounted() {
-        // Kiểm tra và thiết lập trạng thái đăng nhập
-        this.checkLoginStatus();
-        if (this.isLoggedIn) {
+    async mounted() {
+        const authStore = useAuthStore();
+        await authStore.checkLoginStatus();
+        if (authStore.isLoggedIn) {
+            const userStore = useUserStore();
+            await userStore.fetchUserData(); // Fetch user data
             const notificationStore = useNotificationStore();
-            notificationStore.fetchNotifications();
+            await notificationStore.fetchNotifications();
         }
         this.loadExternalScripts();
     },
     methods: {
-        async checkLoginStatus() {
-            const token = localStorage.getItem('token');
-            if (token) {
-                try {
-                    const decodedToken = jwt_decode(token);
-                    const currentTime = Date.now() / 1000; // Thời gian hiện tại tính bằng giây
-                    const expTime = decodedToken.exp; // Thời gian hết hạn của token
-
-                    // Kiểm tra token đã hết hạn chưa
-                    if (expTime > currentTime) {
-                        this.isLoggedIn = true;
-                        const remainingTime = expTime - currentTime; // Thời gian còn lại trước khi token hết hạn
-
-                        // Gọi refreshToken trước khi token hết hạn 1 phút
-                        setTimeout(async () => {
-                            await this.refreshToken();
-                        }, (remainingTime - 60) * 1000);
-
-                        const store = useUserStore();
-                        await store.fetchUserData();
-                    } else {
-                        this.isLoggedIn = false;
-                        localStorage.removeItem('token');
-                    }
-                } catch (error) {
-                    console.error('Token decode error:', error);
-                    this.isLoggedIn = false;
-                    localStorage.removeItem('token');
-                }
-            } else {
-                this.isLoggedIn = false;
-            }
-        },
-        async refreshToken() {
-            try {
-                const refreshToken = localStorage.getItem('refresh_token');
-                if (!refreshToken) {
-                    // Nếu không có refresh_token thì yêu cầu đăng nhập lại
-                    alert('token does not exist');
-                    return;
-                }
-                const response = await axios.post(getUrlList().refreshToken, {}, {
-                    headers: { Authorization: `Bearer ${refreshToken}` },
-                });
-
-                const newToken = response.data.token;
-                localStorage.setItem('token', newToken);
-                this.checkLoginStatus(); // Kiểm tra lại trạng thái đăng nhập
-            } catch (error) {
-                // console.error('Failed to refresh token:', error.response?.data || error.message);
-                // alert('Session expired. Please log in again.');
-                this.handleLogout();
-            }
-        },
-        async handleLogout() {
-            try {
-                const token = localStorage.getItem('token');
-                if (token) {
-                    await axios.post(getUrlList().logout, {}, {
-                        headers: { Authorization: `Bearer ${token}` }
-                    });
-                }
-                localStorage.removeItem('token');
-                localStorage.removeItem('refresh_token');
-                this.isLoggedIn = false;
-                window.location.href = '/login';
-            } catch (error) {
-                console.error('Logout failed:', error);
-            }
-        },
         async navigateToPhoto(photoToken, notificationId) {
             if (notificationId) {
                 const notificationStore = useNotificationStore();
@@ -258,6 +189,10 @@ export default {
                 script.async = false;
                 document.getElementById('scripts').appendChild(script);
             });
+        },
+        async handleLogout() {
+            const authStore = useAuthStore();
+            await authStore.handleLogout();
         },
     },
 };

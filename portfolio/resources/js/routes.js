@@ -1,4 +1,5 @@
 import { createWebHistory, createRouter } from 'vue-router';
+import { useAuthStore } from './stores/authStore.js';
 import Index from './frontTemplate/Index.vue';
 import MyPhoto from './frontTemplate/MyAccount/MyPhoto.vue';
 import MyAccount from "./frontTemplate/MyAccount/MyAccount.vue";
@@ -36,34 +37,15 @@ const router = createRouter({
 });
 
 // Navigation Guard
-router.beforeEach((to, from, next) => {
-    const token = localStorage.getItem('token');
-    let isLoggedIn = false;
+router.beforeEach(async (to, from, next) => {
+    const authStore = useAuthStore();
+    await authStore.checkLoginStatus();
 
-    if (token) {
-        try {
-            const decodedToken = jwt_decode(token); // Giải mã token
-            const currentTime = Date.now() / 1000; // Thời gian hiện tại (tính bằng giây)
-
-            // Kiểm tra thời gian hết hạn của token
-            if (decodedToken.exp > currentTime) {
-                isLoggedIn = true; // Token còn hạn
-            } else {
-                localStorage.removeItem('token'); // Token hết hạn, xóa khỏi localStorage
-                isLoggedIn = false;
-            }
-        } catch (error) {
-            console.error("Token decode error:", error);
-            localStorage.removeItem('token'); // Token không hợp lệ, xóa khỏi localStorage
-            isLoggedIn = false;
-        }
-    }
-
-    // Nếu route yêu cầu xác thực và người dùng không đăng nhập (hoặc token hết hạn)
-    if (to.matched.some(record => record.meta.requiresAuth) && !isLoggedIn) {
-        next({ name: 'Login' });
+    // Nếu route yêu cầu xác thực và người dùng không đăng nhập
+    if (to.matched.some(record => record.meta.requiresAuth) && !authStore.isLoggedIn) {
+        next({ name: 'Login', query: { redirect: to.fullPath } }); // Lưu đường dẫn muốn truy cập
     } else {
-        next();
+        next(); // Tiếp tục điều hướng
     }
 });
 

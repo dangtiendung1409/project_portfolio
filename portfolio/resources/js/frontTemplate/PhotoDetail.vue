@@ -130,19 +130,20 @@
                             <div class="info-container">
                                 <!-- Header with Icons in a Separate Div -->
                                 <div class="icon-wrapper">
-                                    <button class="btn icon-btn" @click="toggleLike(photoDetail)">
+                                    <button class="btn icon-btn" @click="handleAction('toggleLike', photoDetail)">
                                         <i :class="['fa-heart', photoDetail.liked ? 'fas liked' : 'far']"></i>
                                     </button>
-                                    <button class="btn icon-btn">
+                                    <button class="btn icon-btn" @click="handleAction('share')">
                                         <i class="fa-solid fa-share-nodes"></i>
                                     </button>
-                                    <button @click="openAddToGalleryModal(photoDetail.id)" class="btn icon-btn">
+                                    <button class="btn icon-btn" @click="handleAction('addToGallery', photoDetail.id)">
                                         <i class="fas fa-plus"></i>
                                     </button>
                                     <button class="btn icon-btn">
                                         <i class="fa-solid fa-ellipsis"></i>
                                     </button>
                                 </div>
+
                                 <!-- Details Section -->
                                 <div class="details-wrapper">
                                     <h3 class="h3">{{ photoDetail.title }}</h3>
@@ -260,6 +261,7 @@ import axios from "axios";
 import Layout from "./Layout.vue";
 import getUrlList from "../provider.js";
 import { useLikeStore } from '@/stores/likeStore';
+import { useAuthStore } from '@/stores/authStore';
 import AddToGalleryModal from './components/AddToGalleryModal.vue';
 
 export default {
@@ -307,6 +309,34 @@ export default {
                 this.updateLikedState(); // Cập nhật trạng thái liked sau khi lấy chi tiết ảnh
             } catch (error) {
                 console.error("Error fetching photo details:", error);
+            }
+        },
+        async checkLogin() {
+            const authStore = useAuthStore();
+            await authStore.checkLoginStatus();
+            if (!authStore.isLoggedIn) {
+                this.$router.push({ name: 'Login' });
+                return false;
+            }
+            return true;
+        },
+        async handleAction(action, payload) {
+            if (!await this.checkLogin()) {
+                return;
+            }
+
+            switch (action) {
+                case 'toggleLike':
+                    this.toggleLike(payload);
+                    break;
+                case 'addToGallery':
+                    this.openAddToGalleryModal(payload);
+                    break;
+                case 'share':
+                    this.sharePhoto();
+                    break;
+                default:
+                    console.error('Unknown action:', action);
             }
         },
         openFullScreen() {
