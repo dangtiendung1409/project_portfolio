@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('photos', function (Blueprint $table) {
             $table->id();
-            $table->string('title', 255);
-            $table->text('description')->nullable();
+            $table->string('title', 255)->nullable();
+            $table->string('description', 500)->nullable();
             $table->dateTime('upload_date');
             $table->string('location', 255)->nullable();
             $table->boolean('privacy_status');

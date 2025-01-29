@@ -73,7 +73,7 @@
                     </div>
                 </div>
             </div>
-            <button v-if="isLoggedIn" class="upload-button">
+            <button v-if="isLoggedIn" class="upload-button" @click="goToAddPhotos">
                 <i class="fa-solid fa-arrow-up"></i> Upload
             </button>
             <button class="hamburger" aria-label="Toggle navigation">
@@ -193,6 +193,9 @@ export default {
         async handleLogout() {
             const authStore = useAuthStore();
             await authStore.handleLogout();
+        },
+        goToAddPhotos() {
+            this.$router.push({ name: 'AddPhotos' });
         },
     },
 };

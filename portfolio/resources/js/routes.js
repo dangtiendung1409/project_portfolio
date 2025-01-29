@@ -2,6 +2,7 @@ import { createWebHistory, createRouter } from 'vue-router';
 import { useAuthStore } from './stores/authStore.js';
 import Index from './frontTemplate/Index.vue';
 import MyPhoto from './frontTemplate/MyAccount/MyPhoto.vue';
+import AddPhotos from './frontTemplate/AddPhotos.vue';
 import MyAccount from "./frontTemplate/MyAccount/MyAccount.vue";
 import ChangePassword from "./frontTemplate/MyAccount/ChangePassword.vue";
 import Like from "./frontTemplate/MyAccount/Like.vue";
@@ -17,6 +18,7 @@ const routes = [
     { name: 'Index', path: '/', component: Index },
     { name: 'PhotoDetail', path: '/photoDetail/:token', component: PhotoDetail },
     { name: 'MyPhoto', path: '/myPhotos', component: MyPhoto, meta: { requiresAuth: true } },
+    { name: 'AddPhotos', path: '/addPhotos', component: AddPhotos, meta: { requiresAuth: true } },
 
     { name: 'MyGallery', path: '/myGallery', component: MyGallery, meta: { requiresAuth: true } },
     { name: 'GalleryDetails',  path: '/galleryDetails/:galleries_code', component: GalleryDetails, meta: { requiresAuth: true } },

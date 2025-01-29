@@ -27,7 +27,7 @@ class CategorySeeder extends Seeder
 
         foreach ($categories as $index => $category) {
             $randomImageNumber = rand(1, 200); // Lấy số ngẫu nhiên từ 1 đến 200
-            $imagePath = '/images/photos/image-' . $randomImageNumber . '.jpeg'; // Đường dẫn ảnh
+            $imagePath = '/images/categories/image-' . $randomImageNumber . '.jpeg'; // Đường dẫn ảnh
 
             DB::table('categories')->insert([
                 'category_name' => $category,
