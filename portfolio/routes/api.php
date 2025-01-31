@@ -27,7 +27,8 @@ Route::post('/logout', [AuthUserController::class, 'logout']);
 Route::get('/getPhotoData', [HomePageController::class, 'getImages']);
 Route::get('/getFollowData', [HomePageController::class, 'getFollows']);
 Route::get('/getPhotoDetail/{token}', [PhotoDetailController::class, 'getPhotoDetail']);
-
+Route::get('/categories', [HomePageController::class, 'getAllCategories']);
+Route::get('/tags', [HomePageController::class, 'getAllTags']);
 
 Route::middleware('auth:api')->group(function () {
     // Acount user
@@ -53,6 +54,9 @@ Route::middleware('auth:api')->group(function () {
     // notifications
     Route::get('/notifications', [HomePageController::class, 'getUserNotifications']);
     Route::post('/notifications/mark-as-read', [HomePageController::class, 'markNotificationAsRead']);
+
+    // add photo
+    Route::post('/add-photos', [HomePageController::class, 'addPhotos']);
 
     // Auth user
     Route::get('/user', [AuthUserController::class, 'getUser']);

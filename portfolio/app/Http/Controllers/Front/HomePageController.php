@@ -3,18 +3,87 @@
 namespace App\Http\Controllers\Front;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
 use App\Models\Like;
 use App\Models\Notification;
 use App\Models\Photo;
+use App\Models\Tag;
 use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
-
+use Carbon\Carbon;
+use Illuminate\Support\Str;
 
 class HomePageController extends Controller
 {
+    public function addPhotos(Request $request)
+    {
+        // Validate the request
+        $validator = Validator::make($request->all(), [
+            'photos' => 'required|array|max:10',
+            'photos.*.title' => 'nullable|string|max:255',
+            'photos.*.description' => 'nullable|string',
+            'photos.*.location' => 'nullable|string|max:255',
+            'photos.*.image' => 'required|file|mimes:jpeg,png,jpg,gif|max:5120', // Validate file ảnh
+            'photos.*.category_id' => 'required|exists:categories,id',
+            'photos.*.privacy_status' => 'required|string',
+            'photos.*.tags' => 'nullable|string', // Thêm tags vào validation
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $user = Auth::user();
+        $photosData = $request->input('photos');
+        $currentDate = Carbon::now(); // Lấy ngày hiện tại
+
+        foreach ($photosData as $index => $photoData) {
+            $photoData['user_id'] = $user->id;
+            $photoData['upload_date'] = $currentDate; // Đặt ngày hiện tại cho upload_date
+            $photoData['photo_status'] = 'pending'; // Đặt giá trị mặc định là pending
+            $photoData['photo_token'] = Str::uuid(); // Tạo photo_token tự động
+
+            // Xử lý ảnh
+            if ($request->hasFile("photos.$index.image")) {
+                $image = $request->file("photos.$index.image");
+                $imageName = time() . '_' . uniqid() . '.' . $image->extension();
+                $image->move(public_path('images/photos'), $imageName);
+                $photoData['image_url'] = 'images/photos/' . $imageName; // Lưu đường dẫn ảnh
+            }
+
+            // Tạo ảnh trong database
+            $photo = Photo::create($photoData);
+
+            // **Xử lý tags**
+            if (!empty($photoData['tags'])) {
+                $tags = explode(',', $photoData['tags']); // Lấy danh sách tag
+                foreach ($tags as $tagName) {
+                    $tagName = trim($tagName); // Loại bỏ khoảng trắng
+
+                    // Kiểm tra tag đã tồn tại chưa
+                    $tag = Tag::firstOrCreate(['tag_name' => $tagName]);
+
+                    // Attach tag vào bảng trung gian
+                    $photo->tags()->attach($tag->id);
+                }
+            }
+        }
+
+        return response()->json(['message' => 'Photos added successfully'], 201);
+    }
+    public function getAllCategories()
+    {
+        $categories = Category::all();
+        return response()->json($categories);
+    }
+    public function getAllTags()
+    {
+        $tags = Tag::all();
+        return response()->json($tags);
+    }
     public function getImages()
     {
         $images = Photo::with(['category', 'user'])->get();

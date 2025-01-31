@@ -91,9 +91,7 @@
                             </th>
                             <th>id</th>
                             <th>title</th>
-                            <th>description</th>
                             <th>image</th>
-                            <th>location</th>
                             <th>user name</th>
                             <th>category name</th>
                             <th>upload date</th>
@@ -113,13 +111,11 @@
                                 </td>
                                 <td>{{ $photo->id }}</td>
                                 <td>{{ $photo->title }}</td>
-                                <td>{{ $photo->description }}</td>
                                 <td>
                                     @if($photo->image_url)
                                         <img src="{{ asset($photo->image_url) }}" width="150" height="150" style="cursor: pointer; margin-bottom: 10px;" onclick="showModal(this)">
                                     @endif
                                 </td>
-                                <td>{{ $photo->location }}</td>
                                 <td>{{ $photo->user->username }}</td>
                                 <td>{{ $photo->category->category_name }}</td>
                                 <td>{{ date('d-m-Y', strtotime($photo->upload_date)) }}</td>

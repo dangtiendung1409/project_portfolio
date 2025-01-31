@@ -33,14 +33,12 @@
                                     :class="{ selected: file === selectedFile }"
                                     style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; width: 150px; height: 150px;"
                                 >
-        <span style="margin-bottom: 8px;">
-            <file-outlined style="font-size: 24px; color: #007bff;" />
-        </span>
+                                    <span style="margin-bottom: 8px;">
+                                        <file-outlined style="font-size: 24px; color: #007bff;" />
+                                    </span>
                                     <div style="font-size: 14px; font-weight: 500; text-align: center;">{{ file.name }}</div>
                                 </li>
                             </ul>
-
-
                             <a-modal :open="previewVisible" :title="previewTitle" :footer="null" @cancel="handleCancel">
                                 <img alt="example" style="width: 100%" :src="previewImage" />
                             </a-modal>
@@ -51,18 +49,9 @@
                             <a-steps
                                 v-model:current="current"
                                 :items="[
-                                    {
-                                        title: 'Images',
-
-                                    },
-                                    {
-                                        title: 'Details',
-
-                                    },
-                                    {
-                                        title: 'Finish',
-
-                                    },
+                                    { title: 'Images' },
+                                    { title: 'Details' },
+                                    { title: 'Finish' }
                                 ]"
                             >
                                 <template #progressDot="{ index, status, prefixCls }">
@@ -87,9 +76,7 @@
                                 @input="updateCharCount('title')"
                                 maxlength="255"
                             />
-                            <span class="char-count">
-        {{ selectedFile.details.title.length || 0 }}/255
-    </span>
+                            <span class="char-count">{{ selectedFile.details.title.length || 0 }}/255</span>
                         </div>
                         <div class="input-group">
                             <span class="input-label">Location</span>
@@ -100,9 +87,7 @@
                                 @input="updateCharCount('location')"
                                 maxlength="255"
                             />
-                            <span class="char-count">
-        {{ selectedFile.details.location.length || 0 }}/255
-    </span>
+                            <span class="char-count">{{ selectedFile.details.location.length || 0 }}/255</span>
                         </div>
                         <div class="input-group">
                             <span class="input-label">Description</span>
@@ -113,9 +98,7 @@
                                 @input="updateCharCount('description')"
                                 maxlength="500"
                             ></textarea>
-                            <span class="char-count">
-        {{ selectedFile.details.description.length || 0 }}/500
-    </span>
+                            <span class="char-count">{{ selectedFile.details.description.length || 0 }}/500</span>
                         </div>
 
                         <div class="category">
@@ -123,16 +106,14 @@
                                 <span class="input-label">Category</span>
                                 <select v-model="selectedFile.details.category">
                                     <option disabled value="">Choose Category</option>
-                                    <option>Category 1</option>
-                                    <option>Category 2</option>
-                                    <option>Category 3</option>
+                                    <option v-for="category in categories" :key="category.id" :value="category.id">{{ category.category_name }}</option>
                                 </select>
                             </div>
                             <div class="input-group">
                                 <span class="input-label">Photo Privacy</span>
                                 <select v-model="selectedFile.details.privacy">
-                                    <option value="public">Public</option>
-                                    <option value="private">Private</option>
+                                    <option value="0">Public</option>
+                                    <option value="1">Private</option>
                                 </select>
                             </div>
                         </div>
@@ -140,7 +121,7 @@
                             <span class="input-label">Add Custom Tags</span>
                             <div class="keywords-input" style="margin-top: 2px; margin-left: -3px">
                                 <input type="text" v-model="keywordInput" @keyup.enter="addKeyword(keywordInput)" placeholder="Add your keywords" style="width: 500px" />
-                                <button @click="addKeyword(keywordInput)" style="cursor: pointer;  background-color: #0870D1; color: white; border: none; border-radius: 4px; padding: 11px 10px;">
+                                <button @click="addKeyword(keywordInput)" style="cursor: pointer; background-color: #0870D1; color: white; border: none; border-radius: 4px; padding: 11px 10px;">
                                     <i class="fa-solid fa-plus"></i> Add
                                 </button>
                             </div>
@@ -149,31 +130,26 @@
                             <span class="input-label">Tag Suggestions</span>
                             <div class="keywords-input">
                                 <div class="suggested-keywords" style="margin-top: -20px; margin-left: 105px">
-                                  <span v-for="keyword in suggestedKeywords" :key="keyword" class="keyword-tag" @click="addKeyword(keyword)">
-                                     {{ keyword }}
-                                 </span>
+                                    <span v-for="keyword in suggestedKeywords.slice(0, 15)" :key="keyword.id" class="keyword-tag" @click="addKeyword(keyword.tag_name)">
+                                        {{ keyword.tag_name }}
+                                    </span>
                                 </div>
                             </div>
                         </div>
                         <div class="input-group">
                             <div class="selected-tags-container">
-        <span
-            v-for="keyword in selectedFile.details.keywords"
-            :key="keyword"
-            class="selected-tag"
-        >
-            {{ keyword }}
-            <span class="remove-tag" @click="removeKeyword(keyword)">×</span>
-        </span>
+                                <span v-for="keyword in selectedFile.details.keywords" :key="keyword" class="selected-tag">
+                                    {{ keyword }}
+                                    <span class="remove-tag" @click="removeKeyword(keyword)">×</span>
+                                </span>
                             </div>
                         </div>
-
 
                         <div class="upload-button-container" style="display: flex; justify-content: flex-end; margin-top: 20px;">
                             <button @click="resetDetails" class="reset-button">
                                 Reset
                             </button>
-                            <button class="upload-button">
+                            <button @click="uploadPhotos" class="upload-button">
                                 Upload
                             </button>
                         </div>
@@ -184,12 +160,14 @@
     </Layout>
 </template>
 
-
 <script>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue'; // Import onMounted
+import { useRouter } from 'vue-router'; // Import useRouter
 import Layout from './Layout.vue';
 import { PlusOutlined, FileOutlined } from '@ant-design/icons-vue';
-import { Upload, Modal } from 'ant-design-vue';
+import { Upload, Modal, notification } from 'ant-design-vue';
+import axios from 'axios';
+import getUrlList from '../provider.js';
 
 function getBase64(file) {
     return new Promise((resolve, reject) => {
@@ -210,6 +188,7 @@ export default {
         FileOutlined,
     },
     setup() {
+        const router = useRouter(); // Initialize router
         const previewVisible = ref(false);
         const previewImage = ref('');
         const previewTitle = ref('');
@@ -220,26 +199,27 @@ export default {
         const description = ref('');
         const keywordInput = ref('');
         const keywords = ref([]);
-        const suggestedKeywords = ref([
-            'Square - Composition',
-            'No People',
-            'Sofa',
-            'Indoors',
-            'Living Room',
-            'Photography',
-            'Modern',
-            'Furniture',
-            'Home Decor',
-            'Home Interior',
-            'Table',
-            'Design',
-            'Domestic Room',
-            'Apartment',
-            'Cozy',
-        ]);
+        const categories = ref([]);
+        const tags = ref([]);
+        const suggestedKeywords = ref([]);
 
         const current = ref(1);
         const exceededLimit = ref(false); // Cờ để theo dõi trạng thái hiển thị thông báo
+
+        onMounted(async () => {
+            try {
+                const urlList = getUrlList();
+                const [categoriesResponse, tagsResponse] = await Promise.all([
+                    axios.get(urlList.getCategories),
+                    axios.get(urlList.getTags)
+                ]);
+                categories.value = categoriesResponse.data;
+                tags.value = tagsResponse.data;
+                suggestedKeywords.value = tags.value.slice(0, 15); // Lấy 15 tag suggestions đầu tiên
+            } catch (error) {
+                console.error('Error fetching categories or tags:', error);
+            }
+        });
 
         const handleCancel = () => {
             previewVisible.value = false;
@@ -252,7 +232,7 @@ export default {
                     location: '',
                     description: '',
                     category: '',
-                    privacy: 'public',
+                    privacy: '0',
                     keywords: [],
                 };
                 keywordInput.value = '';
@@ -297,7 +277,7 @@ export default {
                         location: '',
                         description: '',
                         category: '',
-                        privacy: 'public',
+                        privacy: '0', // Mặc định là Public
                         keywords: [],
                     },
                 }));
@@ -355,7 +335,6 @@ export default {
             }
         };
 
-
         const removeKeyword = (keyword) => {
             selectedFile.value.details.keywords = selectedFile.value.details.keywords.filter((k) => k !== keyword);
         };
@@ -376,6 +355,51 @@ export default {
             }
         };
 
+        const uploadPhotos = async () => {
+            if (!selectedFile.value.details.category) {
+                Modal.error({
+                    title: 'Upload Failed',
+                    content: 'Please choose a category for the photo.',
+                });
+                return;
+            }
+
+            try {
+                const urlList = getUrlList();
+                const formData = new FormData();
+                fileList.value.forEach((file, index) => {
+                    formData.append(`photos[${index}][title]`, file.details.title || '');
+                    formData.append(`photos[${index}][description]`, file.details.description || '');
+                    formData.append(`photos[${index}][location]`, file.details.location || '');
+                    formData.append(`photos[${index}][category_id]`, file.details.category);
+                    formData.append(`photos[${index}][privacy_status]`, file.details.privacy);
+                    formData.append(`photos[${index}][tags]`, file.details.keywords.join(','));
+                    formData.append(`photos[${index}][image]`, file.originFileObj);
+                });
+
+                const response = await axios.post(urlList.addPhoto, formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        Authorization: `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+
+                if (response.status === 201) {
+                    notification.success({
+                        message: 'Success',
+                        description: 'Photo added successfully, your photo will wait for processing',
+                    });
+                    router.push({ name: 'MyPhoto' });
+                }
+            } catch (error) {
+                Modal.error({
+                    title: 'Upload Failed',
+                    content: 'There was an error uploading the photos.',
+                });
+                console.error('Upload error:', error);
+            }
+        };
+
         return {
             current,
             previewVisible,
@@ -383,6 +407,8 @@ export default {
             previewTitle,
             fileList,
             selectedFile,
+            categories,
+            tags,
             resetDetails,
             handleCancel,
             handlePreview,
@@ -399,10 +425,12 @@ export default {
             addKeyword,
             removeKeyword,
             updateCharCount,
+            uploadPhotos,
         };
     },
 };
 </script>
+
 
 
 <style scoped>

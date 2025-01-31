@@ -43,13 +43,13 @@
                                 <div class="field">
                                     <label class="label">Title</label>
                                     <div class="control">
-                                        <input type="text" name="title" value="{{ $photo->title }}" class="input" readonly>
+                                        <input type="text" name="title" value="{{ $photo->title ?? 'No title' }}" class="input" readonly>
                                     </div>
                                 </div>
                                 <div class="field">
                                     <label class="label">Description</label>
                                     <div class="control">
-                                        <textarea name="description" class="textarea" readonly>{{ $photo->description }}</textarea>
+                                        <textarea name="description" class="textarea" readonly>{{ $photo->description ?? 'No description' }}</textarea>
                                     </div>
                                 </div>
                             </div>
@@ -67,7 +67,7 @@
                                 <div class="field">
                                     <label class="label">Location</label>
                                     <div class="control">
-                                        <input type="text" name="location" value="{{ $photo->location }}" class="input" readonly>
+                                        <input type="text" name="location" value="{{ $photo->location ?? 'No location' }}" class="input" readonly>
                                     </div>
                                 </div>
                             </div>
@@ -85,7 +85,7 @@
                                 <div class="field">
                                     <label class="label">Tags</label>
                                     <div class="control">
-                                        <input type="text" value="{{ implode(', ', $photo->tags->pluck('tag_name')->toArray()) }}" class="input" readonly>
+                                        <input type="text" value="{{ $photo->tags->isNotEmpty() ? implode(', ', $photo->tags->pluck('tag_name')->toArray()) : 'No tags' }}" class="input" readonly>
                                     </div>
                                 </div>
                             </div>

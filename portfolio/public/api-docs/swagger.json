@@ -935,7 +935,77 @@
               }
           }
       },
-
+      "/add-photos": {
+          "post": {
+              "tags": ["Photo"],
+              "summary": "Add multiple photos (up to 10) for the authenticated user",
+              "operationId": "addPhotos",
+              "consumes": ["application/json"],
+              "produces": ["application/json"],
+              "parameters": [
+                  {
+                      "name": "Authorization",
+                      "in": "header",
+                      "description": "Bearer token for authentication",
+                      "required": true,
+                      "type": "string"
+                  },
+                  {
+                      "name": "body",
+                      "in": "body",
+                      "description": "Array of photos to be added",
+                      "required": true,
+                      "schema": {
+                          "type": "object",
+                          "properties": {
+                              "photos": {
+                                  "type": "array",
+                                  "items": {
+                                      "type": "object",
+                                      "properties": {
+                                          "title": { "type": "string" },
+                                          "description": { "type": "string" },
+                                          "location": { "type": "string" },
+                                          "image_url": { "type": "string" },
+                                          "category_id": { "type": "integer" },
+                                          "privacy_status": { "type": "string" },
+                                          "tags": { "type": "string" }
+                                      },
+                                      "required": ["title", "image_url", "category_id", "privacy_status"]
+                                  }
+                              }
+                          }
+                      }
+                  }
+              ],
+              "responses": {
+                  "201": {
+                      "description": "Photos added successfully",
+                      "schema": {
+                          "type": "object",
+                          "properties": {
+                              "message": { "type": "string" }
+                          }
+                      }
+                  },
+                  "422": {
+                      "description": "Validation error",
+                      "schema": {
+                          "type": "object",
+                          "properties": {
+                              "errors": {
+                                  "type": "object",
+                                  "additionalProperties": { "type": "string" }
+                              }
+                          }
+                      }
+                  },
+                  "500": {
+                      "description": "Internal server error"
+                  }
+              }
+          }
+      },
       "/update-profile": {
           "post": {
               "tags": ["AccountUser"],

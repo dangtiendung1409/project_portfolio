@@ -35,7 +35,7 @@
             <header class="card-header">
                 <p class="card-header-title">
                     <span class="icon"><i class="mdi mdi-image"></i></span>
-                    photoPending Pending
+                    Photo
                 </p>
                 <form class="card-header-icon" method="get" onchange="this.submit()">
                     <select style="margin-left:-10px; padding: 5px 10px; border: 1px solid #F1F1F1" name="size">
@@ -64,9 +64,7 @@
                             </th>
                             <th>id</th>
                             <th>title</th>
-                            <th>description</th>
                             <th>image</th>
-                            <th>location</th>
                             <th>user name</th>
                             <th>category name</th>
                             <th>upload date</th>
@@ -86,13 +84,11 @@
                                 </td>
                                 <td>{{ $photo->id }}</td>
                                 <td>{{ $photo->title }}</td>
-                                <td>{{ $photo->description }}</td>
                                 <td>
                                     @if($photo->image_url)
                                         <img src="{{ asset($photo->image_url) }}" width="150" height="150" style="cursor: pointer; margin-bottom: 10px;" onclick="showModal(this)">
                                     @endif
                                 </td>
-                                <td>{{ $photo->location }}</td>
                                 <td>{{ $photo->user->username }}</td>
                                 <td>{{ $photo->category->category_name }}</td>
                                 <td>{{ date('d-m-Y', strtotime($photo->upload_date)) }}</td>
