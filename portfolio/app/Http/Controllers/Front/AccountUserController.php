@@ -3,9 +3,13 @@
 namespace App\Http\Controllers\Front;
 
 use App\Http\Controllers\Controller;
+use App\Models\Comment;
 use App\Models\Gallery;
 use App\Models\Like;
 use App\Models\Notification;
+use App\Models\Photo;
+use App\Models\Report;
+use App\Models\Tag;
 use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
@@ -16,6 +20,141 @@ use Illuminate\Support\Str;
 
 class AccountUserController extends Controller
 {
+    // my photo user
+    public function getApprovedPhotos(Request $request)
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        $approvedPhotos = Photo::where('user_id', $user->id)
+            ->where('photo_status', 'approved')
+            ->get();
+
+        return response()->json([
+            'data' => $approvedPhotos,
+            'message' => 'Approved photos fetched successfully!',
+        ], 200);
+    }
+    public function deletePhoto(Request $request, $photo_id)
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        // Tìm photo theo photo_id và user_id
+        $photo = Photo::where('id', $photo_id)->where('user_id', $user->id)->first();
+
+        if (!$photo) {
+            return response()->json(['message' => 'Photo not found or access denied'], 404);
+        }
+
+        // Xóa các thông báo liên quan đến comments
+        $comments = Comment::where('photo_id', $photo->id)->get();
+        foreach ($comments as $comment) {
+            Notification::where('comment_id', $comment->id)->delete();
+        }
+
+        // Xóa các thông báo liên quan đến likes
+        $likes = Like::where('photo_id', $photo->id)->get();
+        foreach ($likes as $like) {
+            Notification::where('like_id', $like->id)->delete();
+        }
+
+        // Xóa tất cả các thông tin liên quan đến ảnh
+        Notification::where('photo_id', $photo->id)->delete();
+        Comment::where('photo_id', $photo->id)->delete();
+        Report::where('photo_id', $photo->id)->delete();
+        Like::where('photo_id', $photo->id)->delete();
+        $photo->galleries()->detach(); // Xóa quan hệ với galleries
+        $photo->tags()->detach(); // Xóa quan hệ với tags
+
+        // Xóa ảnh
+        $photo->delete();
+
+        return response()->json([
+            'message' => 'Photo and related information deleted successfully!',
+        ], 200);
+    }
+    public function getPhoto($id)
+    {
+        $photo = Photo::with('tags', 'category')->findOrFail($id);
+        $user = Auth::user();
+
+        // Kiểm tra xem photo có thuộc về user không
+        if ($photo->user_id !== $user->id) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        return response()->json($photo);
+    }
+    public function editPhoto(Request $request, $id)
+    {
+        // Validate the request
+        $validator = Validator::make($request->all(), [
+            'title' => 'nullable|string|max:255',
+            'description' => 'nullable|string',
+            'location' => 'nullable|string|max:255',
+            'category_id' => 'nullable|exists:categories,id',
+            'privacy_status' => 'nullable|string',
+            'tags' => 'nullable|string', // Thêm tags vào validation
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $photo = Photo::findOrFail($id);
+        $user = Auth::user();
+
+        // Kiểm tra xem photo có thuộc về user không
+        if ($photo->user_id !== $user->id) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        // Cập nhật các trường đã thay đổi
+        if ($request->filled('title')) {
+            $photo->title = $request->input('title');
+        }
+        if ($request->filled('description')) {
+            $photo->description = $request->input('description');
+        }
+        if ($request->filled('location')) {
+            $photo->location = $request->input('location');
+        }
+        if ($request->filled('category_id')) {
+            $photo->category_id = $request->input('category_id');
+        }
+        if ($request->filled('privacy_status')) {
+            $photo->privacy_status = $request->input('privacy_status');
+        }
+
+        // Lưu các thay đổi
+        $photo->save();
+
+        // **Xử lý tags**
+        if ($request->filled('tags')) {
+            $tags = explode(',', $request->input('tags')); // Lấy danh sách tag
+            $tagIds = [];
+            foreach ($tags as $tagName) {
+                $tagName = trim($tagName); // Loại bỏ khoảng trắng
+
+                // Kiểm tra tag đã tồn tại chưa
+                $tag = Tag::firstOrCreate(['tag_name' => $tagName]);
+                $tagIds[] = $tag->id;
+            }
+
+            // Cập nhật lại các tags
+            $photo->tags()->sync($tagIds);
+        }
+
+        return response()->json(['message' => 'Photo updated successfully'], 200);
+    }
+
     // like photo
     public function getLikedPhotos(Request $request)
     {

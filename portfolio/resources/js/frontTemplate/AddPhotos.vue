@@ -73,7 +73,6 @@
                                 type="text"
                                 placeholder="Enter title"
                                 v-model="selectedFile.details.title"
-                                @input="updateCharCount('title')"
                                 maxlength="255"
                             />
                             <span class="char-count">{{ selectedFile.details.title.length || 0 }}/255</span>
@@ -84,7 +83,6 @@
                                 type="text"
                                 placeholder="Enter location"
                                 v-model="selectedFile.details.location"
-                                @input="updateCharCount('location')"
                                 maxlength="255"
                             />
                             <span class="char-count">{{ selectedFile.details.location.length || 0 }}/255</span>
@@ -95,7 +93,6 @@
                                 placeholder="Enter description"
                                 rows="4"
                                 v-model="selectedFile.details.description"
-                                @input="updateCharCount('description')"
                                 maxlength="500"
                             ></textarea>
                             <span class="char-count">{{ selectedFile.details.description.length || 0 }}/500</span>
@@ -161,22 +158,11 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue'; // Import onMounted
-import { useRouter } from 'vue-router'; // Import useRouter
 import Layout from './Layout.vue';
 import { PlusOutlined, FileOutlined } from '@ant-design/icons-vue';
 import { Upload, Modal, notification } from 'ant-design-vue';
 import axios from 'axios';
 import getUrlList from '../provider.js';
-
-function getBase64(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = (error) => reject(error);
-    });
-}
 
 export default {
     name: 'AddPhotos',
@@ -187,47 +173,50 @@ export default {
         PlusOutlined,
         FileOutlined,
     },
-    setup() {
-        const router = useRouter(); // Initialize router
-        const previewVisible = ref(false);
-        const previewImage = ref('');
-        const previewTitle = ref('');
-        const fileList = ref([]);
-        const selectedFile = ref(null);
-        const title = ref('');
-        const location = ref('');
-        const description = ref('');
-        const keywordInput = ref('');
-        const keywords = ref([]);
-        const categories = ref([]);
-        const tags = ref([]);
-        const suggestedKeywords = ref([]);
+    data() {
+        return {
+            previewVisible: false,
+            previewImage: '',
+            previewTitle: '',
+            fileList: [],
+            selectedFile: null,
+            title: '',
+            location: '',
+            description: '',
+            keywordInput: '',
+            keywords: [],
+            categories: [],
+            tags: [],
+            suggestedKeywords: [],
+            current: 1,
+            exceededLimit: false, // Cờ để theo dõi trạng thái hiển thị thông báo
+        };
+    },
 
-        const current = ref(1);
-        const exceededLimit = ref(false); // Cờ để theo dõi trạng thái hiển thị thông báo
-
-        onMounted(async () => {
+    mounted() {
+        this.fetchCategoriesAndTags();
+    },
+    methods: {
+        async fetchCategoriesAndTags() {
             try {
                 const urlList = getUrlList();
                 const [categoriesResponse, tagsResponse] = await Promise.all([
                     axios.get(urlList.getCategories),
                     axios.get(urlList.getTags)
                 ]);
-                categories.value = categoriesResponse.data;
-                tags.value = tagsResponse.data;
-                suggestedKeywords.value = tags.value.slice(0, 15); // Lấy 15 tag suggestions đầu tiên
+                this.categories = categoriesResponse.data;
+                this.tags = tagsResponse.data;
+                this.suggestedKeywords = this.tags.slice(0, 15); // Lấy 15 tag suggestions đầu tiên
             } catch (error) {
                 console.error('Error fetching categories or tags:', error);
             }
-        });
-
-        const handleCancel = () => {
-            previewVisible.value = false;
-        };
-
-        const resetDetails = () => {
-            if (selectedFile.value) {
-                selectedFile.value.details = {
+        },
+        handleCancel() {
+            this.previewVisible = false;
+        },
+        resetDetails() {
+            if (this.selectedFile) {
+                this.selectedFile.details = {
                     title: '',
                     location: '',
                     description: '',
@@ -235,20 +224,18 @@ export default {
                     privacy: '0',
                     keywords: [],
                 };
-                keywordInput.value = '';
+                this.keywordInput = '';
             }
-        };
-
-        const handlePreview = async (file) => {
+        },
+        async handlePreview(file) {
             if (!file.url && !file.preview) {
-                file.preview = await getBase64(file.originFileObj);
+                file.preview = await this.getBase64(file.originFileObj);
             }
-            previewImage.value = file.url || file.preview;
-            previewVisible.value = true;
-            previewTitle.value = file.name || file.url.substring(file.url.lastIndexOf('/') + 1);
-        };
-
-        const handleChange = (info) => {
+            this.previewImage = file.url || file.preview;
+            this.previewVisible = true;
+            this.previewTitle = file.name || file.url.substring(file.url.lastIndexOf('/') + 1);
+        },
+        handleChange(info) {
             const { fileList: updatedList } = info;
 
             // Lọc các file để tránh trùng lặp và giới hạn số lượng file
@@ -258,19 +245,19 @@ export default {
             );
 
             if (uniqueFiles.length > 10) {
-                if (!exceededLimit.value) {
+                if (!this.exceededLimit) {
                     // Hiển thị thông báo lỗi
                     Modal.error({
                         title: 'Upload Limit Exceeded',
                         content: 'You can only upload up to 10 images!',
                     });
-                    exceededLimit.value = true; // Đặt cờ để thông báo chỉ hiển thị một lần
+                    this.exceededLimit = true; // Đặt cờ để thông báo chỉ hiển thị một lần
                 }
-                fileList.value = uniqueFiles.slice(0, 10); // Giới hạn tối đa 10 file
+                this.fileList = uniqueFiles.slice(0, 10); // Giới hạn tối đa 10 file
                 return; // Ngăn không cho phép thêm ảnh mới
             } else {
-                exceededLimit.value = false; // Đặt lại cờ khi số lượng file hợp lệ
-                fileList.value = uniqueFiles.map((file) => ({
+                this.exceededLimit = false; // Đặt lại cờ khi số lượng file hợp lệ
+                this.fileList = uniqueFiles.map((file) => ({
                     ...file,
                     details: file.details || {
                         title: '',
@@ -284,19 +271,18 @@ export default {
             }
 
             // Chọn file đầu tiên nếu chưa chọn file nào
-            if (!selectedFile.value && fileList.value.length > 0) {
-                selectedFile.value = fileList.value[0];
+            if (!this.selectedFile && this.fileList.length > 0) {
+                this.selectedFile = this.fileList[0];
             }
-        };
-
-        const beforeUpload = (file) => {
-            if (fileList.value.length >= 10) {
-                if (!exceededLimit.value) {
+        },
+        beforeUpload(file) {
+            if (this.fileList.length >= 10) {
+                if (!this.exceededLimit) {
                     Modal.error({
                         title: 'Upload Limit Exceeded',
                         content: 'You can only upload up to 10 images!',
                     });
-                    exceededLimit.value = true;
+                    this.exceededLimit = true;
                 }
                 return false; // Không cho phép upload nếu đã đủ 10 ảnh
             }
@@ -310,7 +296,7 @@ export default {
                 return false;
             }
 
-            const isDuplicate = fileList.value.some(
+            const isDuplicate = this.fileList.some(
                 (existingFile) => existingFile.name === file.name && existingFile.size === file.size
             );
 
@@ -323,40 +309,24 @@ export default {
             }
 
             return true;
-        };
-
-        const addKeyword = (keyword) => {
+        },
+        addKeyword(keyword) {
             if (typeof keyword !== 'string') {
-                keyword = keywordInput.value.trim();
+                keyword = this.keywordInput.trim();
             }
-            if (keyword && !selectedFile.value.details.keywords.includes(keyword)) {
-                selectedFile.value.details.keywords.push(keyword);
-                keywordInput.value = '';
+            if (keyword && !this.selectedFile.details.keywords.includes(keyword)) {
+                this.selectedFile.details.keywords.push(keyword);
+                this.keywordInput = '';
             }
-        };
-
-        const removeKeyword = (keyword) => {
-            selectedFile.value.details.keywords = selectedFile.value.details.keywords.filter((k) => k !== keyword);
-        };
-
-        const selectFile = (file) => {
-            selectedFile.value = file;
-        };
-
-        const updateDetails = (field, value) => {
-            if (selectedFile.value) {
-                selectedFile.value.details[field] = value;
-            }
-        };
-
-        const updateCharCount = (field) => {
-            if (selectedFile.value) {
-                selectedFile.value.details[field] = selectedFile.value.details[field].substring(0, 255); // Đảm bảo không vượt quá giới hạn
-            }
-        };
-
-        const uploadPhotos = async () => {
-            if (!selectedFile.value.details.category) {
+        },
+        removeKeyword(keyword) {
+            this.selectedFile.details.keywords = this.selectedFile.details.keywords.filter((k) => k !== keyword);
+        },
+        selectFile(file) {
+            this.selectedFile = file;
+        },
+        async uploadPhotos() {
+            if (!this.selectedFile.details.category) {
                 Modal.error({
                     title: 'Upload Failed',
                     content: 'Please choose a category for the photo.',
@@ -367,7 +337,7 @@ export default {
             try {
                 const urlList = getUrlList();
                 const formData = new FormData();
-                fileList.value.forEach((file, index) => {
+                this.fileList.forEach((file, index) => {
                     formData.append(`photos[${index}][title]`, file.details.title || '');
                     formData.append(`photos[${index}][description]`, file.details.description || '');
                     formData.append(`photos[${index}][location]`, file.details.location || '');
@@ -389,7 +359,7 @@ export default {
                         message: 'Success',
                         description: 'Photo added successfully, your photo will wait for processing',
                     });
-                    router.push({ name: 'MyPhoto' });
+                    this.$router.push({ name: 'MyPhoto' });
                 }
             } catch (error) {
                 Modal.error({
@@ -398,39 +368,18 @@ export default {
                 });
                 console.error('Upload error:', error);
             }
-        };
-
-        return {
-            current,
-            previewVisible,
-            previewImage,
-            previewTitle,
-            fileList,
-            selectedFile,
-            categories,
-            tags,
-            resetDetails,
-            handleCancel,
-            handlePreview,
-            handleChange,
-            beforeUpload,
-            title,
-            location,
-            description,
-            keywordInput,
-            keywords,
-            suggestedKeywords,
-            selectFile,
-            updateDetails,
-            addKeyword,
-            removeKeyword,
-            updateCharCount,
-            uploadPhotos,
-        };
+        },
+        getBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = (error) => reject(error);
+            });
+        },
     },
 };
 </script>
-
 
 
 <style scoped>

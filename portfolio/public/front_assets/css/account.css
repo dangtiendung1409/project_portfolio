@@ -65,29 +65,6 @@
     text-underline-offset: 10px;
     text-decoration-color: rgb(8, 112, 209); /* Màu sắc gạch dưới */
 }
-.trial-info {
-    margin-top: 30px;
-    padding: 290px;
-    text-align: center;
-    background-color: #fff;
-    flex-shrink: 0;
-    border-radius: 8px; /* Thêm bo góc nếu cần */
-
-}
-
-.trial-button {
-    background-color: #007bff;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-.trial-button:hover {
-    background-color: #0056b3;
-}
 /* Likes */
 .photo-gallery {
     display: grid;

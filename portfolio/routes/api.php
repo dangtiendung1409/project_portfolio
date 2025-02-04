@@ -31,6 +31,13 @@ Route::get('/categories', [HomePageController::class, 'getAllCategories']);
 Route::get('/tags', [HomePageController::class, 'getAllTags']);
 
 Route::middleware('auth:api')->group(function () {
+    // my photo user
+    Route::get('/approved-photos', [AccountUserController::class, 'getApprovedPhotos']);
+    Route::delete('/photos/{photo_id}', [AccountUserController::class, 'deletePhoto']);
+    // edit photo
+    Route::get('/photo/{id}', [AccountUserController::class, 'getPhoto']);
+    Route::put('/edit-photo/{id}', [AccountUserController::class, 'editPhoto']);
+
     // Acount user
     Route::post('/update-profile', [AccountUserController::class, 'updateProfile']);
     Route::post('/change-password', [AccountUserController::class, 'changePassword']);

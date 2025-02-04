@@ -26,6 +26,8 @@ const baseUrl = 'http://127.0.0.1:8000/api';
           // account user
           updateProfile: `${baseUrl}/update-profile`,
           changePassword: `${baseUrl}/change-password`,
+          getApprovedPhotos: `${baseUrl}/approved-photos`,
+          deletePhoto: (photo_id) => `${baseUrl}/photos/${photo_id}`,
 
           // gallery
           getGallery: `${baseUrl}/galleries`,
@@ -39,6 +41,9 @@ const baseUrl = 'http://127.0.0.1:8000/api';
           getPhotoDetail : `${baseUrl}/getPhotoDetail`,
           // add photo
           addPhoto : `${baseUrl}/add-photos`,
+          //edit photo
+          getPhoto: (photo_id) => `${baseUrl}/photo/${photo_id}`,
+          editPhoto: (photo_id) => `${baseUrl}/edit-photo/${photo_id}`,
 
           // categories and tags
           getCategories: `${baseUrl}/categories`,
