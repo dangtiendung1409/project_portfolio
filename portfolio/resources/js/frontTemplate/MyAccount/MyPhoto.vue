@@ -9,22 +9,19 @@
                             <div class="header-content">
                                 <span>My Photos</span>
                                 <p class="header-subtitle">
-                                    <span>0 photo</span>
+                                    <span>{{ photoCount }} photos</span>
                                 </p>
                             </div>
                             <div class="tabs">
-                                <span class="tab-item active">All</span>
-                                <span class="tab-item">Public</span>
-                                <span class="tab-item">Private</span>
+                                <span class="tab-item" :class="{ active: activeTab === 'all' }" @click="setActiveTab('all')">All</span>
+                                <span class="tab-item" :class="{ active: activeTab === 'public' }" @click="setActiveTab('public')">Public</span>
+                                <span class="tab-item" :class="{ active: activeTab === 'private' }" @click="setActiveTab('private')">Private</span>
                             </div>
                         </header>
                         <div class="sort-select">
-                            <div class="show-options">
-                                <label for="show-select">Show:</label>
-                                <select id="show-select">
-                                    <option value="all">All</option>
-                                    <option value="favorites">Favorites</option>
-                                </select>
+                            <div class="search-options">
+                                <input type="text" v-model="searchQuery" placeholder="Search photos..." />
+                                <button @click="searchPhotos"><i class="fa-solid fa-magnifying-glass"></i></button>
                             </div>
                             <div class="sort-options">
                                 <label for="sort-select">Sort by:</label>
@@ -36,50 +33,24 @@
                             </div>
                         </div>
                         <div class="featured-galleries mb-4">
-                            <div class="galleries-grid">
-                                <div class="photo-card create-gallery-card">
-                                    <div class="icon-container">
-                                        <i class="fa-regular fa-image"></i>
-                                    </div>
-                                    <div class="gallery-info">
-                                        <h4>Upload your photos</h4>
-                                    </div>
-                                    <div class="gallery-create">
-                                        <button class="create-gallery-button">Upload</button>
-                                    </div>
-                                </div>
-                                <div v-for="photo in photos" :key="photo.id" class="photo-card">
-                                    <router-link :to="{ name: 'PhotoDetail', params: { token: photo.photo_token } }">
-                                    <img :src="photo.image_url" :alt="photo.title" />
-                                    </router-link>
-                                    <div class="gallery-info">
-                                        <h4>{{ photo.title }}</h4>
-                                        <span>{{ photo.privacy_status == '0' ? 'Public' : 'Private' }}</span>
-                                    </div>
-                                    <button class="ellipsis-icon"
-                                            @click.stop="toggleDropdown('dropdown-' + photo.id, $event)"
-                                            :class="{'active': activeDropdown === 'dropdown-' + photo.id}"
-                                    >
-                                        <i class="fa-solid fa-ellipsis"></i>
-                                    </button>
-                                    <div v-if="activeDropdown === 'dropdown-' + photo.id" class="dropdown-content show"  @click.stop>
-                                        <ul>
-                                            <li @click="openEditPhotoModal(photo.id)">
-                                                <i class="fa-solid fa-pencil"></i> Edit
-                                            </li>
-                                            <li @click="openAddToGalleryModal(photo.id)">
-                                                <i class="fa-solid fa-plus"></i> Add to Gallery
-                                            </li>
-                                            <li @click="downloadImage(photo.image_url, photo.title)">
-                                                <i class="fa-solid fa-download"></i> Download
-                                            </li>
-                                            <li @click="showDeletePhotoConfirm(photo)">
-                                                <i class="fa-solid fa-trash-can"></i> Remove
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
+                            <div v-if="filteredPhotos.length === 0" class="trial-info">
+                                <p>You have not posted any pictures yet?</p>
+                                <p>Share your beautiful photos now!.</p>
+                                <button class="trial-button" @click="goToAddPhoto">Upload photo</button>
                             </div>
+                            <component
+                                v-else
+                                :is="activeComponent"
+                                :photos="filteredPhotos"
+                                @createPhoto="goToAddPhoto"
+                                @goToPhotoDetails="goToPhotoDetails"
+                                @editPhoto="openEditPhotoModal"
+                                @addGallery="openAddToGalleryModal"
+                                @deletePhoto="showDeletePhotoConfirm"
+                                @toggleDropdown="toggleDropdown"
+                                :activeDropdown="activeDropdown"
+                                :downloadImage="downloadImage"
+                            />
                         </div>
                     </main>
                 </div>
@@ -107,9 +78,13 @@ import { ExclamationCircleOutlined } from '@ant-design/icons-vue';
 import Layout from '../Layout.vue';
 import AddToGalleryModal from '../components/AddToGalleryModal.vue';
 import EditPhotoModal from './components/photos/EditPhotoModal.vue';
+import AllPhotos from './components/photos/AllPhotos.vue';
+import PublicPhotos from './components/photos/PublicPhotos.vue';
+import PrivatePhotos from './components/photos/PrivatePhotos.vue';
 import Sidebar from './components/Sidebar.vue';
 import getUrlList from '../../provider.js';
 import '@assets/css/account.css';
+
 export default {
     name: 'MyPhoto',
     components: {
@@ -117,6 +92,9 @@ export default {
         Sidebar,
         AddToGalleryModal,
         EditPhotoModal,
+        AllPhotos,
+        PublicPhotos,
+        PrivatePhotos,
     },
     data() {
         return {
@@ -125,12 +103,52 @@ export default {
             showAddToGallery: false,
             showEditModal: false,
             selectedPhotoId: null,
+            activeTab: 'all',
+            searchQuery: '',
         };
     },
     mounted() {
         this.fetchApprovedPhotos();
     },
+    computed: {
+        filteredPhotos() {
+            let filtered = this.photos;
+            if (this.activeTab === 'public') {
+                filtered = filtered.filter(photo => photo.privacy_status === 0); // Public photos
+            } else if (this.activeTab === 'private') {
+                filtered = filtered.filter(photo => photo.privacy_status === 1); // Private photos
+            }
+            if (this.searchQuery) {
+                const searchQueryLower = this.searchQuery.toLowerCase();
+                filtered = filtered.filter(photo =>
+                    photo.title.toLowerCase().includes(searchQueryLower) ||
+                    photo.description.toLowerCase().includes(searchQueryLower)||
+                    photo.location.toLowerCase().includes(searchQueryLower)||
+                    photo.category.category_name.toLowerCase().includes(searchQueryLower) ||
+                    photo.tags.some(tag => tag.tag_name.toLowerCase().includes(searchQueryLower))
+                );
+            }
+            return filtered;
+        },
+        activeComponent() {
+            if (this.activeTab === 'public') {
+                return 'PublicPhotos';
+            } else if (this.activeTab === 'private') {
+                return 'PrivatePhotos';
+            }
+            return 'AllPhotos';
+        },
+        photoCount() {
+            return this.filteredPhotos.length;
+        }
+    },
     methods: {
+        setActiveTab(tab) {
+            this.activeTab = tab;
+        },
+        goToPhotoDetails(photoToken) {
+            this.$router.push({ name: 'PhotoDetail', params: { token: photoToken } });
+        },
         toggleDropdown(id) {
             this.activeDropdown = this.activeDropdown === id ? null : id;
         },
@@ -200,6 +218,11 @@ export default {
         closeEditModal() {
             this.showEditModal = false; // Close modal
         },
+        goToAddPhoto() {
+            this.$router.push({ name: 'AddPhotos' });
+        },
+        searchPhotos() {
+        }
     }
 }
 </script>
@@ -214,6 +237,28 @@ main {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+}
+.trial-info {
+    margin-top: 30px;
+    padding: 290px;
+    text-align: center;
+    background-color: #fff;
+    flex-shrink: 0;
+    border-radius: 8px;
+}
+
+.trial-button {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.trial-button:hover {
+    background-color: #0056b3;
 }
 .photo-card {
     display: flex;
@@ -301,7 +346,6 @@ main {
 .ellipsis-icon.active {
     background-color: #2986f7; /* Màu nền xanh */
 }
-
 .ellipsis-icon.active i {
     color: #ffffff; /* Màu icon trắng */
 }
@@ -320,7 +364,6 @@ main {
     flex-direction: column;
     margin: 0;
 }
-
 .dropdown-content li {
     padding: 15px 15px 15px 25px;
     display: flex;
@@ -329,18 +372,42 @@ main {
     white-space: nowrap;
     z-index: 1000;
 }
-
 .dropdown-content li:hover {
     color: whitesmoke; /* Màu chữ khi hover */
     background-color: #1890ff; /* Màu nền khi hover */
 }
-
 .dropdown-content li i {
     margin-right: 8px;
 }
-
 .dropdown-content li:hover i {
     color: whitesmoke;
     background-color: #1890ff;
+}
+.sort-select {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.search-options {
+    display: flex;
+    align-items: center;
+}
+.search-options input {
+    padding: 10px;
+    width: 350px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-right: 10px;
+}
+.search-options button {
+    padding: 10px 10px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.search-options button:hover {
+    background-color: #0056b3;
 }
 </style>

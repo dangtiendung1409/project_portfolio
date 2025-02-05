@@ -19,12 +19,9 @@
                             </div>
                         </header>
                         <div class="sort-select">
-                            <div class="show-options">
-                                <label for="show-select">Show:</label>
-                                <select id="show-select">
-                                    <option value="all">All</option>
-                                    <option value="favorites">Favorites</option>
-                                </select>
+                            <div class="search-options">
+                                <input type="text" v-model="searchQuery" placeholder="Search galleries..." />
+                                <button @click="searchGalleries"><i class="fa-solid fa-magnifying-glass"></i></button>
                             </div>
                             <div class="sort-options">
                                 <label for="sort-select">Sort by:</label>
@@ -37,7 +34,14 @@
                         </div>
 
                         <div class="featured-galleries mb-4">
+                            <!-- Kiểm tra nếu không có gallery -->
+                            <div v-if="filteredGalleries.length === 0" class="trial-info">
+                                <p>You have not created any galleries yet.</p>
+                                <p>Start organizing your beautiful photos into galleries now!</p>
+                                <button class="trial-button" @click="goToAddGallery">Create Gallery</button>
+                            </div>
                             <component
+                                v-else
                                 :is="activeComponent"
                                 :galleries="filteredGalleries"
                                 @createGallery="goToAddGallery"
@@ -54,6 +58,7 @@
         </template>
     </Layout>
 </template>
+
 
 <script>
 import { Modal, notification } from 'ant-design-vue';
@@ -82,8 +87,9 @@ export default {
     data() {
         return {
             activeDropdown: null,
-            galleryToDelete: null, // Lưu trữ gallery cần xóa
-            activeTab: 'all', // Quản lý tab đang hoạt động
+            galleryToDelete: null,
+            activeTab: 'all',
+            searchQuery: '',
         };
     },
     computed: {
@@ -92,12 +98,20 @@ export default {
             return store.galleries;
         },
         filteredGalleries() {
+            let filtered = this.galleries;
             if (this.activeTab === 'public') {
-                return this.galleries.filter(gallery => gallery.visibility === 0);
+                filtered = filtered.filter(gallery => gallery.visibility === 0);
             } else if (this.activeTab === 'private') {
-                return this.galleries.filter(gallery => gallery.visibility === 1);
+                filtered = filtered.filter(gallery => gallery.visibility === 1);
             }
-            return this.galleries;
+            if (this.searchQuery) {
+                const searchQueryLower = this.searchQuery.toLowerCase();
+                filtered = filtered.filter(gallery =>
+                    gallery.galleries_name.toLowerCase().includes(searchQueryLower) ||
+                    gallery.galleries_description.toLowerCase().includes(searchQueryLower)
+                );
+            }
+            return filtered;
         },
         activeComponent() {
             if (this.activeTab === 'public') {
@@ -176,6 +190,8 @@ export default {
             } else {
                 console.log('Gallery code is missing or invalid.');
             }
+        },
+        searchGalleries() {
         }
     }
 };
@@ -191,6 +207,62 @@ main {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+}
+.sort-select {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Đảm bảo các phần tử được căn chỉnh đều */
+}
+
+.search-options {
+    display: flex;
+    align-items: center;
+    margin-right: auto; /* Đảm bảo search-options nằm bên trái */
+}
+
+.search-options input {
+    padding: 10px;
+    width: 350px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-right: 10px;
+}
+
+.search-options button {
+    padding: 10px 10px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.search-options button:hover {
+    background-color: #0056b3;
+}
+
+.trial-info {
+    margin-top: 30px;
+    padding: 290px;
+    text-align: center;
+    background-color: #fff;
+    flex-shrink: 0;
+    border-radius: 8px; /* Thêm bo góc nếu cần */
+
+}
+
+.trial-button {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.trial-button:hover {
+    background-color: #0056b3;
 }
 .create-gallery-card {
     display: flex;

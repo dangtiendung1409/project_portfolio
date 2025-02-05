@@ -31,6 +31,7 @@ class AccountUserController extends Controller
 
         $approvedPhotos = Photo::where('user_id', $user->id)
             ->where('photo_status', 'approved')
+            ->with(['category', 'tags'])
             ->get();
 
         return response()->json([
