@@ -49,7 +49,7 @@
                     <router-link :to="'/login'" class="btn-custom login-btn">Log in</router-link>
                     <router-link :to="'/register'" class="btn-custom signup-btn">Sign up</router-link>
                 </div>
-                <i v-if="isLoggedIn" class="fa-regular fa-envelope" style="font-size: 24px;"></i>
+                <i v-if="isLoggedIn" class="fa-regular fa-user" style="font-size: 24px;"></i>
                 <div class="notification-wrapper">
                     <i v-if="isLoggedIn" class="fa-regular fa-bell" style="font-size: 24px;" @click="toggleDropdown('notificationDropdown')">
                         <!-- Badge for unread notifications -->

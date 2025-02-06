@@ -442,14 +442,15 @@ class AccountUserController extends Controller
             'username' => 'sometimes|string|max:255',
             'email' => 'sometimes|email|max:255|unique:users,email,' . $user->id,
             'bio' => 'sometimes|string|nullable',
-            'profile_picture' => 'sometimes|file|mimes:jpeg,png|max:1024', // Chỉ file JPEG/PNG < 1MB
+            'profile_picture' => 'sometimes|file|mimes:jpeg,png|max:1024', // JPEG/PNG < 1MB
+            'cover_photo' => 'sometimes|file|mimes:jpeg,png|max:2048', // Cover có thể lớn hơn (2MB)
         ]);
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        // Cập nhật thông tin user chỉ khi có thay đổi
+        // Cập nhật thông tin user nếu có thay đổi
         $updated = false;
 
         if ($request->filled('username') && $request->username !== $user->username) {
@@ -467,21 +468,31 @@ class AccountUserController extends Controller
             $updated = true;
         }
 
-        // Xử lý upload ảnh vào public/images/avatars
+        // Xử lý upload ảnh đại diện (profile_picture)
         if ($request->hasFile('profile_picture')) {
             $file = $request->file('profile_picture');
-            $filename = time() . '_' . $file->getClientOriginalName();
-
-            // Lưu ảnh vào public/images/avatars
+            $filename = time() . '_profile_' . $file->getClientOriginalName();
             $file->move(public_path('images/avatars'), $filename);
 
-            // Xóa ảnh cũ nếu có
             if ($user->profile_picture && file_exists(public_path($user->profile_picture))) {
                 unlink(public_path($user->profile_picture));
             }
 
-            // Cập nhật đường dẫn ảnh vào database
             $user->profile_picture = 'images/avatars/' . $filename;
+            $updated = true;
+        }
+
+        // Xử lý upload ảnh bìa (cover_photo)
+        if ($request->hasFile('cover_photo')) {
+            $file = $request->file('cover_photo');
+            $filename = time() . '_cover_' . $file->getClientOriginalName();
+            $file->move(public_path('images/covers'), $filename);
+
+            if ($user->cover_photo && file_exists(public_path($user->cover_photo))) {
+                unlink(public_path($user->cover_photo));
+            }
+
+            $user->cover_photo = 'images/covers/' . $filename;
             $updated = true;
         }
 

@@ -194,6 +194,31 @@ select:focus {
     border-radius: 50%;
     margin-bottom: 10px;
 }
+.avatar-container {
+    position: relative;
+    display: inline-block;
+}
+
+.edit-avatar-btn {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: rgb(8, 112, 209);
+    bottom: 35px;
+    right: -20px;
+    color: white;
+    border: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.edit-avatar-btn i {
+    font-size: 14px;
+}
+
 
 .user-details {
     display: flex;
