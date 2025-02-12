@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
-use Illuminate\Support\Str;
 class AuthUserController extends Controller
 {
     public function login(Request $request)
@@ -38,20 +37,19 @@ class AuthUserController extends Controller
     public function register(Request $request)
     {
         $request->validate([
-            'fullName' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
+            'username' => 'required|string|max:50|unique:users',
+            'email' => 'required|string|email|max:150|unique:users',
             'password' => 'required|string|min:3|confirmed',
         ]);
 
         $user = User::create([
-            'username' => $request->input('fullName'),
+            'username' => $request->input('username'),
             'email' => $request->input('email'),
             'password' => bcrypt($request->input('password')),
             'role_id' => 2,
             'is_active' => 1,
             'violation_count' => 0,
             'join_date' => now(),
-            'user_token' => Str::uuid()->toString(),
         ]);
 
         return response()->json(['message' => 'Registration successful'], 201);

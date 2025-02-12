@@ -13,7 +13,7 @@
             <div class="content">
                 <div class="cover-image">
                     <div class="image-preview">
-                        <img :src="tempUser.cover_photo || '/front_assets/img/img_5.jpg'" alt="Cover Preview" />
+                        <img :src="getFullImageUrl(tempUser.cover_photo, 'blackImage.jpeg')" alt="Cover Preview" />
                     </div>
                     <label class="edit-label" @click="selectCoverImage">
                         <i class="fa-solid fa-pencil-alt"></i>
@@ -22,7 +22,7 @@
 
                 <div class="profile-image" style="margin-top: -70px;">
                     <div class="image-preview">
-                        <img :src="tempUser.profile_picture || '/front_assets/img/img_5.jpg'" alt="Profile Preview" />
+                        <img :src="getFullImageUrl(tempUser.profile_picture, 'imageUserDefault.png')" alt="Profile Preview" />
                     </div>
                     <label style="margin-right: 150px; margin-top: 17px" class="edit-label" @click="selectProfileImage">
                         <i class="fa-solid fa-pencil-alt"></i>
@@ -32,19 +32,28 @@
                 <div class="form-group">
                     <label for="username">Username:</label>
                     <input type="text" id="username" v-model="tempUser.username" placeholder="Enter your username" maxlength="50" />
-                    <small class="char-count">{{ tempUser.username.length }}/50</small>
+                    <small class="char-count">{{ tempUser.username?.length ?? 0 }}/50</small>
+                </div>
+                <div class="form-group">
+                    <label for="name">Name:</label>
+                    <input type="text" id="name" v-model="tempUser.name" placeholder="Enter your name" maxlength="50" />
+                    <small class="char-count">{{ tempUser.name?.length ?? 0 }}/50</small>
                 </div>
 
                 <div class="form-group">
                     <label for="email">Email:</label>
                     <input type="email" id="email" v-model="tempUser.email" placeholder="Enter your email" maxlength="150" />
-                    <small class="char-count">{{ tempUser.email.length }}/150</small>
+                    <small class="char-count">{{ tempUser.email?.length ?? 0 }}/150</small>
                 </div>
-
+                <div class="form-group">
+                    <label for="location">Location:</label>
+                    <input type="text" id="location" v-model="tempUser.location" placeholder="Enter your location" maxlength="255" />
+                    <small class="char-count">{{ tempUser.location?.length ?? 0 }}/255</small>
+                </div>
                 <div class="form-group">
                     <label for="bio">Bio:</label>
-                    <textarea id="bio" v-model="tempUser.bio" placeholder="Tell us about yourself" maxlength="255"></textarea>
-                    <small class="char-count">{{ tempUser.bio.length }}/255</small>
+                    <textarea id="bio" v-model="tempUser.bio" placeholder="Tell us about yourself" maxlength="500"></textarea>
+                    <small class="char-count">{{ tempUser.bio?.length ?? 0 }}/500</small>
                 </div>
             </div>
 
@@ -85,8 +94,19 @@ export default {
         };
     },
     methods: {
+        getFullImageUrl(imagePath, defaultImage) {
+            if (!imagePath) {
+                return `/images/${defaultImage}`;
+            }
+            if (imagePath.startsWith('blob:') || imagePath.startsWith('http')) {
+                return imagePath; // Giữ nguyên blob URL hoặc URL đầy đủ
+            }
+            return `http://127.0.0.1:8000${imagePath.startsWith('/') ? imagePath : '/' + imagePath}`;
+        },
+
         closeModal() {
             this.$emit("close");
+            this.$emit("update");
         },
         selectCoverImage() {
             this.$refs.coverImageInput.click();
@@ -117,10 +137,27 @@ export default {
                 });
                 this.closeModal();
             } catch (error) {
-                notification.error({
-                    message: 'Error',
-                    description: 'Failed to update profile!',
-                });
+                // Kiểm tra lỗi trả về từ server
+                if (error.response && error.response.status === 422) {
+                    const errors = error.response.data.errors;
+                    if (errors.username) {
+                        notification.error({
+                            message: 'Username Error',
+                            description: errors.username[0], // Thông báo lỗi đầu tiên cho username
+                        });
+                    }
+                    if (errors.email) {
+                        notification.error({
+                            message: 'Email Error',
+                            description: errors.email[0], // Thông báo lỗi đầu tiên cho email
+                        });
+                    }
+                } else {
+                    notification.error({
+                        message: 'Error',
+                        description: 'Failed to update profile!',
+                    });
+                }
             }
         },
     },

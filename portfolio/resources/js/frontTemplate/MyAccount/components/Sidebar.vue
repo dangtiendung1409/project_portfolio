@@ -16,7 +16,7 @@
             </div>
 
             <div class="user-details">
-                <h2 class="username">{{ user.username }}</h2>
+                <h2 class="username">{{ user.name ? user.name : user.username }}</h2>
             </div>
         </div>
         <ul>

@@ -31,11 +31,7 @@
                             <i class="fa-solid fa-camera"></i>
                             <span>My Photo</span>
                         </router-link>
-                        <router-link :to="'/MyPhoto'">
-                            <i class="fa-solid fa-user-circle"></i>
-                            <span>My Profile</span>
-                        </router-link>
-                        <router-link :to="'/MyPhoto'">
+                        <router-link :to="'/myGallery'">
                             <i class="fa-solid fa-images"></i>
                             <span>My Gallery</span>
                         </router-link>
@@ -49,7 +45,9 @@
                     <router-link :to="'/login'" class="btn-custom login-btn">Log in</router-link>
                     <router-link :to="'/register'" class="btn-custom signup-btn">Sign up</router-link>
                 </div>
-                <i v-if="isLoggedIn" class="fa-regular fa-user" style="font-size: 24px;"></i>
+                <router-link v-if="userName" :to="{ name: 'MyProfile', params: { username: userName } }">
+                    <i v-if="isLoggedIn" class="fa-regular fa-user" style="font-size: 24px; color: black"></i>
+                </router-link>
                 <div class="notification-wrapper">
                     <i v-if="isLoggedIn" class="fa-regular fa-bell" style="font-size: 24px;" @click="toggleDropdown('notificationDropdown')">
                         <!-- Badge for unread notifications -->
@@ -128,6 +126,9 @@ export default {
         ...mapState(useNotificationStore, ['notifications', 'unreadCount']),
         userProfilePicture() {
             return this.user ? this.user.profile_picture : '';
+        },
+        userName() {
+            return this.user ? this.user.username : '';
         },
         displayedNotifications() {
             // Hiển thị 7 thông báo đầu tiên hoặc tất cả thông báo nếu showAll là true

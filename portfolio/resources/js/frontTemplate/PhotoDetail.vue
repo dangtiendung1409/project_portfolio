@@ -169,7 +169,7 @@
                                          alt="User Avatar" class="user-avatar-details" />
                                     <div class="user-info-follow">
                                         <h3 class="user-name">{{ photoDetail.user.username }}</h3>
-                                        <p class="user-bio">{{ photoDetail.user.bio }}</p>
+                                        <p class="user-bio">{{ photoDetail.user.location }}</p>
                                         <button class="btn-follow">Follow</button>
                                     </div>
                                 </div>

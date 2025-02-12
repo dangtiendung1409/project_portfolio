@@ -1,4 +1,3 @@
-
 import { defineStore } from 'pinia';
 import axios from 'axios';
 import getUrlList from '../provider.js';
@@ -7,10 +6,12 @@ export const useUserStore = defineStore('user', {
     state: () => ({
         user: {
             username: '',
+            name: '',
             email: '',
+            location: '',
             bio: '',
             profile_picture: null,
-            cover_photo: null, // Thêm ảnh bìa
+            cover_photo: null,
         },
     }),
     actions: {
@@ -31,8 +32,10 @@ export const useUserStore = defineStore('user', {
         async updateUserProfile(userData, profileFile, coverFile) {
             const formData = new FormData();
             formData.append('username', userData.username);
+            formData.append('name', userData.name || ''); // Cho phép giá trị null
             formData.append('email', userData.email);
-            formData.append('bio', userData.bio);
+            formData.append('location', userData.location || '');
+            formData.append('bio', userData.bio || '');
 
             if (profileFile) {
                 formData.append('profile_picture', profileFile);
@@ -58,4 +61,3 @@ export const useUserStore = defineStore('user', {
         },
     },
 });
-

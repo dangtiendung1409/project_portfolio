@@ -84,9 +84,9 @@
               ],
               "parameters": [
                   {
-                      "name": "fullName",
+                      "name": "userName",
                       "in": "formData",
-                      "description": "Full name of the user",
+                      "description": "User name of the user",
                       "required": true,
                       "type": "string"
                   },
@@ -311,6 +311,238 @@
                   },
                   "404": {
                       "description": "Photo detail not found"
+                  },
+                  "500": {
+                      "description": "Internal server error"
+                  }
+              }
+          }
+      },
+      "/user-by-username/{username}": {
+          "get": {
+              "tags": [
+                  "Profile user"
+              ],
+              "summary": "Get User by Token",
+              "operationId": "getUserByUserName",
+              "produces": [
+                  "application/json"
+              ],
+              "parameters": [
+                  {
+                      "name": "username",
+                      "in": "path",
+                      "description": "Unique username representing the user",
+                      "required": true,
+                      "type": "string"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "User details retrieved successfully",
+                      "schema": {
+                          "type": "object",
+                          "properties": {
+                              "id": {
+                                  "type": "integer"
+                              },
+                              "username": {
+                                  "type": "string"
+                              },
+                              "email": {
+                                  "type": "string"
+                              },
+                              "location": {
+                                  "type": "string"
+                              },
+                              "profile_picture": {
+                                  "type": "string"
+                              },
+                              "cover_photo": {
+                                  "type": "string"
+                              },
+                              "user_token": {
+                                  "type": "string"
+                              },
+                              "bio": {
+                                  "type": "string"
+                              },
+                              "role_id": {
+                                  "type": "integer"
+                              },
+                              "is_active": {
+                                  "type": "boolean"
+                              },
+                              "violation_count": {
+                                  "type": "integer"
+                              }
+                          }
+                      }
+                  },
+                  "404": {
+                      "description": "User not found"
+                  },
+                  "500": {
+                      "description": "Internal server error"
+                  }
+              }
+          }
+      },
+      "/photos-by-username/{username}": {
+          "get": {
+              "tags": [
+                  "Profile user"
+              ],
+              "summary": "Get Photos by Username",
+              "operationId": "getPhotosByUserName",
+              "produces": [
+                  "application/json"
+              ],
+              "parameters": [
+                  {
+                      "name": "username",
+                      "in": "path",
+                      "description": "Unique username representing the user",
+                      "required": true,
+                      "type": "string"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "Photos retrieved successfully",
+                      "schema": {
+                          "type": "array",
+                          "items": {
+                              "type": "object",
+                              "properties": {
+                                  "id": {
+                                      "type": "integer"
+                                  },
+                                  "title": {
+                                      "type": "string"
+                                  },
+                                  "description": {
+                                      "type": "string"
+                                  },
+                                  "upload_date": {
+                                      "type": "string",
+                                      "format": "date-time"
+                                  },
+                                  "location": {
+                                      "type": "string"
+                                  },
+                                  "image_url": {
+                                      "type": "string"
+                                  },
+                                  "photo_status": {
+                                      "type": "string"
+                                  },
+                                  "user_id": {
+                                      "type": "integer"
+                                  },
+                                  "category_id": {
+                                      "type": "integer"
+                                  },
+                                  "photo_token": {
+                                      "type": "string"
+                                  },
+                                  "privacy_status": {
+                                      "type": "integer"
+                                  }
+                              }
+                          }
+                      }
+                  },
+                  "404": {
+                      "description": "User not found or no photos available"
+                  },
+                  "500": {
+                      "description": "Internal server error"
+                  }
+              }
+          }
+      },
+      "/galleries-by-username/{username}": {
+          "get": {
+              "tags": [
+                  "Profile user"
+              ],
+              "summary": "Get Galleries by Username",
+              "operationId": "getGalleriesByUserName",
+              "produces": [
+                  "application/json"
+              ],
+              "parameters": [
+                  {
+                      "name": "username",
+                      "in": "path",
+                      "description": "Unique username representing the user",
+                      "required": true,
+                      "type": "string"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "Galleries retrieved successfully",
+                      "schema": {
+                          "type": "array",
+                          "items": {
+                              "type": "object",
+                              "properties": {
+                                  "id": {
+                                      "type": "integer"
+                                  },
+                                  "title": {
+                                      "type": "string"
+                                  },
+                                  "description": {
+                                      "type": "string"
+                                  },
+                                  "visibility": {
+                                      "type": "integer"
+                                  },
+                                  "user_id": {
+                                      "type": "integer"
+                                  },
+                                  "created_at": {
+                                      "type": "string",
+                                      "format": "date-time"
+                                  },
+                                  "updated_at": {
+                                      "type": "string",
+                                      "format": "date-time"
+                                  },
+                                  "photo": {
+                                      "type": "array",
+                                      "items": {
+                                          "type": "object",
+                                          "properties": {
+                                              "id": {
+                                                  "type": "integer"
+                                              },
+                                              "gallery_id": {
+                                                  "type": "integer"
+                                              },
+                                              "url": {
+                                                  "type": "string"
+                                              },
+                                              "created_at": {
+                                                  "type": "string",
+                                                  "format": "date-time"
+                                              },
+                                              "updated_at": {
+                                                  "type": "string",
+                                                  "format": "date-time"
+                                              }
+                                          }
+                                      }
+                                  }
+                              }
+                          }
+                      }
+                  },
+                  "404": {
+                      "description": "User not found or no galleries available"
                   },
                   "500": {
                       "description": "Internal server error"

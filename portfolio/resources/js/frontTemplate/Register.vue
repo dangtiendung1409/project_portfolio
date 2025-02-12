@@ -28,12 +28,12 @@
 
                     <form @submit.prevent="handleRegister">
                         <div class="input-group">
-                            <label for="fullName">Full Name:</label>
+                            <label for="username">User Name:</label>
                             <div class="input-wrapper">
                                 <i class="fas fa-user input-icon"></i>
-                                <input type="text" id="fullName" v-model="fullName" required>
+                                <input type="text" id="username" v-model="username" required>
                             </div>
-                            <span v-if="errors.fullName && errors.fullName.length" style="color:red">{{ errors.fullName[0] }}</span>
+                            <span v-if="errors.username && errors.username.length" style="color:red">{{ errors.username[0] }}</span>
                         </div>
 
                         <div class="input-group">
@@ -94,12 +94,12 @@ export default {
     },
     data() {
         return {
-            fullName: '',
+            username: '',
             email: '',
             password: '',
             password_confirmation: '',
             errors: {
-                fullName: [],
+                username: [],
                 email: [],
                 password: [],
                 password_confirmation: []
@@ -110,7 +110,7 @@ export default {
         async handleRegister() {
             try {
                 const response = await axios.post(getUrlList().register, {
-                    fullName: this.fullName,
+                    username: this.username,
                     email: this.email,
                     password: this.password,
                     password_confirmation: this.password_confirmation,

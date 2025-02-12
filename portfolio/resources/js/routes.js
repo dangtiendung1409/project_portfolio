@@ -11,12 +11,14 @@ import GalleryDetails from "./frontTemplate/MyAccount/GalleryDetails.vue";
 import AddGallery from "./frontTemplate/MyAccount/AddGallery.vue";
 import EditGallery from "./frontTemplate/MyAccount/EditGallery.vue";
 import PhotoDetail from "./frontTemplate/PhotoDetail.vue";
+import MyProfile from "./frontTemplate/MyProfile.vue";
 import Login from "./frontTemplate/Login.vue";
 import Register from "./frontTemplate/Register.vue";
 import jwt_decode from 'jwt-decode';
 const routes = [
     { name: 'Index', path: '/', component: Index },
     { name: 'PhotoDetail', path: '/photoDetail/:token', component: PhotoDetail },
+    { name: 'MyProfile', path: '/myProfile/:username', component: MyProfile },
     { name: 'MyPhoto', path: '/myPhotos', component: MyPhoto, meta: { requiresAuth: true } },
     { name: 'AddPhotos', path: '/addPhotos', component: AddPhotos, meta: { requiresAuth: true } },
 

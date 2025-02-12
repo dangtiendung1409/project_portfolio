@@ -7,7 +7,9 @@
                 </router-link>
                 <div class="work-info">
                     <div class="user-info2">
+                        <router-link :to="{ name: 'MyProfile', params: { username: item.user.username } }">
                         <img class="user-image2" :src="item.user.profile_picture || '/images/userDefault.png'" style="width: 30px; height: 30px">
+                        </router-link>
                         <span class="user-name2">{{ item.user.username }}</span>
                         <span class="icon-heart2" @click="toggleLike(item)">
                            <i :class="['fas', 'fa-heart', { 'liked': item.liked }]"></i>

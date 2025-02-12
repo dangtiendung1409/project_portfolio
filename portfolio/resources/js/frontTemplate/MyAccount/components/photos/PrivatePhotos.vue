@@ -16,7 +16,7 @@
                 <img :src="photo.image_url" :alt="photo.title" />
             </router-link>
             <div class="gallery-info">
-                <h4>{{ photo.title }}</h4>
+                <h4>{{ truncateTitle(photo.title) }}</h4>
                 <span>{{ photo.privacy_status == '0' ? 'Public' : 'Private' }}</span>
             </div>
             <button class="ellipsis-icon"
@@ -62,6 +62,18 @@ export default {
             required: true
         }
     },
+    methods: {
+        truncateTitle(title) {
+            const maxLength = 20; // Adjust the max length as needed
+            if (!title) {
+                return 'Untitled';
+            }
+            if (title.length > maxLength) {
+                return title.substring(0, maxLength) + '...';
+            }
+            return title;
+        }
+    }
 };
 </script>
 <style scoped>

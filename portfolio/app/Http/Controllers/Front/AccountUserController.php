@@ -439,9 +439,11 @@ class AccountUserController extends Controller
 
         // Validate dữ liệu
         $validator = Validator::make($request->all(), [
-            'username' => 'sometimes|string|max:255',
-            'email' => 'sometimes|email|max:255|unique:users,email,' . $user->id,
-            'bio' => 'sometimes|string|nullable',
+            'username' => 'required|string|max:50|unique:users,username,' . $user->id,
+            'name' => 'sometimes|string|max:50|nullable',
+            'email' => 'required|email|max:255|unique:users,email,' . $user->id,
+            'bio' => 'sometimes|string|max:500|nullable',
+            'location' => 'sometimes|string|max:255|nullable',
             'profile_picture' => 'sometimes|file|mimes:jpeg,png|max:1024', // JPEG/PNG < 1MB
             'cover_photo' => 'sometimes|file|mimes:jpeg,png|max:2048', // Cover có thể lớn hơn (2MB)
         ]);
@@ -453,18 +455,26 @@ class AccountUserController extends Controller
         // Cập nhật thông tin user nếu có thay đổi
         $updated = false;
 
-        if ($request->filled('username') && $request->username !== $user->username) {
+        if ($request->has('username') && $request->username !== $user->username) {
             $user->username = $request->username;
             $updated = true;
         }
+        if ($request->has('name')) {
+            $user->name = $request->name;
+            $updated = true;
+        }
 
-        if ($request->filled('email') && $request->email !== $user->email) {
+        if ($request->has('email') && $request->email !== $user->email) {
             $user->email = $request->email;
             $updated = true;
         }
 
-        if ($request->filled('bio') && $request->bio !== $user->bio) {
+        if ($request->has('bio') && $request->bio !== $user->bio) {
             $user->bio = $request->bio;
+            $updated = true;
+        }
+        if ($request->has('location') && $request->location !== $user->location) {
+            $user->location = $request->location;
             $updated = true;
         }
 
