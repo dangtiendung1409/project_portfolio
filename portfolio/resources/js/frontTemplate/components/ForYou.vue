@@ -157,6 +157,7 @@ export default {
     display: block;
     position: relative;
 }
+
 .user-info2 {
     display: flex;
     align-items: center;

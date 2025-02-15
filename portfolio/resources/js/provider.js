@@ -52,7 +52,10 @@ const baseUrl = 'http://127.0.0.1:8000/api';
           // profile user
           getUserByUserName: (username) => `${baseUrl}/user-by-username/${username}`,
           getPhotosByUserName: (username) => `${baseUrl}/photos-by-username/${username}`,
-          getGalleriesByUserName: (username) => `${baseUrl}/galleries-by-username/${username}`
+          getGalleriesByUserName: (username) => `${baseUrl}/galleries-by-username/${username}`,
+
+          // category
+          getPhotosByCategorySlugs: (slugs) => `${baseUrl}/categories/photos?slugs=${slugs}`,
       }
 }
 export default getUrlList;

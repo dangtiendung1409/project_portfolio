@@ -6,7 +6,7 @@
                 <router-link :to="'/'" class="nav-link" style="color: #007bff">Discover</router-link>
                 <a href="#" class="nav-link">About us</a>
                 <a href="#" class="nav-link">Blog</a>
-                <a href="#" class="nav-link">Category</a>
+                <router-link :to="{ name: 'Category' }" class="nav-link">Category</router-link>
             </div>
         </div>
         <div class="navbar-right">
@@ -203,6 +203,17 @@ export default {
 </script>
 
 <style scoped>
+.navbar {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+main {
+    margin-top: 60px;
+}
 .user-dropdown img {
     width: 30px;
     height: 30px;

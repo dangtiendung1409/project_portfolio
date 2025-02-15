@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\AuthUserController;
 use App\Http\Controllers\Front\AccountUserController;
 use App\Http\Controllers\Front\PhotoDetailController;
 use App\Http\Controllers\Front\ProfileController;
+use App\Http\Controllers\Front\CategoryController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -35,6 +36,9 @@ Route::get('/tags', [HomePageController::class, 'getAllTags']);
 Route::get('/user-by-username/{username}', [ProfileController::class, 'getUserByUserName']);
 Route::get('/photos-by-username/{username}', [ProfileController::class, 'getPhotosByUserName']);
 Route::get('/galleries-by-username/{username}', [ProfileController::class, 'getGalleriesByUserName']);
+
+//Category
+Route::get('/categories/photos', [CategoryController::class, 'getPhotosByCategorySlugs']);
 
 Route::middleware('auth:api')->group(function () {
     // my photo user

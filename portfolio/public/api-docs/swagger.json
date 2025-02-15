@@ -1477,6 +1477,111 @@
                   }
               }
           }
+      },
+      "/categories/photos": {
+          "get": {
+              "tags": [
+                  "Category"
+              ],
+              "summary": "Get Photos by Category Slugs",
+              "operationId": "getPhotosByCategorySlugs",
+              "produces": [
+                  "application/json"
+              ],
+              "parameters": [
+                  {
+                      "name": "slugs",
+                      "in": "query",
+                      "description": "Comma-separated list of category slugs",
+                      "required": true,
+                      "type": "string"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "Photos retrieved successfully",
+                      "schema": {
+                          "type": "array",
+                          "items": {
+                              "type": "object",
+                              "properties": {
+                                  "id": {
+                                      "type": "integer"
+                                  },
+                                  "title": {
+                                      "type": "string"
+                                  },
+                                  "description": {
+                                      "type": "string"
+                                  },
+                                  "upload_date": {
+                                      "type": "string",
+                                      "format": "date-time"
+                                  },
+                                  "location": {
+                                      "type": "string"
+                                  },
+                                  "image_url": {
+                                      "type": "string"
+                                  },
+                                  "photo_status": {
+                                      "type": "string"
+                                  },
+                                  "user_id": {
+                                      "type": "integer"
+                                  },
+                                  "category_id": {
+                                      "type": "integer"
+                                  },
+                                  "photo_token": {
+                                      "type": "string"
+                                  },
+                                  "privacy_status": {
+                                      "type": "string"
+                                  },
+                                  "tags": {
+                                      "type": "array",
+                                      "items": {
+                                          "type": "object",
+                                          "properties": {
+                                              "id": {
+                                                  "type": "integer"
+                                              },
+                                              "name": {
+                                                  "type": "string"
+                                              }
+                                          }
+                                      }
+                                  },
+                                  "user": {
+                                      "type": "object",
+                                      "properties": {
+                                          "id": {
+                                              "type": "integer"
+                                          },
+                                          "username": {
+                                              "type": "string"
+                                          },
+                                          "profile_picture": {
+                                              "type": "string"
+                                          },
+                                          "bio": {
+                                              "type": "string"
+                                          }
+                                      }
+                                  }
+                              }
+                          }
+                      }
+                  },
+                  "404": {
+                      "description": "Categories not found"
+                  },
+                  "500": {
+                      "description": "Internal server error"
+                  }
+              }
+          }
       }
 },
 

@@ -217,30 +217,9 @@
                                         <strong>{{ photoDetail.category.category_name }}</strong>
                                     </h5>
                                     <div class="categories-wrapper">
-                                        <span class="category-tag">Horizontal</span>
-                                        <span class="category-tag">Photography</span>
-                                        <span class="category-tag">Outdoors</span>
-                                        <span class="category-tag">Sea</span>
-                                        <span class="category-tag">Rock - Object</span>
-                                        <span class="category-tag">Nature</span>
-                                        <span class="category-tag">Sky</span>
-                                        <span class="category-tag">Beauty In Nature</span>
-                                        <span class="category-tag">Scenics - Nature</span>
-                                        <span class="category-tag">Water</span>
-                                        <span class="category-tag">Beach</span>
-                                        <span class="category-tag">One Person</span>
-                                        <span class="category-tag">Coastline</span>
-                                        <span class="category-tag">Sunset</span>
-                                        <span class="category-tag">Tranquil Scene</span>
-                                        <span class="category-tag">Utakleiv beach</span>
-                                        <span class="category-tag">Lofoten</span>
-                                        <span class="category-tag">Norway</span>
-                                        <span class="category-tag">Nordic</span>
-                                        <span class="category-tag">Canon</span>
-                                        <span class="category-tag">travel</span>
-                                        <span class="category-tag">landscapes</span>
-                                        <span class="category-tag">sunset</span>
-                                        <span class="category-tag">rocks</span>
+                                        <router-link v-for="category in categories" :key="category.id" :to="{ name: 'DetailsCategory', query: { slugs: category.slug } }" class="category-tag">
+                                            {{ category.category_name }}
+                                        </router-link>
                                     </div>
                                 </div>
                             </div>
@@ -274,21 +253,22 @@ export default {
         return {
             isHovered: false,
             photoDetail: {
-                    title: "",
-                    description: "",
-                    location: "",
-                    upload_date:"",
-                    image_url: "",
-                    liked: false ,
-                    user: {
-                        username: "",
-                        profile_picture: "",
-                        bio: "",
-                    },
-                    category: {
-                        category_name: "",
-                    },
+                title: "",
+                description: "",
+                location: "",
+                upload_date:"",
+                image_url: "",
+                liked: false,
+                user: {
+                    username: "",
+                    profile_picture: "",
+                    bio: "",
+                },
+                category: {
+                    category_name: "",
+                },
             },
+            categories: [],
             showAddToGallery: false,
             selectedPhotoId: null,
         };
@@ -301,6 +281,12 @@ export default {
             },
         },
     },
+    async mounted() {
+        const likeStore = useLikeStore();
+        await likeStore.fetchLikedPhotos();
+        this.updateLikedState();
+        this.fetchCategories();
+    },
     methods: {
         async fetchPhotoDetail(token) {
             try {
@@ -309,6 +295,15 @@ export default {
                 this.updateLikedState(); // Cập nhật trạng thái liked sau khi lấy chi tiết ảnh
             } catch (error) {
                 console.error("Error fetching photo details:", error);
+            }
+        },
+        async fetchCategories() {
+            try {
+                const response = await axios.get(getUrlList().getCategories);
+                console.log("API response:", response.data);
+                this.categories = response.data;
+            } catch (error) {
+                console.error("Error fetching categories:", error);
             }
         },
         async checkLogin() {
@@ -412,11 +407,6 @@ export default {
         closeAddToGalleryModal() {
             this.showAddToGallery = false; // Đóng modal
         },
-    },
-    async mounted() {
-        const likeStore = useLikeStore();
-        await likeStore.fetchLikedPhotos(); // Lấy danh sách các ảnh đã được like từ store
-        this.updateLikedState();
     },
 };
 </script>
