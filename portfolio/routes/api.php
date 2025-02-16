@@ -8,6 +8,7 @@ use App\Http\Controllers\Front\AccountUserController;
 use App\Http\Controllers\Front\PhotoDetailController;
 use App\Http\Controllers\Front\ProfileController;
 use App\Http\Controllers\Front\CategoryController;
+use App\Http\Controllers\Front\SearchController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -39,6 +40,9 @@ Route::get('/galleries-by-username/{username}', [ProfileController::class, 'getG
 
 //Category
 Route::get('/categories/photos', [CategoryController::class, 'getPhotosByCategorySlugs']);
+
+// Search photos
+Route::get('/search-photos', [SearchController::class, 'searchPhotos']);
 
 Route::middleware('auth:api')->group(function () {
     // my photo user

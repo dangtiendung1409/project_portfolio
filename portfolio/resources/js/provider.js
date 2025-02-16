@@ -56,6 +56,9 @@ const baseUrl = 'http://127.0.0.1:8000/api';
 
           // category
           getPhotosByCategorySlugs: (slugs) => `${baseUrl}/categories/photos?slugs=${slugs}`,
+
+          // search photos
+          searchPhotos: `${baseUrl}/search-photos`,
       }
 }
 export default getUrlList;

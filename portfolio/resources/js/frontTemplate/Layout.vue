@@ -11,8 +11,8 @@
         </div>
         <div class="navbar-right">
             <div class="search-bar">
-                <input type="text" placeholder="Search powered by AI">
-                <i class="fas fa-search search-icon"></i>
+                <input type="text" placeholder="Search powered by AI" v-model="searchQuery" @keyup.enter="searchPhotos">
+                <i class="fas fa-search search-icon" @click="searchPhotos"></i>
             </div>
             <div class="icon-container">
                 <div v-if="isLoggedIn" class="user-dropdown">
@@ -118,6 +118,7 @@ export default {
     data() {
         return {
             showAll: false,
+            searchQuery: '',
         };
     },
     computed: {
@@ -197,6 +198,9 @@ export default {
         },
         goToAddPhotos() {
             this.$router.push({ name: 'AddPhotos' });
+        },
+        searchPhotos() {
+            this.$router.push({ name: 'Search', query: { q: this.searchQuery } });
         },
     },
 };
