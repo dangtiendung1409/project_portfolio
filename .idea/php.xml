@@ -117,6 +117,8 @@
       <path value="$PROJECT_DIR$/portfolio/vendor/tymon/jwt-auth" />
       <path value="$PROJECT_DIR$/portfolio/vendor/lcobucci/clock" />
       <path value="$PROJECT_DIR$/portfolio/vendor/lcobucci/jwt" />
+      <path value="$PROJECT_DIR$/portfolio/vendor/predis/predis" />
+      <path value="$PROJECT_DIR$/portfolio/vendor/firebase/php-jwt" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.1">

@@ -123,6 +123,8 @@
       <excludeFolder url="file://$MODULE_DIR$/portfolio/vendor/tymon/jwt-auth" />
       <excludeFolder url="file://$MODULE_DIR$/portfolio/vendor/lcobucci/clock" />
       <excludeFolder url="file://$MODULE_DIR$/portfolio/vendor/lcobucci/jwt" />
+      <excludeFolder url="file://$MODULE_DIR$/portfolio/vendor/predis/predis" />
+      <excludeFolder url="file://$MODULE_DIR$/portfolio/vendor/firebase/php-jwt" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

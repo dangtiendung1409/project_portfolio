@@ -156,7 +156,7 @@
                                             400 <span>Likes</span>
                                             <span class="arrow">&gt;</span>
                                         </li>
-                                        <li><i class="fa-regular fa-eye"></i> 27.5K <span>Impressions</span> </li>
+                                        <li><i class="fa-regular fa-eye"></i> {{ formattedViews }} <span>Impressions</span></li>
                                         <li>
                                             <i class="fa-solid fa-arrow-up"></i> {{ getTimeAgo(photoDetail.upload_date) }}
                                         </li>
@@ -257,6 +257,7 @@ export default {
                 description: "",
                 location: "",
                 upload_date:"",
+                total_views:"",
                 image_url: "",
                 liked: false,
                 user: {
@@ -281,6 +282,17 @@ export default {
             },
         },
     },
+    computed: {
+        formattedViews() {
+            const views = this.photoDetail.total_views;
+            if (views >= 1000000) {
+                return (views / 1000000).toFixed(1) + "M";
+            } else if (views >= 1000) {
+                return (views / 1000).toFixed(1) + "K";
+            }
+            return views;
+        }
+    },
     async mounted() {
         const likeStore = useLikeStore();
         await likeStore.fetchLikedPhotos();
@@ -290,17 +302,27 @@ export default {
     methods: {
         async fetchPhotoDetail(token) {
             try {
-                const response = await axios.get(`${getUrlList().getPhotoDetail}/${token}`);
+                const tokenFromLocalStorage = localStorage.getItem("token"); // JWT của user
+                console.log("Token from Local Storage:", tokenFromLocalStorage);
+
+                const response = await axios.get(`${getUrlList().getPhotoDetail}/${token}`, {
+                    headers: {
+                        Authorization: `Bearer ${tokenFromLocalStorage}`
+                    }
+                });
+
+                console.log("Response Headers:", response.config.headers);
                 this.photoDetail = response.data.data;
-                this.updateLikedState(); // Cập nhật trạng thái liked sau khi lấy chi tiết ảnh
+                this.updateLikedState();
             } catch (error) {
                 console.error("Error fetching photo details:", error);
             }
         },
+
         async fetchCategories() {
             try {
                 const response = await axios.get(getUrlList().getCategories);
-                console.log("API response:", response.data);
+                // console.log("API response:", response.data);
                 this.categories = response.data;
             } catch (error) {
                 console.error("Error fetching categories:", error);

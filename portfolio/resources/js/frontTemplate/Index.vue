@@ -231,7 +231,7 @@ export default {
             try {
                 const response = await axios.get(getUrlList().getPhotoData);
                 this.photos = response.data;
-                console.log(this.photos);
+                // console.log(this.photos);
             } catch (error) {
                 console.error(error);
             }

@@ -21,6 +21,7 @@ class Photo extends Model
         'category_id',
         'photo_token',
         'privacy_status',
+        'total_views',
     ];
     public function notifications()
     {

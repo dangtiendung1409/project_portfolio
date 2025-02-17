@@ -23,7 +23,7 @@ return new class extends Migration
             $table->char('photo_token', 36)->unique();
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('category_id');
-
+            $table->unsignedBigInteger('total_views')->default(0);
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('category_id')->references('id')->on('categories')->onDelete('cascade');
             $table->softDeletes();
