@@ -318,6 +318,183 @@
               }
           }
       },
+      "/comments/{token}": {
+          "get": {
+              "tags": [
+                  "HomePage"
+              ],
+              "summary": "Get Comments by Photo Token",
+              "operationId": "getCommentsByPhotoToken",
+              "produces": [
+                  "application/json"
+              ],
+              "parameters": [
+                  {
+                      "name": "token",
+                      "in": "path",
+                      "description": "Unique token representing the photo",
+                      "required": true,
+                      "type": "string"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "Comments retrieved successfully",
+                      "schema": {
+                          "type": "array",
+                          "items": {
+                              "type": "object",
+                              "properties": {
+                                  "id": {
+                                      "type": "integer"
+                                  },
+                                  "photo_id": {
+                                      "type": "integer"
+                                  },
+                                  "user_id": {
+                                      "type": "integer"
+                                  },
+                                  "comment_text": {
+                                      "type": "string"
+                                  },
+                                  "created_at": {
+                                      "type": "string",
+                                      "format": "date-time"
+                                  },
+                                  "updated_at": {
+                                      "type": "string",
+                                      "format": "date-time"
+                                  }
+                              }
+                          }
+                      }
+                  },
+                  "404": {
+                      "description": "Photo or comments not found"
+                  },
+                  "500": {
+                      "description": "Internal server error"
+                  }
+              }
+          }
+      },
+      "/comments": {
+          "post": {
+              "tags": [
+                  "HomePage"
+              ],
+              "summary": "Post a new comment on a photo",
+              "operationId": "postComment",
+              "produces": [
+                  "application/json"
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "parameters": [
+                  {
+                      "name": "Authorization",
+                      "in": "header",
+                      "description": "JWT Bearer token",
+                      "required": true,
+                      "type": "string"
+                  },
+                  {
+                      "name": "body",
+                      "in": "body",
+                      "description": "Comment details",
+                      "required": true,
+                      "schema": {
+                          "type": "object",
+                          "required": [
+                              "photo_token",
+                              "comment_text"
+                          ],
+                          "properties": {
+                              "photo_token": {
+                                  "type": "string",
+                                  "description": "Token of the photo to comment on"
+                              },
+                              "comment_text": {
+                                  "type": "string",
+                                  "description": "Content of the comment"
+                              }
+                          }
+                      }
+                  }
+              ],
+              "responses": {
+                  "201": {
+                      "description": "Comment posted successfully",
+                      "schema": {
+                          "type": "object",
+                          "properties": {
+                              "message": {
+                                  "type": "string",
+                                  "example": "Comment posted successfully"
+                              },
+                              "comment": {
+                                  "type": "object",
+                                  "properties": {
+                                      "id": {
+                                          "type": "integer"
+                                      },
+                                      "photo_id": {
+                                          "type": "integer"
+                                      },
+                                      "user_id": {
+                                          "type": "integer"
+                                      },
+                                      "comment_text": {
+                                          "type": "string"
+                                      },
+                                      "created_at": {
+                                          "type": "string",
+                                          "format": "date-time"
+                                      },
+                                      "updated_at": {
+                                          "type": "string",
+                                          "format": "date-time"
+                                      },
+                                      "user": {
+                                          "type": "object",
+                                          "properties": {
+                                              "id": {
+                                                  "type": "integer"
+                                              },
+                                              "username": {
+                                                  "type": "string"
+                                              },
+                                              "profile_picture": {
+                                                  "type": "string"
+                                              }
+                                          }
+                                      }
+                                  }
+                              }
+                          }
+                      }
+                  },
+                  "400": {
+                      "description": "Invalid input data"
+                  },
+                  "401": {
+                      "description": "Unauthorized - Invalid or missing token"
+                  },
+                  "404": {
+                      "description": "Photo not found"
+                  },
+                  "500": {
+                      "description": "Internal server error"
+                  }
+              },
+              "security": [
+                  {
+                      "Bearer": []
+                  }
+              ]
+          }
+      },
       "/user-by-username/{username}": {
           "get": {
               "tags": [

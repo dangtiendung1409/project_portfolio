@@ -39,6 +39,8 @@ const baseUrl = 'http://127.0.0.1:8000/api';
           deletePhotoFromGallery: (galleries_code, photo_id) => `${baseUrl}/gallery/${galleries_code}/photo/${photo_id}`,
           // photo details
           getPhotoDetail : `${baseUrl}/getPhotoDetail`,
+          getCommentsByPhotoToken: `${baseUrl}/comments`,
+          postComment: `${baseUrl}/comments`,
           // add photo
           addPhoto : `${baseUrl}/add-photos`,
           //edit photo

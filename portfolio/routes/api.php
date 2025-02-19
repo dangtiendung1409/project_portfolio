@@ -30,6 +30,7 @@ Route::post('/logout', [AuthUserController::class, 'logout']);
 Route::get('/getPhotoData', [HomePageController::class, 'getImages']);
 Route::get('/getFollowData', [HomePageController::class, 'getFollows']);
 Route::get('/getPhotoDetail/{token}', [PhotoDetailController::class, 'getPhotoDetail']);
+Route::get('/comments/{token}', [PhotoDetailController::class, 'getCommentsByPhotoToken']);
 Route::get('/categories', [HomePageController::class, 'getAllCategories']);
 Route::get('/tags', [HomePageController::class, 'getAllTags']);
 
@@ -78,6 +79,9 @@ Route::middleware('auth:api')->group(function () {
 
     // add photo
     Route::post('/add-photos', [HomePageController::class, 'addPhotos']);
+
+    // post comment
+    Route::post('/comments', [PhotoDetailController::class, 'postComment']);
 
     // Auth user
     Route::get('/user', [AuthUserController::class, 'getUser']);

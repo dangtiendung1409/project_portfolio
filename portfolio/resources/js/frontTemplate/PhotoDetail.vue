@@ -173,43 +173,60 @@
                                         <button class="btn-follow">Follow</button>
                                     </div>
                                 </div>
+                                <!-- Chỉ sửa phần comment section trong template -->
                                 <div class="comments-section">
                                     <div class="comment-input-wrapper">
-                                        <img src="/front_assets/img/img_1.jpg" alt="User Avatar" class="comment-avatar-auth" />
-                                        <input type="text" class="comment-input" placeholder="Write your comment here" />
-                                    </div>
-                                    <h5 class="comments-header">20 Comments</h5>
+                                        <img :src="photoDetail?.user?.profile_picture ? 'http://127.0.0.1:8000/' + photoDetail.user.profile_picture : '/images/imageUserDefault.png'"
+                                             alt="User Avatar"
+                                             class="comment-avatar-auth" />
 
-                                    <div class="comment">
-                                        <img src="/front_assets/img/img_1.jpg" alt="User Avatar" class="comment-avatar" />
-                                        <div class="comment-content">
-                                            <div class="comment-header">
-                                                <span class="comment-author">06. Đặng tiến dũng dung</span>
-                                                <i class="fa-solid fa-ellipsis comment-options"></i>
-                                            </div>
-                                            <p class="comment-text">so magical</p>
-                                            <div class="comment-footer">
-                                                <span class="comment-time">1 second</span>
-                                                <span class="comment-reply">Reply</span>
-                                            </div>
+                                        <input
+                                            type="text"
+                                            class="comment-input"
+                                            placeholder="Write your comment here"
+                                            v-model="newComment"
+                                            @focus="showButtons = true"
+                                            @keydown.enter.prevent
+                                        />
+
+                                        <div v-if="showButtons" class="comment-buttons">
+                                            <button class="cancel-btn" @click="cancelComment">Cancel</button>
+                                            <button class="post-btn" :disabled="!newComment.trim()" @click="postComment">Post</button>
                                         </div>
                                     </div>
 
-                                    <div class="comment">
-                                        <img src="/front_assets/img/img_1.jpg" alt="User Avatar" class="comment-avatar" />
-                                        <div class="comment-content">
-                                            <div class="comment-header">
-                                                <span class="comment-author">christian maurel</span>
-                                                <i class="fa-solid fa-ellipsis comment-options"></i>
-                                            </div>
-                                            <p class="comment-text">Awesome landscape 💯💯💯 beautiful colors ✨💥✨</p>
-                                            <div class="comment-footer">
-                                                <span class="comment-time">4 days</span>
-                                                <span class="comment-reply">Reply</span>
+                                    <!-- Kiểm tra nếu không có comment -->
+                                    <div v-if="comments.length === 0" class="no-comment">
+                                        <i class="fa-regular fa-comment comment-icon"></i>
+                                        <h3>No comment yet</h3>
+                                        <p>There is no comment for this artwork yet. Make your first comment here!</p>
+                                    </div>
+
+                                    <!-- Hiển thị comment nếu có -->
+                                    <div v-else>
+                                        <h5 class="comments-header">{{ comments.length }} Comments</h5>
+                                        <div v-for="(comment, index) in displayedComments" :key="comment.id" class="comment">
+                                            <img :src="comment?.user?.profile_picture ? 'http://127.0.0.1:8000/' + comment.user.profile_picture : '/images/imageUserDefault.png'"
+                                                 alt="User Avatar"
+                                                 class="comment-avatar" />
+                                            <div class="comment-content">
+                                                <div class="comment-header">
+                                                    <span class="comment-author">{{ comment?.user?.username || 'Unknown User' }}</span>
+                                                    <i class="fa-solid fa-ellipsis comment-options"></i>
+                                                </div>
+                                                <p class="comment-text">{{ comment.comment_text }}</p>
+                                                <div class="comment-footer">
+                                                    <span class="comment-time">{{ getTimeAgo(comment.created_at) }}</span>
+                                                </div>
                                             </div>
                                         </div>
+                                        <button v-if="comments.length > 3" @click="toggleComments" class="read-more-button">
+                                            {{ showAllComments ? "Read Less" : "Read More" }}
+                                        </button>
                                     </div>
                                 </div>
+
+
                                 <!-- Categories Section -->
                                 <div class="categories-section">
                                     <h5 class="categories-header">
@@ -239,9 +256,11 @@
 import axios from "axios";
 import Layout from "./Layout.vue";
 import getUrlList from "../provider.js";
+import { useCommentStore } from '@/stores/commentStore';
 import { useLikeStore } from '@/stores/likeStore';
 import { useAuthStore } from '@/stores/authStore';
 import AddToGalleryModal from './components/AddToGalleryModal.vue';
+import { storeToRefs } from 'pinia';
 
 export default {
     name: "PhotoDetail",
@@ -269,6 +288,10 @@ export default {
                     category_name: "",
                 },
             },
+            newComment: '',
+            isPosting: false, // Ngăn chặn spam comment
+            showButtons: false,
+            showAllComments: false,
             categories: [],
             showAddToGallery: false,
             selectedPhotoId: null,
@@ -283,6 +306,13 @@ export default {
         },
     },
     computed: {
+        comments() {
+            const commentStore = useCommentStore();
+            return commentStore.comments;
+        },
+        displayedComments() {
+            return this.showAllComments ? this.comments : this.comments.slice(0, 3);
+        },
         formattedViews() {
             const views = this.photoDetail.total_views;
             if (views >= 1000000) {
@@ -294,35 +324,69 @@ export default {
         }
     },
     async mounted() {
-        const likeStore = useLikeStore();
-        await likeStore.fetchLikedPhotos();
-        this.updateLikedState();
-        this.fetchCategories();
+        try {
+            const token = this.$route.params.token;
+
+            // Fetch comments và categories không cần auth
+            const commentStore = useCommentStore();
+            await commentStore.fetchComments(token);
+            await this.fetchCategories();
+
+            // Những operation cần auth
+            const tokenFromLocalStorage = localStorage.getItem("token");
+            if (tokenFromLocalStorage) {
+                const likeStore = useLikeStore();
+                await likeStore.fetchLikedPhotos();
+                this.updateLikedState();
+            }
+        } catch (error) {
+            console.error("Error in mounted:", error);
+        }
     },
     methods: {
         async fetchPhotoDetail(token) {
             try {
-                const tokenFromLocalStorage = localStorage.getItem("token"); // JWT của user
-                console.log("Token from Local Storage:", tokenFromLocalStorage);
+                const tokenFromLocalStorage = localStorage.getItem("token");
+                const headers = tokenFromLocalStorage
+                    ? { Authorization: `Bearer ${tokenFromLocalStorage}` }
+                    : {};
 
                 const response = await axios.get(`${getUrlList().getPhotoDetail}/${token}`, {
-                    headers: {
-                        Authorization: `Bearer ${tokenFromLocalStorage}`
-                    }
+                    headers: headers
                 });
-
-                console.log("Response Headers:", response.config.headers);
                 this.photoDetail = response.data.data;
                 this.updateLikedState();
             } catch (error) {
                 console.error("Error fetching photo details:", error);
             }
         },
+        async postComment() {
+            if (!this.newComment.trim()) {
+                return;
+            }
 
+            if (!await this.checkLogin()) {
+                return;
+            }
+
+            const token = this.$route.params.token;
+            const commentStore = useCommentStore();
+
+            commentStore.postComment(token, this.newComment);
+            this.newComment = ''; // Xóa nội dung
+            this.showButtons = false; // Ẩn nút sau khi gửi
+        },
+
+        cancelComment() {
+            this.newComment = ''; // Xóa nội dung
+            this.showButtons = false; // Ẩn nút
+        },
+        toggleComments() {
+            this.showAllComments = !this.showAllComments;
+        },
         async fetchCategories() {
             try {
                 const response = await axios.get(getUrlList().getCategories);
-                // console.log("API response:", response.data);
                 this.categories = response.data;
             } catch (error) {
                 console.error("Error fetching categories:", error);
@@ -442,4 +506,76 @@ export default {
 .icon-btn .fa-heart.liked {
     color: #ff5a5f; /* Màu khi đã like */
 }
+.no-comment {
+    text-align: center;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+.comment-icon {
+    font-size: 48px;
+    color: #1877f2;
+    margin-bottom: 10px;
+}
+
+.no-comment h3 {
+    font-size: 20px;
+    color: #333;
+    font-weight: bold;
+}
+
+.no-comment p {
+    font-size: 14px;
+    color: #666;
+}
+
+.comment-buttons {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+    margin-left: 90px; /* Dịch sang phải */
+}
+
+.cancel-btn, .post-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.cancel-btn {
+    background-color: transparent;
+    color: #1877f2;
+}
+
+.post-btn {
+    background-color: #1877f2;
+    color: white;
+}
+
+.post-btn:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.read-more-button {
+    display: block;
+    margin: 10px auto;
+    padding: 8px 16px;
+    border: 1px solid #007bff;
+    background-color: white;
+    color: #007bff;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.read-more-button:hover {
+    background-color: #007bff;
+    color: white;
+}
+
 </style>
