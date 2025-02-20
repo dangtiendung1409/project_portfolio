@@ -80,8 +80,13 @@ Route::middleware('auth:api')->group(function () {
     // add photo
     Route::post('/add-photos', [HomePageController::class, 'addPhotos']);
 
-    // post comment
+    //comment
     Route::post('/comments', [PhotoDetailController::class, 'postComment']);
+    Route::delete('/comments/{id}', [PhotoDetailController::class, 'deleteComment']);
+
+    // delete comment
+    Route::delete('/comments/{comment_id}', [PhotoDetailController::class, 'deleteComment']);
+
 
     // Auth user
     Route::get('/user', [AuthUserController::class, 'getUser']);

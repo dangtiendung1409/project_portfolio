@@ -36,5 +36,19 @@ export const useCommentStore = defineStore('commentStore', {
                 console.error("Error posting comment:", error);
             }
         },
+        async deleteComment(commentId, photoToken) {
+            try {
+                const tokenFromLocalStorage = localStorage.getItem("token");
+                await axios.delete(`${getUrlList().deleteComment(commentId)}`, {
+                    headers: {
+                        Authorization: `Bearer ${tokenFromLocalStorage}`
+                    }
+                });
+
+                await this.fetchComments(photoToken); // Cập nhật danh sách
+            } catch (error) {
+                console.error("Error deleting comment:", error);
+            }
+        },
     },
 });

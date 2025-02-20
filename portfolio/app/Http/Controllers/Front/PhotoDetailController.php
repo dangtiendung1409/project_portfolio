@@ -95,56 +95,40 @@ class PhotoDetailController extends Controller
         ]);
 
         try {
-            $photo = Photo::where('photo_token', $request->photo_token)->first();
+            $user = Auth::user(); // Lấy user từ auth:api
+            if (!$user) {
+                return response()->json(['message' => 'Unauthorized'], 401);
+            }
 
+            $photo = Photo::where('photo_token', $request->photo_token)->first();
             if (!$photo) {
                 return response()->json(['message' => 'Photo not found'], 404);
-            }
-
-            // Lấy Bearer Token từ headers
-            $bearerToken = $request->bearerToken();
-            Log::info('Bearer Token:', ['token' => $bearerToken]);
-            $userId = null;
-
-            if ($bearerToken) {
-                try {
-                    $decoded = JWT::decode($bearerToken, new Key(env('JWT_SECRET'), 'HS256'));
-                    $userId = $decoded->sub ?? null;
-                    Log::info('Decoded JWT:', ['decoded' => $decoded]);
-                } catch (\Exception $e) {
-                    Log::error('Invalid JWT:', ['error' => $e->getMessage()]);
-                    return response()->json(['message' => 'Unauthorized'], 401);
-                }
-            }
-
-            if (!$userId) {
-                return response()->json(['message' => 'Unauthorized'], 401);
             }
 
             // Tạo comment
             $comment = new Comment();
             $comment->photo_id = $photo->id;
-            $comment->user_id = $userId;
+            $comment->user_id = $user->id;
             $comment->comment_text = $request->comment_text;
             $comment->save();
 
-            // Gửi thông báo cho chủ sở hữu ảnh
-            if ($photo->user_id != $userId) { // Không gửi nếu người bình luận là chủ ảnh
+            // Gửi thông báo cho chủ sở hữu ảnh nếu người bình luận không phải chủ ảnh
+            if ($photo->user_id !== $user->id) {
                 Notification::create([
-                    'user_id' => $userId, // Người gửi (người bình luận)
+                    'user_id' => $user->id, // Người gửi (người bình luận)
                     'recipient_id' => $photo->user_id, // Chủ ảnh (người nhận)
                     'comment_id' => $comment->id,
                     'photo_id' => $photo->id,
                     'like_id' => null, // Không liên quan đến like
                     'type' => '1',
-                    'content' => User::find($userId)->username . ' has commented on your photo.',
+                    'content' => "{$user->username} has commented on your photo.",
                     'is_read' => 0,
                     'notification_date' => now(),
                 ]);
             }
 
             // Load relationship với user và trả về comment với thông tin user
-            $comment = Comment::with('user')->find($comment->id);
+            $comment->load('user');
 
             return response()->json([
                 'message' => 'Comment posted successfully',
@@ -155,5 +139,34 @@ class PhotoDetailController extends Controller
             return response()->json(['message' => 'Internal Server Error'], 500);
         }
     }
+    public function deleteComment($id)
+    {
+        try {
+            $user = Auth::user(); // Lấy thông tin user từ auth:api
+
+            $comment = Comment::find($id);
+
+            if (!$comment) {
+                return response()->json(['message' => 'Comment not found'], 404);
+            }
+
+            // Kiểm tra nếu user là chủ sở hữu của comment hoặc chủ của ảnh
+            if ($comment->user_id !== $user->id && $comment->photo->user_id !== $user->id) {
+                return response()->json(['message' => 'Unauthorized'], 403);
+            }
+
+            // Xóa tất cả thông báo liên quan đến comment này
+            Notification::where('comment_id', $comment->id)->delete();
+
+            // Xóa comment
+            $comment->delete();
+
+            return response()->json(['message' => 'Comment deleted successfully'], 200);
+        } catch (\Exception $e) {
+            Log::error('Error deleting comment: ' . $e->getMessage());
+            return response()->json(['message' => 'Internal Server Error'], 500);
+        }
+    }
+
 
 }

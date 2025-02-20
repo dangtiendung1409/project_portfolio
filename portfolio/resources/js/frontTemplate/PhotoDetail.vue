@@ -212,8 +212,21 @@
                                             <div class="comment-content">
                                                 <div class="comment-header">
                                                     <span class="comment-author">{{ comment?.user?.username || 'Unknown User' }}</span>
-                                                    <i class="fa-solid fa-ellipsis comment-options"></i>
+                                                    <i class="fa-solid fa-ellipsis comment-options"
+                                                       @click.stop="toggleDropdown('dropdown-' + comment.id, $event)"
+                                                       :class="{'active': activeDropdown === 'dropdown-' + comment.id}"></i>
                                                 </div>
+                                                <div v-if="activeDropdown === 'dropdown-' + comment.id" class="dropdown-content show" @click.stop>
+                                                    <ul>
+                                                        <li v-if="comment.user.id !== userStore.user.id">
+                                                            <i class="fa-regular fa-flag"></i> Report
+                                                        </li>
+                                                        <li v-if="comment.user.id === userStore.user.id" @click="showDeleteConfirm(comment)">
+                                                            <i class="fa-solid fa-trash-can"></i> Delete
+                                                        </li>
+                                                    </ul>
+                                                </div>
+
                                                 <p class="comment-text">{{ comment.comment_text }}</p>
                                                 <div class="comment-footer">
                                                     <span class="comment-time">{{ getTimeAgo(comment.created_at) }}</span>
@@ -259,8 +272,13 @@ import getUrlList from "../provider.js";
 import { useCommentStore } from '@/stores/commentStore';
 import { useLikeStore } from '@/stores/likeStore';
 import { useAuthStore } from '@/stores/authStore';
+import { useUserStore } from '@/stores/userStore';
 import AddToGalleryModal from './components/AddToGalleryModal.vue';
 import { storeToRefs } from 'pinia';
+import { Modal } from 'ant-design-vue';
+import { h } from 'vue';
+import { ExclamationCircleOutlined } from '@ant-design/icons-vue';
+
 
 export default {
     name: "PhotoDetail",
@@ -292,6 +310,7 @@ export default {
             isPosting: false, // Ngăn chặn spam comment
             showButtons: false,
             showAllComments: false,
+            activeDropdown: null,
             categories: [],
             showAddToGallery: false,
             selectedPhotoId: null,
@@ -321,7 +340,10 @@ export default {
                 return (views / 1000).toFixed(1) + "K";
             }
             return views;
-        }
+        },
+        userStore() {
+            return useUserStore();
+        },
     },
     async mounted() {
         try {
@@ -376,6 +398,20 @@ export default {
             this.newComment = ''; // Xóa nội dung
             this.showButtons = false; // Ẩn nút sau khi gửi
         },
+        showDeleteConfirm(comment) {
+            Modal.confirm({
+                title: 'Are you sure you want to delete this comment?',
+                icon: h(ExclamationCircleOutlined),
+                content: 'This action cannot be undone. Once deleted, this comment will be permanently removed.',
+                onOk: () => this.deleteComment(comment.id),
+                onCancel() {},
+            });
+        },
+        async deleteComment(commentId) {
+            const commentStore = useCommentStore();
+            const photoToken = this.$route.params.token;
+            await commentStore.deleteComment(commentId, photoToken);
+        },
 
         cancelComment() {
             this.newComment = ''; // Xóa nội dung
@@ -383,6 +419,9 @@ export default {
         },
         toggleComments() {
             this.showAllComments = !this.showAllComments;
+        },
+        toggleDropdown(id) {
+            this.activeDropdown = this.activeDropdown === id ? null : id;
         },
         async fetchCategories() {
             try {
@@ -577,5 +616,38 @@ export default {
     background-color: #007bff;
     color: white;
 }
+.dropdown-content {
+   margin-left: -5px;
+    margin-top: -40px;
+}
+.dropdown-content ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+}
 
+.dropdown-content li {
+    padding: 15px 15px 15px 25px;
+    display: flex;
+    align-items: center;
+    color: #222222;
+    white-space: nowrap;
+    z-index: 1000;
+}
+
+.dropdown-content li:hover {
+    color: whitesmoke; /* Màu chữ khi hover */
+    background-color: #1890ff; /* Màu nền khi hover */
+}
+
+.dropdown-content li i {
+    margin-right: 8px;
+}
+
+.dropdown-content li:hover i {
+    color: whitesmoke;
+    background-color: #1890ff;
+}
 </style>

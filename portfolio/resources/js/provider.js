@@ -41,6 +41,7 @@ const baseUrl = 'http://127.0.0.1:8000/api';
           getPhotoDetail : `${baseUrl}/getPhotoDetail`,
           getCommentsByPhotoToken: `${baseUrl}/comments`,
           postComment: `${baseUrl}/comments`,
+          deleteComment: (commentId) => `${baseUrl}/comments/${commentId}`,
           // add photo
           addPhoto : `${baseUrl}/add-photos`,
           //edit photo
