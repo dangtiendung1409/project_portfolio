@@ -40,7 +40,9 @@
                         <p class="profile-location">
                             <i class="fa-solid fa-location-dot"></i> {{ user.location ? user.location : 'no location' }}
                         </p>
-                        <button class="follow-button" v-if="!isMyProfile">Follow</button>
+                        <button class="follow-button" v-if="!isMyProfile" @click="toggleFollow">
+                            {{ isFollowing ? 'Unfollow' : 'Follow' }}
+                        </button>
                         <p class="profile-bio">
                             <span v-if="user.bio">
                                 <span v-if="isBioExpanded">{{ user.bio }}</span>
@@ -52,8 +54,8 @@
                             <span v-else>No bio</span>
                         </p>
                         <div class="profile-stats">
-                            <span><strong>58.1K</strong> Followers</span>
-                            <span><strong>120</strong> Following</span>
+                            <span><strong>{{ followersCount }}</strong> Followers</span>
+                            <span><strong>{{ user.following_count }}</strong> Following</span>
                             <span><strong>2.1M</strong> Photo Likes</span>
                         </div>
                     </div>
@@ -95,7 +97,7 @@ import GalleryGrid from './components/profile/GalleryGrid.vue';
 import getUrlList from '../provider.js';
 import { notification } from 'ant-design-vue';
 import { useUserStore } from '../stores/userStore.js';
-
+import { useFollowStore } from '../stores/followStore.js';
 export default {
     name: "MyProfile",
     components: {
@@ -115,6 +117,8 @@ export default {
             showUpdateModal: false,
             selectedUserId: null,
             isMyProfile: false, // Thêm biến này để xác định trang cá nhân của mình
+            isFollowing: false, // Trạng thái Follow/Unfollow
+            followersCount: 0, // Số lượng người theo dõi
         };
     },
     computed: {
@@ -131,11 +135,14 @@ export default {
             return this.user.bio;
         }
     },
-    mounted() {
-        this.fetchUserData();
+    async mounted() {
+        await this.fetchUserData();
         this.fetchPhotos();
         this.fetchGalleries();
-        this.checkIfMyProfile();
+        await this.checkIfMyProfile();
+        if (!this.isMyProfile) {
+            await this.checkFollowingStatus();
+        }
     },
     methods: {
         toggleDropdown(id) {
@@ -156,6 +163,38 @@ export default {
         },
         closeUpdateProfileModal() {
             this.showUpdateModal = false; // Close modal
+        },
+        async checkFollowingStatus() {
+            const followStore = useFollowStore();
+            await followStore.fetchFollowingList();
+            this.isFollowing = followStore.followingList.includes(this.user.id);
+        },
+        async toggleFollow() {
+            if (this.isFollowing) {
+                await this.unfollowUser();
+            } else {
+                await this.followUser();
+            }
+        },
+        async followUser() {
+            try {
+                const followStore = useFollowStore();
+                await followStore.followUser(this.user.id);
+                this.isFollowing = true;
+                this.followersCount++;
+            } catch (error) {
+                console.error('Error following user:', error);
+            }
+        },
+        async unfollowUser() {
+            try {
+                const followStore = useFollowStore();
+                await followStore.unfollowUser(this.user.id);
+                this.isFollowing = false;
+                this.followersCount--;
+            } catch (error) {
+                console.error('Error unfollowing user:', error);
+            }
         },
         async fetchPhotos() {
             const username = this.$route.params.username;

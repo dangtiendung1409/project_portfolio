@@ -9,6 +9,7 @@ use App\Http\Controllers\Front\PhotoDetailController;
 use App\Http\Controllers\Front\ProfileController;
 use App\Http\Controllers\Front\CategoryController;
 use App\Http\Controllers\Front\SearchController;
+use App\Http\Controllers\Front\FollowController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -84,9 +85,11 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/comments', [PhotoDetailController::class, 'postComment']);
     Route::delete('/comments/{id}', [PhotoDetailController::class, 'deleteComment']);
 
-    // delete comment
-    Route::delete('/comments/{comment_id}', [PhotoDetailController::class, 'deleteComment']);
-
+    // follow
+    Route::post('/follow', [FollowController::class, 'follow']);
+    Route::post('/unfollow/{following_id}', [FollowController::class, 'unfollow']);
+    Route::get('/following-list', [FollowController::class, 'followingList']); //Danh sách người dùng mà user hiện tại đang theo dõi
+    Route::get('/followers-list', [FollowController::class, 'followersList']); //Danh sách những người theo dõi user hiện tại
 
     // Auth user
     Route::get('/user', [AuthUserController::class, 'getUser']);

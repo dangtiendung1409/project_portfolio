@@ -5,9 +5,10 @@
                 <div class="container">
                     <TabBar :activeItem="activeItem" :setActive="setActive" />
                     <ForYou v-if="activeItem === 'forYou'" :photos="photos" />
-                    <Following v-else-if="activeItem === 'following'" :users="followingUsers" :follows="follows"/>
+                    <Following v-else-if="activeItem === 'following'" :users="followingUsers"/>
                     <Explore v-else-if="activeItem === 'explore'" :users="followingUsers"/>
                 </div>
+
             </div>
 
             <div class="site-section">
@@ -160,49 +161,7 @@ export default {
         return {
             activeItem: 'forYou',
             photos: [],
-            follows: [],
-            followingUsers: [
-                {
-                    id: 1, name: 'Paul Boomsma',
-                    image: '/front_assets/img/user1.jpeg',
-                    backgroundImages: ['/front_assets/img/img_1.jpg', '/front_assets/img/img_2.jpg', '/front_assets/img/img_3.jpg', '/front_assets/img/img_4.jpg']
-                },
-                {
-                    id: 2, name: 'Dario Maschietti',
-                    image: '/front_assets/img/user2.jpeg',
-                    backgroundImages: ['/front_assets/img/img_1.jpg', '/front_assets/img/img_2.jpg', '/front_assets/img/img_3.jpg', '/front_assets/img/img_4.jpg']
-                },
-                {
-                    id: 3, name: 'Instagram User',
-                    image: '/front_assets/img/user3.jpeg',
-                    backgroundImages: ['/front_assets/img/img_1.jpg', '/front_assets/img/img_2.jpg', '/front_assets/img/img_3.jpg', '/front_assets/img/img_4.jpg']
-                },
-                {
-                    id: 4, name: 'Łukasz Spychała',
-                    image: '/front_assets/img/user4.jpeg',
-                    backgroundImages: ['/front_assets/img/img_1.jpg', '/front_assets/img/img_2.jpg', '/front_assets/img/img_3.jpg', '/front_assets/img/img_4.jpg']
-                },
-                {
-                    id: 5, name: 'ADRIAN RAGONA',
-                    image: '/front_assets/img/user5.jpeg',
-                    backgroundImages: ['/front_assets/img/img_1.jpg', '/front_assets/img/img_2.jpg', '/front_assets/img/img_3.jpg', '/front_assets/img/img_4.jpg']
-                },
-                {
-                    id: 6, name: 'ADRIAN RAGONA',
-                    image: '/front_assets/img/user5.jpeg',
-                    backgroundImages: ['/front_assets/img/img_1.jpg', '/front_assets/img/img_2.jpg', '/front_assets/img/img_3.jpg', '/front_assets/img/img_4.jpg']
-                },
-                {
-                    id: 7, name: 'ADRIAN RAGONA',
-                    image: '/front_assets/img/user5.jpeg',
-                    backgroundImages: ['/front_assets/img/img_1.jpg', '/front_assets/img/img_2.jpg', '/front_assets/img/img_3.jpg', '/front_assets/img/img_4.jpg']
-                },
-                {
-                    id: 8, name: 'ADRIAN RAGONA',
-                    image: '/front_assets/img/user5.jpeg',
-                    backgroundImages: ['/front_assets/img/img_1.jpg', '/front_assets/img/img_2.jpg', '/front_assets/img/img_3.jpg', '/front_assets/img/img_4.jpg']
-                },
-            ],
+            followingUsers: [],
         }
     },
     watch: {
@@ -236,13 +195,21 @@ export default {
                 console.error(error);
             }
         },
-        async getFollow(){
-            try{
-                const response = await axios.get(getUrlList().getFollowData);
-                this.follows = response.data;
-                console.log(this.follows);
-            }catch (error){
-                console.log(error);
+        async getFollow() {
+            try {
+                const token = localStorage.getItem("token"); // Lấy token nếu có
+
+                let headers = {};
+                if (token) {
+                    headers = {
+                        Authorization: `Bearer ${token}`,
+                    };
+                }
+
+                const response = await axios.get(getUrlList().getFollowData, { headers });
+                this.followingUsers = response.data.data || [];
+            } catch (error) {
+                console.error("Lỗi khi lấy danh sách follow:", error);
             }
         }
     }

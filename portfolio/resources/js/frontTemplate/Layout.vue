@@ -17,7 +17,7 @@
             <div class="icon-container">
                 <div v-if="isLoggedIn" class="user-dropdown">
                     <img v-if="userProfilePicture"
-                         :src="'http://127.0.0.1:8000/' + userProfilePicture"
+                         :src="'http://127.0.0.1:8000' + userProfilePicture"
                          alt="User"
                          style="width: 30px; height: 30px; border-radius: 50%;"
                          @click="toggleDropdown('dropdownMenu')" />
@@ -59,7 +59,8 @@
                              :class="['notification-item', { 'unread': !notification.read }]">
                             <img :src="`/${notification.image}`" alt="User" class="notification-image">
                             <div class="notification-content">
-                                <p class="notification-message" @click="navigateToPhoto(notification.photoToken, notification.id)">
+                                <p class="notification-message"
+                                   @click="navigateToPhoto(notification.photoToken, notification.id, notification.type)">
                                     {{ notification.message }}
                                 </p>
                                 <small class="notification-time">{{ notification.time }}</small>
@@ -152,12 +153,18 @@ export default {
         this.loadExternalScripts();
     },
     methods: {
-        async navigateToPhoto(photoToken, notificationId) {
+        async navigateToPhoto(photoToken, notificationId, type) {
             if (notificationId) {
                 const notificationStore = useNotificationStore();
-                await notificationStore.markNotificationAsRead(notificationId); // This should now work
+                await notificationStore.markNotificationAsRead(notificationId);
             }
 
+            // Nếu type = 2 (follow), chỉ đánh dấu đã đọc, không chuyển trang
+            if (type === 2) {
+                return;
+            }
+
+            // Nếu có photoToken, chuyển hướng đến trang chi tiết ảnh
             if (photoToken) {
                 this.$router.push({ name: 'PhotoDetail', params: { token: photoToken } });
             } else {

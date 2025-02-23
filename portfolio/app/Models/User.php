@@ -93,6 +93,33 @@ class User extends Authenticatable implements JWTSubject
         return $this->belongsToMany(User::class, 'follows', 'follower_id', 'following_id');
     }
     /**
+     * Kiểm tra xem user hiện tại có follow user khác không
+     */
+    public function isFollowing($userId)
+    {
+        return Follow::where('follower_id', $this->id)
+            ->where('following_id', $userId)
+            ->exists();
+    }
+    public function blockedUsers()
+    {
+        return $this->hasMany(Block::class, 'blocker_id');
+    }
+
+    public function blockedBy()
+    {
+        return $this->hasMany(Block::class, 'blocked_id');
+    }
+    /**
+     * Kiểm tra xem người dùng hiện tại có bị một user khác chặn không
+     */
+    public function isBlockedBy($userId)
+    {
+        return Block::where('blocker_id', $userId)
+            ->where('blocked_id', $this->id)
+            ->exists();
+    }
+    /**
      * The attributes that should be hidden for serialization.
      *
      * @var array<int, string>

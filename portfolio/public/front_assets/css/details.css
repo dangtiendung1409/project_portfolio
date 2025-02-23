@@ -64,7 +64,8 @@
     color: #ffffff;
     border: none;
     border-radius: 20px;
-    padding: 10px 24px;
+    padding: 10px 30px;
+    min-width: 120px;
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;

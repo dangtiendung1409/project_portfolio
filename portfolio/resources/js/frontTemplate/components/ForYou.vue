@@ -8,7 +8,7 @@
                 <div class="work-info">
                     <div class="user-info2">
                         <router-link :to="{ name: 'MyProfile', params: { username: item.user.username } }">
-                        <img class="user-image2" :src="item.user.profile_picture || '/images/userDefault.png'" style="width: 30px; height: 30px">
+                            <img class="user-image2" :src="item.user.profile_picture || '/images/userDefault.png'" style="width: 30px; height: 30px">
                         </router-link>
                         <span class="user-name2">{{ item.user.username }}</span>
                         <span class="icon-heart2" @click="toggleLike(item)">
@@ -24,7 +24,10 @@
                 <ul>
                     <li @click="handleClick('addToGallery', item.id)"><i class="fa-regular fa-square-plus"></i> Add to Gallery</li>
                     <li @click="handleClick('blockUser', item.id)"><i class="fas fa-user-slash"></i> Block User</li>
-                    <li @click="handleClick('followUser', item.id)"><i class="fas fa-user-plus"></i> Follow User</li>
+                    <li v-if="item.user && userStore.user && item.user.id !== userStore.user.id" @click="toggleFollow(item)">
+                        <i class="fas" :class="item.following ? 'fa-user-minus' : 'fa-user-plus'"></i>
+                        {{ item.following ? 'Unfollow' : 'Follow' }}
+                    </li>
                     <li @click="handleClick('reportPhoto', item.id)"><i class="fas fa-flag"></i> Report This Photo</li>
                 </ul>
             </div>
@@ -42,6 +45,9 @@ import lazyDirective from '../../lazy.js';
 import AddToGalleryModal from "../components/AddToGalleryModal.vue";
 import { useLikeStore } from '@/stores/likeStore';
 import { useAuthStore } from '@/stores/authStore';
+import { useFollowStore } from '@/stores/followStore';
+import { useUserStore } from '@/stores/userStore';
+
 export default {
     directives: {
         lazy: lazyDirective,
@@ -63,9 +69,21 @@ export default {
         };
     },
     async mounted() {
+        const userStore = useUserStore();
+        await userStore.fetchUserData();
+
         const likeStore = useLikeStore();
-        await likeStore.fetchLikedPhotos(); // Lấy danh sách các ảnh đã được like từ store
+        await likeStore.fetchLikedPhotos();
         this.updateLikedState();
+
+        const followStore = useFollowStore();
+        await followStore.fetchFollowingList();
+        this.updateFollowingState();
+    },
+    computed: {
+        userStore() {
+            return useUserStore();
+        }
     },
     methods: {
         async checkLogin() {
@@ -97,6 +115,30 @@ export default {
                     break;
                 default:
                     console.error('Unknown action:', action);
+            }
+        },
+        updateFollowingState() {
+            const followStore = useFollowStore();
+            this.photos.forEach(photo => {
+                photo.following = followStore.followingList.includes(photo.user.id);
+            });
+        },
+        async toggleFollow(item) {
+            if (!await this.checkLogin()) return;
+
+            const followStore = useFollowStore();
+            const userId = item.user.id;
+
+            try {
+                if (item.following) {
+                    await followStore.unfollowUser(userId);
+                    item.following = false;
+                } else {
+                    await followStore.followUser(userId);
+                    item.following = true;
+                }
+            } catch (error) {
+                console.error('Error toggling follow:', error);
             }
         },
         updateLikedState() {
@@ -144,6 +186,7 @@ export default {
         photos: {
             handler() {
                 this.updateLikedState();
+                this.updateFollowingState();
             },
             deep: true,
             immediate: true

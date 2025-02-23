@@ -164,19 +164,26 @@
                                 </div>
 
                                 <div class="user-profile-wrapper">
-                                    <img :src="photoDetail.user.profile_picture ? 'http://127.0.0.1:8000/' +
+                                    <img :src="photoDetail.user.profile_picture ? 'http://127.0.0.1:8000' +
                                     photoDetail.user.profile_picture : '/images/imageUserDefault.png'"
                                          alt="User Avatar" class="user-avatar-details" />
                                     <div class="user-info-follow">
                                         <h3 class="user-name">{{ photoDetail.user.username }}</h3>
                                         <p class="user-bio">{{ photoDetail.user.location }}</p>
-                                        <button class="btn-follow">Follow</button>
+
+                                        <!-- Kiểm tra nếu không phải chính mình thì mới hiển thị nút -->
+                                        <button v-if="photoDetail.user.id !== userStore.user?.id"
+                                                class="btn-follow"
+                                                :class="{ 'following': isFollowing }"
+                                                @click="toggleFollow">
+                                            {{ isFollowing ? 'Unfollow' : 'Follow' }}
+                                        </button>
                                     </div>
                                 </div>
                                 <!-- Chỉ sửa phần comment section trong template -->
                                 <div class="comments-section">
                                     <div class="comment-input-wrapper">
-                                        <img :src="photoDetail?.user?.profile_picture ? 'http://127.0.0.1:8000/' + photoDetail.user.profile_picture : '/images/imageUserDefault.png'"
+                                        <img :src="userStore.user.profile_picture ? 'http://127.0.0.1:8000' + userStore.user.profile_picture : '/images/imageUserDefault.png'"
                                              alt="User Avatar"
                                              class="comment-avatar-auth" />
 
@@ -269,6 +276,7 @@
 import axios from "axios";
 import Layout from "./Layout.vue";
 import getUrlList from "../provider.js";
+import { useFollowStore } from '@/stores/followStore';
 import { useCommentStore } from '@/stores/commentStore';
 import { useLikeStore } from '@/stores/likeStore';
 import { useAuthStore } from '@/stores/authStore';
@@ -325,6 +333,10 @@ export default {
         },
     },
     computed: {
+        isFollowing() {
+            return this.photoDetail.user?.id
+                && useFollowStore().followingList.includes(this.photoDetail.user.id);
+        },
         comments() {
             const commentStore = useCommentStore();
             return commentStore.comments;
@@ -360,6 +372,10 @@ export default {
                 const likeStore = useLikeStore();
                 await likeStore.fetchLikedPhotos();
                 this.updateLikedState();
+
+                // Fetch danh sách người dùng đã follow nếu đã đăng nhập
+                const followStore = useFollowStore();
+                await followStore.fetchFollowingList();
             }
         } catch (error) {
             console.error("Error in mounted:", error);
@@ -380,6 +396,22 @@ export default {
                 this.updateLikedState();
             } catch (error) {
                 console.error("Error fetching photo details:", error);
+            }
+        },
+        async toggleFollow() {
+            if (!await this.checkLogin()) return;
+
+            const followStore = useFollowStore();
+            const userId = this.photoDetail.user.id;
+
+            try {
+                if (this.isFollowing) {
+                    await followStore.unfollowUser(userId);
+                } else {
+                    await followStore.followUser(userId);
+                }
+            } catch (error) {
+                console.error("Error toggling follow:", error);
             }
         },
         async postComment() {

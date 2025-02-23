@@ -62,6 +62,12 @@ const baseUrl = 'http://127.0.0.1:8000/api';
 
           // search photos
           searchPhotos: `${baseUrl}/search-photos`,
+
+          // follow/unfollow
+          followUser: `${baseUrl}/follow`,
+          unfollowUser: (following_id) => `${baseUrl}/unfollow/${following_id}`,
+          getFollowingList: `${baseUrl}/following-list`,
+          getFollowersList: `${baseUrl}/followers-list`,
       }
 }
 export default getUrlList;

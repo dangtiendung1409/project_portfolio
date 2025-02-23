@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class HomePageController extends Controller
 {
@@ -89,26 +90,38 @@ class HomePageController extends Controller
         $images = Photo::with(['category', 'user'])->get();
         return response()->json($images);
     }
-    public function getFollows() {
-        // Lấy tất cả users cùng với 4 ảnh đầu tiên từ tất cả các photo của họ
-        $follows = User::with(['photos.images' => function ($query) {
-            $query->limit(4); // Giới hạn chỉ lấy 4 ảnh đầu tiên từ tất cả các photo
-        }])->get();
+    public function getFollows(Request $request)
+    {
+        try {
+            $currentUser = JWTAuth::parseToken()->authenticate();
+            $followedUserIds = $currentUser->followings()->pluck('users.id');
+            $blockedUserIds = $currentUser->blockedUsers()->pluck('blocked_id')
+                ->merge($currentUser->blockedBy()->pluck('blocker_id'));
 
-        // Khai báo biến chứa kết quả cuối cùng
-        $result = $follows->map(function ($user) {
-            // Lấy ra tất cả ảnh từ các photo của user
-            $allImages = $user->photos->flatMap(function ($photo) {
-                return $photo->images; // Lấy tất cả ảnh từ từng photo
-            });
+            // Lấy danh sách user chưa follow và chưa bị block
+            $users = User::whereNotIn('id', $followedUserIds)
+                ->whereNotIn('id', $blockedUserIds)
+                ->where('id', '!=', $currentUser->id)
+                ->with(['photos' => function ($query) {
+                    $query->where('privacy_status', 0)
+                        ->where('photo_status', 'approved');
+                }])
+                ->get();
+        } catch (\Exception $e) {
+            // Nếu không có token, lấy toàn bộ danh sách user cùng với ảnh được hiển thị
+            $users = User::with(['photos' => function ($query) {
+                $query->where('privacy_status', 0)
+                    ->where('photo_status', 'approved');
+            }])
+                ->get();
+        }
 
-            // Lấy ra 4 ảnh đầu tiên từ tất cả ảnh của user
-            $user->images = $allImages->take(4); // Lấy 4 ảnh đầu tiên
-            return $user; // Trả về user với 4 ảnh
-        });
-
-        return response()->json($result);
+        return response()->json([
+            'status' => 'success',
+            'data' => $users
+        ], 200);
     }
+
     public function likePhoto(Request $request)
     {
         $user = Auth::user(); // Người đang đăng nhập

@@ -231,15 +231,23 @@
               "tags": [
                   "HomePage"
               ],
-              "summary": "Get Follow Data",
+              "summary": "Get Users Not Followed",
               "operationId": "getFollowData",
               "produces": [
                   "application/json"
               ],
-              "parameters": [],
+              "parameters": [
+                  {
+                      "name": "Authorization",
+                      "in": "header",
+                      "required": true,
+                      "type": "string",
+                      "description": "Bearer token for authentication"
+                  }
+              ],
               "responses": {
                   "200": {
-                      "description": "Follow data retrieved successfully",
+                      "description": "List of users who are not followed and not blocked",
                       "schema": {
                           "type": "array",
                           "items": {
@@ -248,15 +256,44 @@
                                   "id": {
                                       "type": "integer"
                                   },
-                                  "user_id": {
-                                      "type": "integer"
+                                  "username": {
+                                      "type": "string"
                                   },
-                                  "follower_id": {
-                                      "type": "integer"
+                                  "name": {
+                                      "type": "string"
+                                  },
+                                  "email": {
+                                      "type": "string"
+                                  },
+                                  "profile_picture": {
+                                      "type": "string"
+                                  },
+                                  "bio": {
+                                      "type": "string"
+                                  },
+                                  "photos": {
+                                      "type": "array",
+                                      "items": {
+                                          "type": "object",
+                                          "properties": {
+                                              "id": {
+                                                  "type": "integer"
+                                              },
+                                              "image_url": {
+                                                  "type": "string"
+                                              },
+                                              "caption": {
+                                                  "type": "string"
+                                              }
+                                          }
+                                      }
                                   }
                               }
                           }
                       }
+                  },
+                  "401": {
+                      "description": "Unauthorized - Invalid or missing token"
                   },
                   "500": {
                       "description": "Internal server error"
@@ -264,6 +301,7 @@
               }
           }
       },
+
       "/getPhotoDetail/{token}": {
           "get": {
               "tags": [
@@ -543,6 +581,245 @@
                   },
                   "404": {
                       "description": "Comment not found"
+                  },
+                  "500": {
+                      "description": "Internal server error"
+                  }
+              },
+              "security": [
+                  {
+                      "Bearer": []
+                  }
+              ]
+          }
+      },
+      "/follow": {
+          "post": {
+              "tags": [
+                  "Follow"
+              ],
+              "summary": "Follow a user",
+              "description": "Follow another user. The authenticated user follows the specified user.",
+              "operationId": "followUser",
+              "produces": [
+                  "application/json"
+              ],
+              "parameters": [
+                  {
+                      "name": "Authorization",
+                      "in": "header",
+                      "description": "JWT Bearer token",
+                      "required": true,
+                      "type": "string"
+                  },
+                  {
+                      "name": "body",
+                      "in": "body",
+                      "description": "User ID to follow",
+                      "required": true,
+                      "schema": {
+                          "type": "object",
+                          "properties": {
+                              "following_id": {
+                                  "type": "integer",
+                                  "example": 2
+                              }
+                          }
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "Successfully followed the user",
+                      "schema": {
+                          "type": "object",
+                          "properties": {
+                              "message": {
+                                  "type": "string",
+                                  "example": "Đã theo dõi thành công!"
+                              }
+                          }
+                      }
+                  },
+                  "400": {
+                      "description": "Bad request - Already following or trying to follow self"
+                  },
+                  "401": {
+                      "description": "Unauthorized - Invalid or missing token"
+                  },
+                  "500": {
+                      "description": "Internal server error"
+                  }
+              },
+              "security": [
+                  {
+                      "Bearer": []
+                  }
+              ]
+          }
+      },
+      "/unfollow/{following_id}": {
+          "post": {
+              "tags": [
+                  "Follow"
+              ],
+              "summary": "Unfollow a user",
+              "description": "Unfollow a user that the authenticated user is currently following.",
+              "operationId": "unfollowUser",
+              "produces": [
+                  "application/json"
+              ],
+              "parameters": [
+                  {
+                      "name": "Authorization",
+                      "in": "header",
+                      "description": "JWT Bearer token",
+                      "required": true,
+                      "type": "string"
+                  },
+                  {
+                      "name": "following_id",
+                      "in": "path",
+                      "description": "ID of the user to unfollow",
+                      "required": true,
+                      "type": "integer",
+                      "example": 2
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "Successfully unfollowed the user",
+                      "schema": {
+                          "type": "object",
+                          "properties": {
+                              "message": {
+                                  "type": "string",
+                                  "example": "Đã hủy theo dõi!"
+                              }
+                          }
+                      }
+                  },
+                  "400": {
+                      "description": "Bad request - User was not being followed"
+                  },
+                  "401": {
+                      "description": "Unauthorized - Invalid or missing token"
+                  },
+                  "500": {
+                      "description": "Internal server error"
+                  }
+              },
+              "security": [
+                  {
+                      "Bearer": []
+                  }
+              ]
+          }
+      },
+      "/following-list": {
+          "get": {
+              "tags": [
+                  "Follow"
+              ],
+              "summary": "Get following list",
+              "description": "Retrieve a list of users that the authenticated user is following.",
+              "operationId": "getFollowingList",
+              "produces": [
+                  "application/json"
+              ],
+              "parameters": [
+                  {
+                      "name": "Authorization",
+                      "in": "header",
+                      "description": "JWT Bearer token",
+                      "required": true,
+                      "type": "string"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "Successfully retrieved the following list",
+                      "schema": {
+                          "type": "array",
+                          "items": {
+                              "type": "object",
+                              "properties": {
+                                  "id": {
+                                      "type": "integer",
+                                      "example": 2
+                                  },
+                                  "name": {
+                                      "type": "string",
+                                      "example": "Nguyen Van A"
+                                  },
+                                  "email": {
+                                      "type": "string",
+                                      "example": "nguyenvana@example.com"
+                                  }
+                              }
+                          }
+                      }
+                  },
+                  "401": {
+                      "description": "Unauthorized - Invalid or missing token"
+                  },
+                  "500": {
+                      "description": "Internal server error"
+                  }
+              },
+              "security": [
+                  {
+                      "Bearer": []
+                  }
+              ]
+          }
+      },
+      "/followers-list": {
+          "get": {
+              "tags": [
+                  "Follow"
+              ],
+              "summary": "Get followers list",
+              "description": "Retrieve a list of users who are following the authenticated user.",
+              "operationId": "getFollowersList",
+              "produces": [
+                  "application/json"
+              ],
+              "parameters": [
+                  {
+                      "name": "Authorization",
+                      "in": "header",
+                      "description": "JWT Bearer token",
+                      "required": true,
+                      "type": "string"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "Successfully retrieved the followers list",
+                      "schema": {
+                          "type": "array",
+                          "items": {
+                              "type": "object",
+                              "properties": {
+                                  "id": {
+                                      "type": "integer",
+                                      "example": 3
+                                  },
+                                  "name": {
+                                      "type": "string",
+                                      "example": "Tran Van B"
+                                  },
+                                  "email": {
+                                      "type": "string",
+                                      "example": "tranvanb@example.com"
+                                  }
+                              }
+                          }
+                      }
+                  },
+                  "401": {
+                      "description": "Unauthorized - Invalid or missing token"
                   },
                   "500": {
                       "description": "Internal server error"
