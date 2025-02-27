@@ -2,12 +2,9 @@
     <Layout>
         <template v-slot:content="slotProps">
             <div class="site-section">
-                <!-- Cover Photo -->
                 <div class="cover-photo">
                     <img :src="coverPhotoUrl" alt="Cover Photo" class="cover-img" />
                 </div>
-
-                <!-- Profile Information -->
                 <div class="profile-info">
                     <div class="profile-avatar">
                         <img :src="profilePictureUrl" alt="Profile Avatar" class="avatar-img" />
@@ -15,20 +12,19 @@
                     <div class="screen-right-icons">
                         <i @click="openUpdateProfileModal(user.id)" class="fa-solid fa-pencil" v-if="isMyProfile"></i>
                         <i class="fa-solid fa-share-nodes" @click="copyProfileLink"></i>
-                        <i class="fa-solid fa-ellipsis"  @click.stop="toggleDropdown('dropdown-' + user.id, $event)"
+                        <i class="fa-solid fa-ellipsis" @click.stop="toggleDropdown('dropdown-' + user.id, $event)"
                            :class="{'active': activeDropdown === 'dropdown-' + user.id}"></i>
                     </div>
                     <div v-if="activeDropdown === 'dropdown-' + user.id" class="dropdown-content show" @click.stop>
                         <ul>
-                            <li v-if="isMyProfile">
+                            <li v-if="isMyProfile" @click="goToMyPhotos">
                                 <i class="fas fa-camera"></i> My Photos
                             </li>
-                            <li v-if="isMyProfile">
+                            <li v-if="isMyProfile" @click="goToMyGalleries">
                                 <i class="fas fa-images"></i> My Galleries
                             </li>
-                            <!-- Sử dụng v-if để kiểm tra điều kiện -->
-                            <li v-if="!isMyProfile">
-                                <i class="fa-solid fa-user-large-slash"></i> Block user
+                            <li v-if="!isMyProfile" @click="toggleBlockUser">
+                                <i class="fa-solid fa-user-large-slash"></i> {{ isBlocked ? 'Unblock user' : 'Block user' }}
                             </li>
                             <li v-if="!isMyProfile">
                                 <i class="fa-regular fa-flag"></i> Report this profile
@@ -40,9 +36,13 @@
                         <p class="profile-location">
                             <i class="fa-solid fa-location-dot"></i> {{ user.location ? user.location : 'no location' }}
                         </p>
-                        <button class="follow-button" v-if="!isMyProfile" @click="toggleFollow">
+                        <button v-if="!isMyProfile && isBlocked" @click="toggleBlockUser" class="unblock-button">
+                            Unblock
+                        </button>
+                        <button v-if="!isMyProfile && !isBlocked" @click="toggleFollow" class="follow-button">
                             {{ isFollowing ? 'Unfollow' : 'Follow' }}
                         </button>
+
                         <p class="profile-bio">
                             <span v-if="user.bio">
                                 <span v-if="isBioExpanded">{{ user.bio }}</span>
@@ -54,27 +54,24 @@
                             <span v-else>No bio</span>
                         </p>
                         <div class="profile-stats">
-                            <span><strong>{{ followersCount }}</strong> Followers</span>
-                            <span><strong>{{ user.following_count }}</strong> Following</span>
+                            <span @click="showFollowersPopup"><strong>{{ userFollowersCount }}</strong> Followers</span>
+                            <span @click="showFollowingPopup"><strong>{{ userFollowingCount }}</strong> Following</span>
                             <span><strong>2.1M</strong> Photo Likes</span>
                         </div>
                     </div>
                 </div>
-                <!-- Tabs -->
-                <div class="tabs">
-                    <a href="#" class="tab" :class="{ active: activeTab === 'photos' }" @click.prevent="activeTab = 'photos'">
+                <div class="tabs" v-if="!isBlocked && (photos.length > 0 || galleries.length > 0)">
+                    <a class="tab" :class="{ active: activeTab === 'photos' }" @click.prevent="activeTab = 'photos'" v-if="photos.length > 0">
                         Photos <span>{{ photos.length }}</span>
                     </a>
-                    <a href="#" class="tab" :class="{ active: activeTab === 'galleries' }" @click.prevent="activeTab = 'galleries'">
+                    <a class="tab" :class="{ active: activeTab === 'galleries' }" @click.prevent="activeTab = 'galleries'" v-if="galleries.length > 0">
                         Galleries <span>{{ galleries.length }}</span>
                     </a>
                 </div>
-
-                <!-- Content based on active tab -->
-                <div v-if="activeTab === 'photos'">
-                    <PhotoGrid :photos="photos" />
+                <div v-if="activeTab === 'photos' && !isBlocked">
+                    <PhotoGrid :photos="photos" :checkLogin="checkLogin" />
                 </div>
-                <div v-else-if="activeTab === 'galleries'">
+                <div v-else-if="activeTab === 'galleries' && !isBlocked">
                     <GalleryGrid :galleries="galleries" />
                 </div>
             </div>
@@ -84,8 +81,52 @@
         :isVisible="showUpdateModal"
         :user-id="selectedUserId"
         @close="closeUpdateProfileModal"
-        @update="fetchUserData"
+        @update="reloadProfileData"
     />
+    <!-- Popup hiển thị danh sách Followers -->
+    <div v-if="followersPopupVisible" class="popup-overlay" @click.self="closeFollowersPopup">
+        <div class="popup-content">
+            <div class="popup-header">
+                <h3>{{ user.name || user.username }}'s Followers</h3>
+                <button @click="closeFollowersPopup" class="popup-close">×</button>
+            </div>
+            <div v-if="followersData.length > 0" class="popup-list">
+                <div v-for="follower in followersData" :key="follower.id" class="popup-item">
+                    <img :src="follower.profile_picture ? `http://127.0.0.1:8000/images/avatars/${follower.profile_picture.split('/').pop()}` : '/images/imageUserDefault.png'" alt="Avatar" class="popup-avatar" />
+                    <div class="popup-user-info">
+                        <span class="popup-username">{{ follower.username }}</span>
+                        <span class="popup-followers">{{ follower.followers_count || 0 }} Followers</span>
+                    </div>
+                    <button @click.stop="toggleFollowUser(follower.username)" class="popup-follow-button">
+                        {{ followStore.followingList.includes(follower.id) ? 'Unfollow' : 'Follow' }}
+                    </button>
+                </div>
+            </div>
+            <div v-else class="popup-no-data">No followers found.</div>
+        </div>
+    </div>
+    <!-- Popup hiển thị danh sách Following -->
+    <div v-if="followingPopupVisible" class="popup-overlay" @click.self="closeFollowingPopup">
+        <div class="popup-content">
+            <div class="popup-header">
+                <h3>{{ user.name || user.username }}'s Following</h3>
+                <button @click="closeFollowingPopup" class="popup-close">×</button>
+            </div>
+            <div v-if="followingData.length > 0" class="popup-list">
+                <div v-for="following in followingData" :key="following.id" class="popup-item">
+                    <img :src="following.profile_picture ? `http://127.0.0.1:8000/images/avatars/${following.profile_picture.split('/').pop()}` : '/images/imageUserDefault.png'" alt="Avatar" class="popup-avatar" />
+                    <div class="popup-user-info">
+                        <span class="popup-username">{{ following.username }}</span>
+                        <span class="popup-followers">{{ following.followers_count || 0 }} Followers</span>
+                    </div>
+                    <button @click.stop="toggleFollowUser(following.username)" class="popup-follow-button">
+                        {{ followStore.followingList.includes(following.id) ? 'Unfollow' : 'Follow' }}
+                    </button>
+                </div>
+            </div>
+            <div v-else class="popup-no-data">No following found.</div>
+        </div>
+    </div>
 </template>
 
 <script>
@@ -95,9 +136,14 @@ import UpdateProfileModal from './MyAccount/components/UpdateProfileModal.vue';
 import PhotoGrid from './components/profile/PhotoGrid.vue';
 import GalleryGrid from './components/profile/GalleryGrid.vue';
 import getUrlList from '../provider.js';
-import { notification } from 'ant-design-vue';
+import { useAuthStore } from '@/stores/authStore';
 import { useUserStore } from '../stores/userStore.js';
 import { useFollowStore } from '../stores/followStore.js';
+import { useBlockStore } from '../stores/blockStore';
+import { notification, Modal } from 'ant-design-vue';
+import { ExclamationCircleOutlined } from '@ant-design/icons-vue';
+import { h } from 'vue';
+
 export default {
     name: "MyProfile",
     components: {
@@ -116,9 +162,11 @@ export default {
             isBioExpanded: false,
             showUpdateModal: false,
             selectedUserId: null,
-            isMyProfile: false, // Thêm biến này để xác định trang cá nhân của mình
-            isFollowing: false, // Trạng thái Follow/Unfollow
-            followersCount: 0, // Số lượng người theo dõi
+            isMyProfile: false,
+            isFollowing: false,
+            isBlocked: false,
+            followersPopupVisible: false,
+            followingPopupVisible: false,
         };
     },
     computed: {
@@ -133,18 +181,65 @@ export default {
                 return this.user.bio.substring(0, 100) + '...';
             }
             return this.user.bio;
+        },
+        userStore() {
+            return useUserStore();
+        },
+        isLoggedIn() {
+            const authStore = useAuthStore();
+            return authStore.isLoggedIn;
+        },
+        followStore() {
+            return useFollowStore();
+        },
+        userFollowersCount() {
+            return this.followStore.userFollowersList.length;
+        },
+        userFollowingCount() {
+            return this.followStore.userFollowingList.length;
+        },
+        followersData() {
+            return this.followStore.userFollowersList;
+        },
+        followingData() {
+            return this.followStore.userFollowingList;
+        },
+    },
+    watch: {
+        '$route.params.username': {
+            immediate: true,
+            handler() {
+                this.reloadProfileData();
+            }
         }
     },
     async mounted() {
-        await this.fetchUserData();
-        this.fetchPhotos();
-        this.fetchGalleries();
-        await this.checkIfMyProfile();
-        if (!this.isMyProfile) {
-            await this.checkFollowingStatus();
-        }
+        await this.reloadProfileData();
     },
     methods: {
+        async checkLogin() {
+            const authStore = useAuthStore();
+            await authStore.checkLoginStatus();
+            if (!authStore.isLoggedIn) {
+                this.$router.push({ name: 'Login' });
+                return false;
+            }
+            return true;
+        },
+        async reloadProfileData() {
+            await this.fetchUserData();
+            this.fetchPhotos();
+            this.fetchGalleries();
+            await this.checkIfBlocked();
+            await this.checkIfMyProfile();
+            if (!this.isMyProfile) {
+                await this.checkFollowingStatus();
+            }
+            const followStore = useFollowStore();
+            const username = this.$route.params.username;
+            await followStore.fetchUserFollowersList(username);
+            await followStore.fetchUserFollowingList(username);
+        },
         toggleDropdown(id) {
             this.activeDropdown = this.activeDropdown === id ? null : id;
         },
@@ -157,12 +252,41 @@ export default {
                 console.error('Error fetching user data:', error);
             }
         },
+        async checkIfBlocked() {
+            const blockStore = useBlockStore();
+            await blockStore.fetchBlockedUsers();
+            this.isBlocked = blockStore.blockedUsers.includes(this.user.id);
+        },
+        async toggleBlockUser() {
+            if (!await this.checkLogin()) return;
+            const blockStore = useBlockStore();
+            if (this.isBlocked) {
+                await blockStore.unblockUser(this.user.id);
+                this.isBlocked = false;
+                notification.success({
+                    message: 'Success',
+                    description: `${this.user.username} is unblocked.`,
+                    placement: 'topRight',
+                    duration: 3,
+                });
+            } else {
+                await blockStore.blockUser(this.user.id);
+                this.isBlocked = true;
+                this.isFollowing = false;
+                notification.success({
+                    message: 'Success',
+                    description: `${this.user.username} has been blocked. All their related content will not be visible going forward.`,
+                    placement: 'topRight',
+                    duration: 3,
+                });
+            }
+        },
         openUpdateProfileModal(id) {
             this.selectedUserId = id;
-            this.showUpdateModal = true; // Mở modal
+            this.showUpdateModal = true;
         },
         closeUpdateProfileModal() {
-            this.showUpdateModal = false; // Close modal
+            this.showUpdateModal = false;
         },
         async checkFollowingStatus() {
             const followStore = useFollowStore();
@@ -170,30 +294,46 @@ export default {
             this.isFollowing = followStore.followingList.includes(this.user.id);
         },
         async toggleFollow() {
+            if (!await this.checkLogin()) return;
+            if (this.isBlocked) return;
+
+            const followStore = useFollowStore();
+            const username = this.$route.params.username;
+
             if (this.isFollowing) {
-                await this.unfollowUser();
+                Modal.confirm({
+                    title: 'Are you sure you want to unfollow this user?',
+                    icon: h(ExclamationCircleOutlined),
+                    content: 'This will unfollow the photographer. You will no longer see their content in your For You feed.',
+                    onOk: async () => {
+                        try {
+                            await followStore.unfollowUser(this.user.id, username);
+                            this.isFollowing = false;
+                            notification.success({
+                                message: 'Success',
+                                description: `You have unfollowed ${this.user.username}.`,
+                                placement: 'topRight',
+                                duration: 3,
+                            });
+                        } catch (error) {
+                            console.error('Error unfollowing user:', error);
+                        }
+                    },
+                    onCancel() {},
+                });
             } else {
-                await this.followUser();
-            }
-        },
-        async followUser() {
-            try {
-                const followStore = useFollowStore();
-                await followStore.followUser(this.user.id);
-                this.isFollowing = true;
-                this.followersCount++;
-            } catch (error) {
-                console.error('Error following user:', error);
-            }
-        },
-        async unfollowUser() {
-            try {
-                const followStore = useFollowStore();
-                await followStore.unfollowUser(this.user.id);
-                this.isFollowing = false;
-                this.followersCount--;
-            } catch (error) {
-                console.error('Error unfollowing user:', error);
+                try {
+                    await followStore.followUser(this.user.id, username);
+                    this.isFollowing = true;
+                    notification.success({
+                        message: 'Success',
+                        description: `You are now following ${this.user.username}.`,
+                        placement: 'topRight',
+                        duration: 3,
+                    });
+                } catch (error) {
+                    console.error('Error following user:', error);
+                }
             }
         },
         async fetchPhotos() {
@@ -243,7 +383,80 @@ export default {
             if (authUser.username === this.$route.params.username) {
                 this.isMyProfile = true;
             }
-        }
+        },
+        goToMyPhotos() {
+            this.$router.push({ name: 'MyPhoto' });
+        },
+        goToMyGalleries() {
+            this.$router.push({ name: 'MyGallery' });
+        },
+        showFollowersPopup() {
+            console.log('Opening Followers Popup', this.followersData);
+            this.followersPopupVisible = true;
+        },
+        closeFollowersPopup() {
+            this.followersPopupVisible = false;
+        },
+        showFollowingPopup() {
+            console.log('Opening Following Popup', this.followingData);
+            this.followingPopupVisible = true;
+        },
+        closeFollowingPopup() {
+            this.followingPopupVisible = false;
+        },
+        async toggleFollowUser(username) {
+            if (!await this.checkLogin()) return;
+
+            const followStore = useFollowStore();
+            try {
+                const userData = await axios.get(getUrlList().getUserByUserName(username));
+                const userId = userData.data.id;
+
+                if (followStore.followingList.includes(userId)) {
+                    await followStore.unfollowUser(userId);
+                    notification.success({
+                        message: 'Success',
+                        description: `You have unfollowed ${username}.`,
+                        placement: 'topRight',
+                        duration: 3,
+                    });
+                } else {
+                    await followStore.followUser(userId);
+                    notification.success({
+                        message: 'Success',
+                        description: `You are now following ${username}.`,
+                        placement: 'topRight',
+                        duration: 3,
+                    });
+                }
+                // Làm mới danh sách followers/following sau khi thay đổi
+                const profileUsername = this.$route.params.username;
+                await followStore.fetchUserFollowersList(profileUsername);
+                await followStore.fetchUserFollowingList(profileUsername);
+            } catch (error) {
+                console.error('Error toggling follow for user:', error);
+                notification.error({
+                    message: 'Error',
+                    description: `Failed to toggle follow for ${username}.`,
+                    placement: 'topRight',
+                    duration: 3,
+                });
+            }
+        },
+        async fetchUserByUsername(username) {
+            try {
+                const response = await axios.get(getUrlList().getUserByUserName(username));
+                return {
+                    id: response.data.id,
+                    username: response.data.username,
+                    profile_picture: response.data.profile_picture,
+                    followers_count: response.data.followers_count || 0 // Lấy trực tiếp từ API
+                };
+            } catch (error) {
+                console.error(`Error fetching user data for ${username}:`, error);
+                return null;
+            }
+        },
     }
 };
 </script>
@@ -254,12 +467,13 @@ export default {
     right: 75px;
     top: 83%;
     margin-top: 10px;
-    z-index: 1000;
+    z-index: 1001;
     background-color: white;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     border-radius: 4px;
     overflow: hidden;
 }
+
 .dropdown-content ul {
     list-style: none;
     padding: 0;
@@ -278,8 +492,8 @@ export default {
 }
 
 .dropdown-content li:hover {
-    color: whitesmoke; /* Màu chữ khi hover */
-    background-color: #1890ff; /* Màu nền khi hover */
+    color: whitesmoke;
+    background-color: #1890ff;
 }
 
 .dropdown-content li i {
@@ -290,12 +504,38 @@ export default {
     color: whitesmoke;
     background-color: #1890ff;
 }
+
+.unblock-button {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 16px;
+    line-height: 20px;
+    font-weight: bold;
+    margin: 0px;
+    border-radius: 28px;
+    cursor: pointer;
+    text-align: center;
+    border: 2px solid red;
+    color: red;
+    background-color: white;
+    width: auto;
+    min-width: 110px;
+    max-height: 32px;
+    padding: 4px 14px;
+}
+
+.unblock-button:hover {
+    background-color: rgb(230, 230, 230);
+}
+
 .site-section {
     color: #333;
     display: flex;
     flex-direction: column;
     padding: 5px;
 }
+
 .screen-right-icons {
     position: absolute;
     top: 80%;
@@ -314,6 +554,7 @@ export default {
 .screen-right-icons i:hover {
     color: #0870D1;
 }
+
 .cover-photo {
     margin-top: 65px;
     word-break: break-word;
@@ -377,10 +618,11 @@ export default {
     color: gray;
     margin: 5px 0;
 }
+
 .profile-location i {
-    margin-right: 2px; /* Tạo khoảng cách giữa icon và chữ */
-    color: black; /* Màu đỏ cho icon (tuỳ chỉnh) */
-    font-size: 16px; /* Kích thước icon */
+    margin-right: 2px;
+    color: black;
+    font-size: 16px;
 }
 
 .profile-bio {
@@ -405,17 +647,20 @@ export default {
     font-size: 14px;
     color: black;
     font-weight: bold;
+    cursor: pointer;
+}
+
+.profile-stats span:hover {
+    color: #007bff;
 }
 
 .profile-stats span strong {
-    color: gray; /* Màu xám cho số */
+    color: gray;
 }
 
 .follow-button {
     display: inline-flex;
-    -webkit-box-pack: center;
     justify-content: center;
-    -webkit-box-align: center;
     align-items: center;
     font-size: 16px;
     line-height: 20px;
@@ -468,5 +713,114 @@ export default {
     right: 0;
     height: 2px;
     background-color: #0870D1;
+}
+
+/* Style cho popup */
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.popup-content {
+    background-color: white;
+    border-radius: 12px; /* Tăng độ cong */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); /* Bóng lớn hơn */
+    width: 500px; /* Mở rộng độ rộng */
+    max-height: 90vh; /* Tăng chiều cao tối đa */
+    overflow-y: auto;
+    position: relative;
+}
+
+.popup-header {
+    padding: 15px 20px; /* Tăng padding */
+    border-bottom: 2px solid #eee; /* Dày hơn */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.popup-header h3 {
+    margin: 0;
+    font-size: 20px; /* Tăng kích thước chữ */
+    color: #333;
+    font-weight: bold;
+}
+
+.popup-close {
+    background: none;
+    border: none;
+    font-size: 34px; /* Tăng kích thước nút đóng */
+    cursor: pointer;
+    color: #666;
+    padding: 0;
+    line-height: 1;
+    width: 24px;
+    height: 24px;
+}
+
+.popup-list {
+    padding: 15px; /* Tăng padding */
+}
+
+.popup-item {
+    display: flex;
+    align-items: center;
+    padding: 15px 0; /* Tăng padding */
+    border-bottom: 2px solid #eee; /* Dày hơn */
+}
+
+.popup-avatar {
+    width: 40px; /* Tăng kích thước avatar */
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 15px; /* Tăng khoảng cách */
+}
+
+.popup-user-info {
+    flex-grow: 1;
+}
+
+.popup-username {
+    font-size: 16px; /* Tăng kích thước chữ */
+    color: #333;
+    display: block;
+    font-weight: bold;
+}
+
+.popup-followers {
+    font-size: 14px; /* Tăng kích thước chữ */
+    color: #666;
+    display: block;
+}
+
+.popup-follow-button {
+    background-color: #007bff;
+    border: none;
+    border-radius: 24px; /* Tăng độ cong */
+    color: white;
+    padding: 8px 16px; /* Tăng padding */
+    font-size: 14px; /* Tăng kích thước chữ */
+    cursor: pointer;
+    margin-left: 15px; /* Tăng khoảng cách */
+}
+
+.popup-follow-button:hover {
+    background-color: #0056b3;
+}
+
+.popup-no-data {
+    padding: 30px; /* Tăng padding */
+    text-align: center;
+    color: #666;
+    font-size: 16px; /* Tăng kích thước chữ */
 }
 </style>

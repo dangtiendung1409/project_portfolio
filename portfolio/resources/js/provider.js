@@ -66,8 +66,16 @@ const baseUrl = 'http://127.0.0.1:8000/api';
           // follow/unfollow
           followUser: `${baseUrl}/follow`,
           unfollowUser: (following_id) => `${baseUrl}/unfollow/${following_id}`,
-          getFollowingList: `${baseUrl}/following-list`,
-          getFollowersList: `${baseUrl}/followers-list`,
+          getFollowingList: `${baseUrl}/following-list`, // danh sách người dùng đang login follow
+          getFollowersList: `${baseUrl}/followers-list`, // danh sách follow người dùng đang login
+          getFollowingUser: (username) => `${baseUrl}/getFollowingUser/${username}`, // danh sách username đang follow
+          getFollowersUser: (username) => `${baseUrl}/getFollowersUser/${username}`, // danh sách theo dõi username
+
+
+          // block/unblock
+          blockUser: `${baseUrl}/block`,
+          unblockUser: `${baseUrl}/unblock`,
+          getBlockedUsers: `${baseUrl}/blocked-users`,
       }
 }
 export default getUrlList;

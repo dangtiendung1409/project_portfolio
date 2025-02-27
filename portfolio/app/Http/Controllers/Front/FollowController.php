@@ -97,4 +97,45 @@ class FollowController extends Controller
 
         return response()->json($followers);
     }
+    /**
+     * Danh sách mà username theo dõi
+     */
+    public function followingUser($username)
+    {
+        $user = User::where('username', $username)->first();
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+
+        $following = $user->followings()->get();
+
+        // Thêm followers_count cho mỗi user trong danh sách following
+        $followingWithCount = $following->map(function ($follower) {
+            $followersCount = Follow::where('following_id', $follower->id)->count();
+            return array_merge($follower->toArray(), ['followers_count' => $followersCount]);
+        });
+
+        return response()->json($followingWithCount);
+    }
+
+    /**
+     * Danh sách người theo dõi username
+     */
+    public function followersUser($username)
+    {
+        $user = User::where('username', $username)->first();
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+
+        $followers = $user->followers()->get();
+
+        // Thêm followers_count cho mỗi user trong danh sách followers
+        $followersWithCount = $followers->map(function ($follower) {
+            $followersCount = Follow::where('following_id', $follower->id)->count();
+            return array_merge($follower->toArray(), ['followers_count' => $followersCount]);
+        });
+
+        return response()->json($followersWithCount);
+    }
 }

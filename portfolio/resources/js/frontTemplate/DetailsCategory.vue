@@ -90,9 +90,16 @@
                         <div v-if="activeDropdown === 'dotsDropdown-' + image.id" class="dropdown-content show" style="right: 25px">
                             <ul>
                                 <li @click="handleClick('addToGallery', image.id)"><i class="fa-regular fa-square-plus"></i> Add to Gallery</li>
-                                <li @click="handleClick('blockUser', image.id)"><i class="fas fa-user-slash"></i> Block User</li>
-                                <li @click="handleClick('followUser', image.id)"><i class="fas fa-user-plus"></i> Follow User</li>
-                                <li @click="handleClick('reportPhoto', image.id)"><i class="fas fa-flag"></i> Report This Photo</li>
+                                <li v-if="image.user && userStore.user && image.user.id !== userStore.user.id" @click="toggleBlockUser(image.user)">
+                                    <i class="fas fa-user-slash"></i> {{ image.blocked ? 'Unblock' : 'Block' }}
+                                </li>
+                                <li v-if="image.user && userStore.user && image.user.id !== userStore.user.id" @click="toggleFollow(image)">
+                                    <i class="fas" :class="image.following ? 'fa-user-minus' : 'fa-user-plus'"></i>
+                                    {{ image.following ? 'Unfollow' : 'Follow' }}
+                                </li>
+                                <li v-if="image.user && userStore.user && image.user.id !== userStore.user.id" @click="handleClick('reportPhoto', image.id)"><i class="fas fa-flag"></i>
+                                    Report This Photo
+                                </li>
                             </ul>
                         </div>
                     </div>
@@ -114,7 +121,12 @@ import getUrlList from '../provider.js';
 import AddToGalleryModal from "./components/AddToGalleryModal.vue";
 import { useLikeStore } from '@/stores/likeStore';
 import { useAuthStore } from '@/stores/authStore';
-
+import { useBlockStore } from '@/stores/blockStore';
+import { useFollowStore } from '@/stores/followStore';
+import { useUserStore } from '@/stores/userStore';
+import { Modal,notification } from 'ant-design-vue';
+import { ExclamationCircleOutlined } from '@ant-design/icons-vue';
+import { h } from 'vue';
 export default {
     name: "DetailsCategory",
     components: {
@@ -140,6 +152,36 @@ export default {
         const likeStore = useLikeStore();
         await likeStore.fetchLikedPhotos(); // Lấy danh sách các ảnh đã được like từ store
         this.updateLikedState();
+
+        const notifData = localStorage.getItem('blockNotification');
+        if (notifData) {
+            const {message, description, duration} = JSON.parse(notifData);
+            notification.success({
+                message,
+                description,
+                placement: 'topRight',
+                duration,
+            });
+            localStorage.removeItem('blockNotification');
+        }
+    },
+    async mounted() {
+        const userStore = useUserStore();
+        await userStore.fetchUserData();
+
+        const followStore = useFollowStore();
+        await followStore.fetchFollowingList();
+        this.updateFollowingState();
+
+        const blockStore = useBlockStore();
+        blockStore.fetchBlockedUsers().then(() => {
+            this.updateBlockedState();
+        });
+    },
+    computed: {
+        userStore() {
+            return useUserStore();
+        }
     },
     methods: {
         async fetchCategories() {
@@ -159,13 +201,117 @@ export default {
                 return;
             }
             const urlList = getUrlList();
+            const token = localStorage.getItem('token');
+
             try {
-                const response = await axios.get(urlList.getPhotosByCategorySlugs(slugs));
+                const response = await axios.get(urlList.getPhotosByCategorySlugs(slugs), {
+                    headers: token ? { 'Authorization': 'Bearer ' + token } : {}
+                });
                 this.images = response.data;
             } catch (error) {
                 console.error('Failed to fetch photos:', error);
                 this.images = [];
             }
+        },
+        updateFollowingState() {
+            const followStore = useFollowStore();
+            this.images.forEach(image => {
+                image.following = followStore.followingList.includes(image.user.id);
+            });
+        },
+        async toggleFollow(image) {
+            if (!await this.checkLogin()) return;
+
+            const followStore = useFollowStore();
+            const userId = image.user.id;
+            const username = image.user.username; // Lấy username để hiển thị trong thông báo
+
+            if (image.following) {
+                Modal.confirm({
+                    title: 'Are you sure you want to unfollow this user?',
+                    icon: h(ExclamationCircleOutlined),
+                    content: 'This will unfollow the photographer. You will no longer see their content in your For You feed.',
+                    onOk: async () => {
+                        try {
+                            await followStore.unfollowUser(userId);
+                            image.following = false;
+                            notification.success({
+                                message: 'Success',
+                                description: `You have unfollowed ${username}.`,
+                                placement: 'topRight',
+                                duration: 3,
+                            });
+                        } catch (error) {
+                            console.error('Error unfollowing user:', error);
+                            notification.error({
+                                message: 'Error',
+                                description: 'Failed to unfollow the user.',
+                                placement: 'topRight',
+                                duration: 3,
+                            });
+                        }
+                    },
+                    onCancel() {
+                        // Không làm gì nếu hủy
+                    },
+                });
+            } else {
+                try {
+                    await followStore.followUser(userId);
+                    image.following = true;
+                    notification.success({
+                        message: 'Success',
+                        description: `You are now following ${username}.`,
+                        placement: 'topRight',
+                        duration: 3,
+                    });
+                } catch (error) {
+                    console.error('Error following user:', error);
+                    notification.error({
+                        message: 'Error',
+                        description: 'Failed to follow the user.',
+                        placement: 'topRight',
+                        duration: 3,
+                    });
+                }
+            }
+        },
+        async toggleBlockUser(user) {
+            if (!await this.checkLogin()) return;
+
+            const blockStore = useBlockStore();
+            const userId = user.id;
+
+            try {
+                if (blockStore.blockedUsers.includes(userId)) {
+                    await blockStore.unblockUser(userId);
+                    localStorage.setItem('blockNotification', JSON.stringify({
+                        message: 'Success',
+                        description: `${user.username} is unblocked.`,
+                        duration: 3,
+                    }));
+                } else {
+                    await blockStore.blockUser(userId);
+                    localStorage.setItem('blockNotification', JSON.stringify({
+                        message: 'Success',
+                        description: `${user.username} has been blocked. All their related content will not be visible going forward.`,
+                        duration: 3,
+                    }));
+                }
+
+                this.updateBlockedState();
+
+                // Reload lại trang để cập nhật dữ liệu
+                window.location.reload();
+            } catch (error) {
+                console.error("Error toggling block:", error);
+            }
+        },
+        updateBlockedState() {
+            const blockStore = useBlockStore();
+            this.images.forEach(image => {
+                image.blocked = blockStore.blockedUsers.includes(image.user.id);
+            });
         },
         getProfilePicture(profilePicture) {
             const baseUrl = 'http://127.0.0.1:8000/images/avatars/';
@@ -289,6 +435,7 @@ export default {
         },
         images: {
             handler() {
+                this.updateFollowingState();
                 this.updateLikedState();
             },
             deep: true,

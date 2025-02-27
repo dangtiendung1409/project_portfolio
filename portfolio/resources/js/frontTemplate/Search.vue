@@ -10,16 +10,20 @@
                     <!-- Hiển thị nếu có kết quả -->
                     <div v-if="totalResults > 0" class="image-grid" :class="{ 'single-result': totalResults === 1 }">
                         <div class="image-item" v-for="(image, index) in images" :key="index">
+                            <router-link :to="{ name: 'PhotoDetail', params: { token: image.photo_token } }">
                             <img :src="image.image_url" alt="Search Result" class="search-image" />
+                            </router-link>
                             <div class="work-info">
                                 <div class="user-info2">
+                                    <router-link :to="{ name: 'MyProfile', params: { username: image.user.username } }">
                                     <img class="user-image2" :src="getProfilePicture(image.user.profile_picture)" style="width: 30px; height: 30px">
+                                    </router-link>
                                     <span class="user-name2">{{ image.user.username }}</span>
-                                    <span class="icon-heart2">
+                                    <span class="icon-heart2" @click="toggleLike(image)">
                                         <i :class="['fas', 'fa-heart', { 'liked': image.liked }]"></i>
                                     </span>
                                     <span class="icon-dots2">
-                                       <i class="fa-regular fa-square-plus"></i>
+                                       <i @click="handleClick('addToGallery', image.id)" class="fa-regular fa-square-plus"></i>
                                     </span>
                                 </div>
                             </div>
@@ -36,10 +40,18 @@
             </div>
         </template>
     </Layout>
+    <AddToGalleryModal
+        :is-visible="showAddToGallery"
+        :photo-id="selectedPhotoId"
+        @close="closeAddToGalleryModal"
+    />
 </template>
 
 <script>
 import Layout from './Layout.vue';
+import AddToGalleryModal from "./components/AddToGalleryModal.vue";
+import { useAuthStore } from '@/stores/authStore';
+import { useLikeStore } from '@/stores/likeStore';
 import axios from 'axios';
 import getUrlList from '../provider.js';
 
@@ -47,37 +59,108 @@ export default {
     name: "Search",
     components: {
         Layout,
+        AddToGalleryModal,
     },
     data() {
         return {
             images: [],
             totalResults: 0,
             activeDropdown: null,
+            showAddToGallery: false,
+            selectedPhotoId: null,
         };
     },
     async mounted() {
-        await this.fetchSearchResults();
+        const likeStore = useLikeStore();
+        await likeStore.fetchLikedPhotos(); // Tải danh sách ảnh đã like trước
+        await this.fetchSearchResults(); // Sau đó tải ảnh tìm kiếm
+        this.updateLikedState(); // Cập nhật trạng thái like
     },
+
     watch: {
         '$route.query.q': {
-            handler() {
-                this.fetchSearchResults();
+            async handler() {
+                await this.fetchSearchResults();
+                this.updateLikedState(); // Đảm bảo trạng thái "liked" được cập nhật
             },
             immediate: true
         }
     },
+
+
     methods: {
         async fetchSearchResults() {
             const urlList = getUrlList();
             const searchTerm = this.$route.query.q || '';
+            const token = localStorage.getItem('token'); // Lấy token từ localStorage hoặc Vuex nếu bạn lưu ở đó
+
             try {
-                const response = await axios.get(`${urlList.searchPhotos}?q=${searchTerm}`);
+                const response = await axios.get(`${urlList.searchPhotos}?q=${searchTerm}`, {
+                    headers: {
+                        Authorization: token ? `Bearer ${token}` : '', // Gửi token nếu có
+                    }
+                });
                 this.images = response.data;
                 this.totalResults = this.images.length;
             } catch (error) {
                 console.error('Failed to fetch search results:', error);
                 this.images = [];
                 this.totalResults = 0;
+            }
+        },
+        async checkLogin() {
+            const authStore = useAuthStore();
+            await authStore.checkLoginStatus();
+            if (!authStore.isLoggedIn) {
+                this.$router.push({ name: 'Login' });
+                return false;
+            }
+            return true;
+        },
+        async handleClick(action, itemId) {
+            if (!await this.checkLogin()) {
+                return; // Nếu chưa đăng nhập, dừng thực hiện các hành động khác
+            }
+
+            switch (action) {
+                case 'addToGallery':
+                    this.openAddToGalleryModal(itemId);
+                    break;
+                default:
+                    console.error('Unknown action:', action);
+            }
+        },
+        openAddToGalleryModal(id) {
+            this.selectedPhotoId = id;
+            this.showAddToGallery = true; // Mở modal
+        },
+        closeAddToGalleryModal() {
+            this.showAddToGallery = false; // Đóng modal
+        },
+        updateLikedState() {
+            const likeStore = useLikeStore();
+            this.images.forEach(image => {
+                image.liked = likeStore.likedPhotos.includes(image.id);
+            });
+        },
+        async toggleLike(image) {
+            if (!await this.checkLogin()) {
+                return;
+            }
+
+            const photo_id = image.id; // ID của ảnh
+            const photo_user_id = image.user.id; // ID của người sở hữu ảnh
+            const likeStore = useLikeStore();
+
+            try {
+                if (image.liked) {
+                    await likeStore.unlikePhoto(photo_id);
+                } else {
+                    await likeStore.likePhoto(photo_id, photo_user_id); // Gửi thêm photo_user_id
+                }
+                image.liked = !image.liked; // Đảo ngược trạng thái liked
+            } catch (error) {
+                console.error('Failed to toggle like:', error);
             }
         },
         getProfilePicture(profilePicture) {
@@ -161,7 +244,9 @@ export default {
     object-fit: cover; /* Đảm bảo hình ảnh phủ đầy thẻ */
     border-radius: 8px; /* Bo góc */
 }
-
+.icon-heart2 .fa-heart.liked {
+    color: #ff5a5f; /* Màu khi đã like */
+}
 .work-info {
     position: absolute;
     bottom: 0;

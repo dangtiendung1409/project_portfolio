@@ -1,7 +1,15 @@
 <template>
     <Layout>
         <template v-slot:content="slotProps">
-            <div class="site-section">
+            <!-- Nếu user của ảnh bị block, hiển thị placeholder -->
+            <div v-if="isPhotoUserBlocked" class="blocked-container">
+                <div class="blocked-content">
+                    <i class="fa-solid fa-circle-xmark blocked-icon"></i>
+                    <h2>Something went wrong</h2>
+                    <p>Please refresh the page to try again.</p>
+                </div>
+            </div>
+            <div v-else class="site-section">
                 <div>
                     <div class="row">
                         <!-- Main Image Section -->
@@ -164,9 +172,11 @@
                                 </div>
 
                                 <div class="user-profile-wrapper">
+                                    <router-link :to="{ name: 'MyProfile', params: { username: photoDetail.user.username || 'defaultUsername' } }">
                                     <img :src="photoDetail.user.profile_picture ? 'http://127.0.0.1:8000' +
                                     photoDetail.user.profile_picture : '/images/imageUserDefault.png'"
                                          alt="User Avatar" class="user-avatar-details" />
+                                    </router-link>
                                     <div class="user-info-follow">
                                         <h3 class="user-name">{{ photoDetail.user.username }}</h3>
                                         <p class="user-bio">{{ photoDetail.user.location }}</p>
@@ -281,12 +291,12 @@ import { useCommentStore } from '@/stores/commentStore';
 import { useLikeStore } from '@/stores/likeStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useUserStore } from '@/stores/userStore';
+import { useBlockStore } from '@/stores/blockStore';
 import AddToGalleryModal from './components/AddToGalleryModal.vue';
 import { storeToRefs } from 'pinia';
-import { Modal } from 'ant-design-vue';
+import { Modal,notification } from 'ant-design-vue';
 import { h } from 'vue';
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue';
-
 
 export default {
     name: "PhotoDetail",
@@ -322,6 +332,7 @@ export default {
             categories: [],
             showAddToGallery: false,
             selectedPhotoId: null,
+            isPhotoUserBlocked: false,
         };
     },
     watch: {
@@ -377,6 +388,14 @@ export default {
                 const followStore = useFollowStore();
                 await followStore.fetchFollowingList();
             }
+            await this.fetchPhotoDetail(token);
+
+            // 2. Fetch danh sách user bị block
+            const blockStore = useBlockStore();
+            await blockStore.fetchBlockedUsers();
+
+            // 3. Kiểm tra xem user của ảnh có nằm trong blockStore.blockedUsers không
+            this.isPhotoUserBlocked = blockStore.blockedUsers.includes(this.photoDetail.user.id);
         } catch (error) {
             console.error("Error in mounted:", error);
         }
@@ -403,15 +422,58 @@ export default {
 
             const followStore = useFollowStore();
             const userId = this.photoDetail.user.id;
+            const username = this.photoDetail.user.username; // Lấy username để hiển thị trong thông báo
 
-            try {
-                if (this.isFollowing) {
-                    await followStore.unfollowUser(userId);
-                } else {
+            if (this.isFollowing) {
+                // Nếu đang follow, hiển thị modal xác nhận unfollow
+                Modal.confirm({
+                    title: 'Are you sure you want to unfollow this user?',
+                    icon: h(ExclamationCircleOutlined),
+                    content: 'This will unfollow the photographer. You will no longer see their content in your For You feed.',
+                    onOk: async () => {
+                        try {
+                            await followStore.unfollowUser(userId);
+                            this.isFollowing = false;
+                            notification.success({
+                                message: 'Success',
+                                description: `You have unfollowed ${username}.`,
+                                placement: 'topRight',
+                                duration: 3,
+                            });
+                        } catch (error) {
+                            console.error('Error unfollowing user:', error);
+                            notification.error({
+                                message: 'Error',
+                                description: `Failed to unfollow ${username}.`,
+                                placement: 'topRight',
+                                duration: 3,
+                            });
+                        }
+                    },
+                    onCancel() {
+                        // Không làm gì nếu hủy
+                    },
+                });
+            } else {
+                // Nếu chưa follow thì thực hiện follow luôn
+                try {
                     await followStore.followUser(userId);
+                    this.isFollowing = true;
+                    notification.success({
+                        message: 'Success',
+                        description: `You are now following ${username}.`,
+                        placement: 'topRight',
+                        duration: 3,
+                    });
+                } catch (error) {
+                    console.error('Error following user:', error);
+                    notification.error({
+                        message: 'Error',
+                        description: `Failed to follow ${username}.`,
+                        placement: 'topRight',
+                        duration: 3,
+                    });
                 }
-            } catch (error) {
-                console.error("Error toggling follow:", error);
             }
         },
         async postComment() {
@@ -569,6 +631,25 @@ export default {
 </script>
 <style src="../public/front_assets/css/details.css"></style>
 <style scoped>
+.blocked-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 400px; /* Hoặc 100vh tuỳ ý */
+    background-color: #f8f8f8;
+}
+
+.blocked-content {
+    text-align: center;
+    color: #555;
+}
+
+.blocked-icon {
+    font-size: 50px;
+    margin-bottom: 10px;
+    color: #999;
+}
+
 .icon-btn {
     background: none;
     cursor: pointer;

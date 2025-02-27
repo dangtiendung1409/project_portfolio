@@ -28,6 +28,10 @@ export default {
             type: Array,
             required: true,
         },
+        checkLogin: {
+            type: Function,
+            required: true,
+        },
     },
     components: {
         AddToGalleryModal,
@@ -39,9 +43,15 @@ export default {
         };
     },
     methods: {
-        openAddToGalleryModal(id) {
+        async openAddToGalleryModal(id) {
+            // Gọi checkLogin trước khi mở modal
+            const isLoggedIn = await this.checkLogin();
+            if (!isLoggedIn) {
+                // Nếu chưa đăng nhập, checkLogin đã xử lý chuyển hướng (hoặc bạn có thể thông báo)
+                return;
+            }
             this.selectedPhotoId = id;
-            this.showAddToGallery = true; // Mở modal
+            this.showAddToGallery = true;
         },
         closeAddToGalleryModal() {
             this.showAddToGallery = false; // Đóng modal

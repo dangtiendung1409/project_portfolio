@@ -301,7 +301,6 @@
               }
           }
       },
-
       "/getPhotoDetail/{token}": {
           "get": {
               "tags": [
@@ -813,6 +812,320 @@
                                   "email": {
                                       "type": "string",
                                       "example": "tranvanb@example.com"
+                                  }
+                              }
+                          }
+                      }
+                  },
+                  "401": {
+                      "description": "Unauthorized - Invalid or missing token"
+                  },
+                  "500": {
+                      "description": "Internal server error"
+                  }
+              },
+              "security": [
+                  {
+                      "Bearer": []
+                  }
+              ]
+          }
+      },
+      "/getFollowingUser/{username}": {
+          "get": {
+              "tags": [
+                  "Follow"
+              ],
+              "summary": "Get following list of a user",
+              "description": "Retrieve a list of users that the specified user is following.",
+              "operationId": "getFollowingUser",
+              "produces": [
+                  "application/json"
+              ],
+              "parameters": [
+                  {
+                      "name": "username",
+                      "in": "path",
+                      "description": "Username of the user whose following list is to be retrieved",
+                      "required": true,
+                      "type": "string",
+                      "example": "admin"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "Successfully retrieved the following list",
+                      "schema": {
+                          "type": "array",
+                          "items": {
+                              "type": "object",
+                              "properties": {
+                                  "id": {
+                                      "type": "integer",
+                                      "example": 1
+                                  },
+                                  "name": {
+                                      "type": "string",
+                                      "example": "Nguyen Van A"
+                                  },
+                                  "email": {
+                                      "type": "string",
+                                      "example": "nguyenvana@example.com"
+                                  }
+                              }
+                          }
+                      }
+                  },
+                  "404": {
+                      "description": "User not found",
+                      "schema": {
+                          "type": "object",
+                          "properties": {
+                              "message": {
+                                  "type": "string",
+                                  "example": "User not found"
+                              }
+                          }
+                      }
+                  },
+                  "500": {
+                      "description": "Internal server error"
+                  }
+              }
+          }
+      },
+      "/getFollowersUser/{username}": {
+          "get": {
+              "tags": [
+                  "Follow"
+              ],
+              "summary": "Get followers list of a user",
+              "description": "Retrieve a list of users who are following the specified user.",
+              "operationId": "getFollowersUser",
+              "produces": [
+                  "application/json"
+              ],
+              "parameters": [
+                  {
+                      "name": "username",
+                      "in": "path",
+                      "description": "Username of the user whose followers list is to be retrieved",
+                      "required": true,
+                      "type": "string",
+                      "example": "admin"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "Successfully retrieved the followers list",
+                      "schema": {
+                          "type": "array",
+                          "items": {
+                              "type": "object",
+                              "properties": {
+                                  "id": {
+                                      "type": "integer",
+                                      "example": 2
+                                  },
+                                  "name": {
+                                      "type": "string",
+                                      "example": "Tran Van B"
+                                  },
+                                  "email": {
+                                      "type": "string",
+                                      "example": "tranvanb@example.com"
+                                  }
+                              }
+                          }
+                      }
+                  },
+                  "404": {
+                      "description": "User not found",
+                      "schema": {
+                          "type": "object",
+                          "properties": {
+                              "message": {
+                                  "type": "string",
+                                  "example": "User not found"
+                              }
+                          }
+                      }
+                  },
+                  "500": {
+                      "description": "Internal server error"
+                  }
+              }
+          }
+      },
+      "/block": {
+          "post": {
+              "tags": [
+                  "Block"
+              ],
+              "summary": "Block a user",
+              "description": "Block another user. The authenticated user blocks the specified user.",
+              "operationId": "blockUser",
+              "produces": [
+                  "application/json"
+              ],
+              "parameters": [
+                  {
+                      "name": "Authorization",
+                      "in": "header",
+                      "description": "JWT Bearer token",
+                      "required": true,
+                      "type": "string"
+                  },
+                  {
+                      "name": "body",
+                      "in": "body",
+                      "description": "User ID to block",
+                      "required": true,
+                      "schema": {
+                          "type": "object",
+                          "properties": {
+                              "blocked_id": {
+                                  "type": "integer",
+                                  "example": 3
+                              }
+                          }
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "Successfully blocked the user",
+                      "schema": {
+                          "type": "object",
+                          "properties": {
+                              "message": {
+                                  "type": "string",
+                                  "example": "Người dùng đã bị chặn thành công!"
+                              }
+                          }
+                      }
+                  },
+                  "400": {
+                      "description": "Bad request - User already blocked or trying to block self"
+                  },
+                  "401": {
+                      "description": "Unauthorized - Invalid or missing token"
+                  },
+                  "500": {
+                      "description": "Internal server error"
+                  }
+              },
+              "security": [
+                  {
+                      "Bearer": []
+                  }
+              ]
+          }
+      },
+      "/unblock": {
+          "post": {
+              "tags": [
+                  "Block"
+              ],
+              "summary": "Unblock a user",
+              "description": "Unblock a previously blocked user.",
+              "operationId": "unblockUser",
+              "produces": [
+                  "application/json"
+              ],
+              "parameters": [
+                  {
+                      "name": "Authorization",
+                      "in": "header",
+                      "description": "JWT Bearer token",
+                      "required": true,
+                      "type": "string"
+                  },
+                  {
+                      "name": "body",
+                      "in": "body",
+                      "description": "User ID to unblock",
+                      "required": true,
+                      "schema": {
+                          "type": "object",
+                          "properties": {
+                              "blocked_id": {
+                                  "type": "integer",
+                                  "example": 3
+                              }
+                          }
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "Successfully unblocked the user",
+                      "schema": {
+                          "type": "object",
+                          "properties": {
+                              "message": {
+                                  "type": "string",
+                                  "example": "Người dùng đã được bỏ chặn thành công!"
+                              }
+                          }
+                      }
+                  },
+                  "400": {
+                      "description": "Bad request - User not blocked"
+                  },
+                  "401": {
+                      "description": "Unauthorized - Invalid or missing token"
+                  },
+                  "500": {
+                      "description": "Internal server error"
+                  }
+              },
+              "security": [
+                  {
+                      "Bearer": []
+                  }
+              ]
+          }
+      },
+      "/blocked-users": {
+          "get": {
+              "tags": [
+                  "Block"
+              ],
+              "summary": "Get blocked users",
+              "description": "Retrieve a list of users blocked by the authenticated user.",
+              "operationId": "getBlockedUsers",
+              "produces": [
+                  "application/json"
+              ],
+              "parameters": [
+                  {
+                      "name": "Authorization",
+                      "in": "header",
+                      "description": "JWT Bearer token",
+                      "required": true,
+                      "type": "string"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "List of blocked users",
+                      "schema": {
+                          "type": "array",
+                          "items": {
+                              "type": "object",
+                              "properties": {
+                                  "id": {
+                                      "type": "integer",
+                                      "example": 3
+                                  },
+                                  "username": {
+                                      "type": "string",
+                                      "example": "john_doe"
+                                  },
+                                  "profile_picture": {
+                                      "type": "string",
+                                      "example": "https://example.com/profile.jpg"
                                   }
                               }
                           }

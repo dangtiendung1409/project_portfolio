@@ -48,7 +48,7 @@ class UserSeeder extends Seeder
                 'name' => 'admin',
                 'email' => 'admin@gmail.com',
                 'password' => Hash::make('12345'),
-                'profile_picture' => 'images/avatars/user_0.jpeg',
+                'profile_picture' => '/images/avatars/user_0.jpeg',
                 'location' => 'Hanoi, Vietnam',
                 'cover_photo' => '/images/covers/covers_0.jpeg',
                 'bio' => 'I love animal and beauty scene.',

@@ -38,7 +38,9 @@
 <script>
 import { useAuthStore } from '@/stores/authStore';
 import { useFollowStore } from '@/stores/followStore';
-
+import { Modal,notification } from 'ant-design-vue';
+import { ExclamationCircleOutlined } from '@ant-design/icons-vue';
+import { h } from 'vue';
 export default {
     props: {
         users: Array,
@@ -68,18 +70,58 @@ export default {
             if (!await this.checkLogin()) return;
 
             const followStore = useFollowStore();
-            try {
-                if (user.following) {
-                    await followStore.unfollowUser(user.id);
-                    user.following = false;
-                } else {
+            const username = user.username; // Lấy username để hiển thị trong thông báo
+
+            if (user.following) {
+                Modal.confirm({
+                    title: 'Are you sure you want to unfollow this user?',
+                    icon: h(ExclamationCircleOutlined),
+                    content: 'This will unfollow the photographer. You will no longer see their content in your For You feed.',
+                    onOk: async () => {
+                        try {
+                            await followStore.unfollowUser(user.id);
+                            user.following = false;
+                            notification.success({
+                                message: 'Success',
+                                description: `You have unfollowed ${username}.`,
+                                placement: 'topRight',
+                                duration: 3,
+                            });
+                        } catch (error) {
+                            console.error('Error unfollowing user:', error);
+                            notification.error({
+                                message: 'Error',
+                                description: `Failed to unfollow ${username}.`,
+                                placement: 'topRight',
+                                duration: 3,
+                            });
+                        }
+                    },
+                    onCancel() {
+                        // Không làm gì nếu hủy
+                    },
+                });
+            } else {
+                try {
                     await followStore.followUser(user.id);
                     user.following = true;
+                    notification.success({
+                        message: 'Success',
+                        description: `You are now following ${username}.`,
+                        placement: 'topRight',
+                        duration: 3,
+                    });
+                } catch (error) {
+                    console.error('Error following user:', error);
+                    notification.error({
+                        message: 'Error',
+                        description: `Failed to follow ${username}.`,
+                        placement: 'topRight',
+                        duration: 3,
+                    });
                 }
-            } catch (error) {
-                console.error('Error toggling follow:', error);
             }
-        }
+        },
     },
     watch: {
         users: {

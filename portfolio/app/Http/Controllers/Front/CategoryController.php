@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Category;
 use App\Models\Photo;
-
+use Tymon\JWTAuth\Facades\JWTAuth;
 class CategoryController extends Controller
 {
     /**
@@ -27,10 +27,25 @@ class CategoryController extends Controller
             return response()->json(['message' => 'Categories not found'], 404);
         }
 
-        // Lấy tất cả các ảnh thuộc về các danh mục đó + thông tin user + tags
-        $photos = Photo::whereIn('category_id', $categories->pluck('id'))
-            ->with(['user', 'tags'])
-            ->get();
+        // Khởi tạo query cho ảnh thuộc các danh mục đã tìm được
+        $query = Photo::whereIn('category_id', $categories->pluck('id'));
+
+        // Nếu có token trong header, lọc bỏ các ảnh của user bị block
+        $token = $request->header('Authorization');
+        if ($token) {
+            try {
+                $user = JWTAuth::parseToken()->authenticate();
+                if ($user) {
+                    $blockedUserIds = $user->blockedUsers()->pluck('blocked_id');
+                    $query->whereNotIn('user_id', $blockedUserIds);
+                }
+            } catch (\Exception $e) {
+                // Nếu token không hợp lệ hoặc không xác thực được user thì bỏ qua bước lọc
+            }
+        }
+
+        // Lấy tất cả các ảnh cùng với thông tin user và tags
+        $photos = $query->with(['user', 'tags'])->get();
 
         return response()->json($photos);
     }

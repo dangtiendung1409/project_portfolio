@@ -23,12 +23,17 @@
             <div v-if="activeDropdown === 'dotsDropdown-' + item.id" class="dropdown-content show" style="right: 25px">
                 <ul>
                     <li @click="handleClick('addToGallery', item.id)"><i class="fa-regular fa-square-plus"></i> Add to Gallery</li>
-                    <li @click="handleClick('blockUser', item.id)"><i class="fas fa-user-slash"></i> Block User</li>
+                    <li v-if="item.user && userStore.user && item.user.id !== userStore.user.id" @click="toggleBlockUser(item.user)">
+                        <i class="fas fa-user-slash"></i> {{ item.blocked ? 'Unblock' : 'Block' }}
+                    </li>
                     <li v-if="item.user && userStore.user && item.user.id !== userStore.user.id" @click="toggleFollow(item)">
                         <i class="fas" :class="item.following ? 'fa-user-minus' : 'fa-user-plus'"></i>
                         {{ item.following ? 'Unfollow' : 'Follow' }}
                     </li>
-                    <li @click="handleClick('reportPhoto', item.id)"><i class="fas fa-flag"></i> Report This Photo</li>
+                    <li v-if="item.user && userStore.user && item.user.id !== userStore.user.id" @click="handleClick('reportPhoto', item.id)">
+                        <i class="fas fa-flag"></i>
+                        Report This Photo
+                    </li>
                 </ul>
             </div>
         </div>
@@ -47,6 +52,10 @@ import { useLikeStore } from '@/stores/likeStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useFollowStore } from '@/stores/followStore';
 import { useUserStore } from '@/stores/userStore';
+import { useBlockStore } from '@/stores/blockStore';
+import { Modal,notification } from 'ant-design-vue';
+import { ExclamationCircleOutlined } from '@ant-design/icons-vue';
+import { h } from 'vue';
 
 export default {
     directives: {
@@ -79,6 +88,11 @@ export default {
         const followStore = useFollowStore();
         await followStore.fetchFollowingList();
         this.updateFollowingState();
+
+        const blockStore = useBlockStore();
+        blockStore.fetchBlockedUsers().then(() => {
+            this.updateBlockedState();
+        });
     },
     computed: {
         userStore() {
@@ -128,31 +142,102 @@ export default {
 
             const followStore = useFollowStore();
             const userId = item.user.id;
+            const username = item.user.username; // Lấy username để hiển thị trong thông báo
 
-            try {
-                if (item.following) {
-                    await followStore.unfollowUser(userId);
-                    item.following = false;
-                } else {
+            // Nếu đang follow, hiển thị modal xác nhận unfollow
+            if (item.following) {
+                Modal.confirm({
+                    title: 'Are you sure you want to unfollow this user?',
+                    icon: h(ExclamationCircleOutlined),
+                    content: 'This will unfollow the photographer. You will no longer see their content in your For You feed.',
+                    onOk: async () => {
+                        try {
+                            await followStore.unfollowUser(userId);
+                            item.following = false;
+                            notification.success({
+                                message: 'Success',
+                                description: `You have unfollowed ${username}.`,
+                                placement: 'topRight',
+                                duration: 3,
+                            });
+                        } catch (error) {
+                            console.error('Error unfollowing user:', error);
+                            notification.error({
+                                message: 'Error',
+                                description: 'Failed to unfollow the user.',
+                                placement: 'topRight',
+                                duration: 3,
+                            });
+                        }
+                    },
+                    onCancel() {
+                        // Không làm gì nếu hủy
+                    },
+                });
+            } else {
+                // Nếu chưa follow thì follow luôn
+                try {
                     await followStore.followUser(userId);
                     item.following = true;
+                    notification.success({
+                        message: 'Success',
+                        description: `You are now following ${username}.`,
+                        placement: 'topRight',
+                        duration: 3,
+                    });
+                } catch (error) {
+                    console.error('Error following user:', error);
+                    notification.error({
+                        message: 'Error',
+                        description: 'Failed to follow the user.',
+                        placement: 'topRight',
+                        duration: 3,
+                    });
                 }
-            } catch (error) {
-                console.error('Error toggling follow:', error);
             }
+        },
+        async toggleBlockUser(user) {
+            if (!await this.checkLogin()) return;
+
+            const blockStore = useBlockStore();
+            const userId = user.id;
+
+            try {
+                if (blockStore.blockedUsers.includes(userId)) {
+                    await blockStore.unblockUser(userId);
+                    localStorage.setItem('blockNotification', JSON.stringify({
+                        message: 'Success',
+                        description: `${user.username} is unblocked.`,
+                        duration: 3,
+                    }));
+                } else {
+                    await blockStore.blockUser(userId);
+                    localStorage.setItem('blockNotification', JSON.stringify({
+                        message: 'Success',
+                        description: `${user.username} has been blocked. All their related content will not be visible going forward.`,
+                        duration: 3,
+                    }));
+                }
+
+                this.updateBlockedState();
+
+                // Reload trang sau khi lưu thông báo
+                window.location.reload();
+            } catch (error) {
+                console.error("Error toggling block:", error);
+            }
+        },
+        updateBlockedState() {
+            const blockStore = useBlockStore();
+            this.photos.forEach(photo => {
+                photo.blocked = blockStore.blockedUsers.includes(photo.user.id);
+            });
         },
         updateLikedState() {
             const likeStore = useLikeStore();
             this.photos.forEach(photo => {
                 photo.liked = likeStore.likedPhotos.includes(photo.id); // Cập nhật trạng thái liked của từng ảnh
             });
-        },
-        toggleDropdown(id) {
-            if (this.activeDropdown === id) {
-                this.activeDropdown = null;
-            } else {
-                this.activeDropdown = id;
-            }
         },
         async toggleLike(item) {
             if (!await this.checkLogin()) {
@@ -174,6 +259,13 @@ export default {
                 console.error('Failed to toggle like:', error);
             }
         },
+        toggleDropdown(id) {
+            if (this.activeDropdown === id) {
+                this.activeDropdown = null;
+            } else {
+                this.activeDropdown = id;
+            }
+        },
         openAddToGalleryModal(photoId) {
             this.selectedPhotoId = photoId;
             this.showAddToGallery = true; // Mở modal
@@ -181,6 +273,19 @@ export default {
         closeAddToGalleryModal() {
             this.showAddToGallery = false; // Đóng modal
         },
+    },
+    created() {
+        const notifData = localStorage.getItem('blockNotification');
+        if (notifData) {
+            const {message, description, duration} = JSON.parse(notifData);
+            notification.success({
+                message,
+                description,
+                placement: 'topRight',
+                duration,
+            });
+            localStorage.removeItem('blockNotification');
+        }
     },
     watch: {
         photos: {

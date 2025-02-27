@@ -10,6 +10,9 @@ class Block extends Model
     use HasFactory;
 
     protected $fillable = ['blocker_id', 'blocked_id'];
+    public $timestamps = false;
+    public $incrementing = false; // Không sử dụng ID tự tăng
+    protected $primaryKey = null; // Không có khóa chính mặc định
 
     public function blocker()
     {

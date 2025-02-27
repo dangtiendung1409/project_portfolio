@@ -12,11 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('blocks', function (Blueprint $table) {
-            $table->id();
             $table->foreignId('blocker_id')->constrained('users')->onDelete('cascade'); // Người chặn
             $table->foreignId('blocked_id')->constrained('users')->onDelete('cascade'); // Người bị chặn
             $table->timestamp('blocked_at')->useCurrent(); // Thời gian bị chặn
-            $table->unique(['blocker_id', 'blocked_id']); // Đảm bảo không có bản ghi trùng
+
+            $table->primary(['blocker_id', 'blocked_id']);
         });
     }
 

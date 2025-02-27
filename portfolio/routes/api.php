@@ -10,6 +10,7 @@ use App\Http\Controllers\Front\ProfileController;
 use App\Http\Controllers\Front\CategoryController;
 use App\Http\Controllers\Front\SearchController;
 use App\Http\Controllers\Front\FollowController;
+use App\Http\Controllers\Front\BlockController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -39,6 +40,9 @@ Route::get('/tags', [HomePageController::class, 'getAllTags']);
 Route::get('/user-by-username/{username}', [ProfileController::class, 'getUserByUserName']);
 Route::get('/photos-by-username/{username}', [ProfileController::class, 'getPhotosByUserName']);
 Route::get('/galleries-by-username/{username}', [ProfileController::class, 'getGalleriesByUserName']);
+Route::get('/getFollowingUser/{username}', [FollowController::class, 'followingUser']); // Danh sách người dùng mà user được chỉ định đang theo dõi
+Route::get('/getFollowersUser/{username}', [FollowController::class, 'followersUser']); // Danh sách những người theo dõi user được chỉ định
+
 
 //Category
 Route::get('/categories/photos', [CategoryController::class, 'getPhotosByCategorySlugs']);
@@ -90,6 +94,11 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/unfollow/{following_id}', [FollowController::class, 'unfollow']);
     Route::get('/following-list', [FollowController::class, 'followingList']); //Danh sách người dùng mà user hiện tại đang theo dõi
     Route::get('/followers-list', [FollowController::class, 'followersList']); //Danh sách những người theo dõi user hiện tại
+
+    // block
+    Route::post('/block', [BlockController::class, 'blockUser']);
+    Route::post('/unblock', [BlockController::class, 'unblockUser']);
+    Route::get('/blocked-users', [BlockController::class, 'getBlockedUsers']); // Lấy danh sách người bị chặn bởi user login
 
     // Auth user
     Route::get('/user', [AuthUserController::class, 'getUser']);

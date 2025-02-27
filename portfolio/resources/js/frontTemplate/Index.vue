@@ -188,7 +188,15 @@ export default {
         },
         async getPhoto() {
             try {
-                const response = await axios.get(getUrlList().getPhotoData);
+                const token = localStorage.getItem("token"); // Lấy token nếu có
+
+                let headers = {};
+                if (token) {
+                    headers = {
+                        Authorization: `Bearer ${token}`,
+                    };
+                }
+                const response = await axios.get(getUrlList().getPhotoData, { headers });
                 this.photos = response.data;
                 // console.log(this.photos);
             } catch (error) {

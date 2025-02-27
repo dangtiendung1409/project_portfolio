@@ -85,11 +85,27 @@ class HomePageController extends Controller
         $tags = Tag::all();
         return response()->json($tags);
     }
-    public function getImages()
+    public function getImages(Request $request)
     {
-        $images = Photo::with(['category', 'user'])->get();
+        try {
+            // Lấy user hiện tại từ token
+            $currentUser = JWTAuth::parseToken()->authenticate();
+
+            // Lấy danh sách user bị chặn
+            $blockedUserIds = $currentUser->blockedUsers()->pluck('blocked_id');
+
+            // Lọc ảnh: loại bỏ ảnh của user bị chặn
+            $images = Photo::with(['category', 'user'])
+                ->whereNotIn('user_id', $blockedUserIds)
+                ->get();
+        } catch (\Exception $e) {
+            // Nếu không có token, lấy tất cả ảnh
+            $images = Photo::with(['category', 'user'])->get();
+        }
+
         return response()->json($images);
     }
+
     public function getFollows(Request $request)
     {
         try {
