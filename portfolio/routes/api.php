@@ -40,6 +40,7 @@ Route::get('/tags', [HomePageController::class, 'getAllTags']);
 Route::get('/user-by-username/{username}', [ProfileController::class, 'getUserByUserName']);
 Route::get('/photos-by-username/{username}', [ProfileController::class, 'getPhotosByUserName']);
 Route::get('/galleries-by-username/{username}', [ProfileController::class, 'getGalleriesByUserName']);
+Route::get('/gallery-details-user/{galleries_code}', [ProfileController::class, 'getGalleryDetailUser']);
 Route::get('/getFollowingUser/{username}', [FollowController::class, 'followingUser']); // Danh sách người dùng mà user được chỉ định đang theo dõi
 Route::get('/getFollowersUser/{username}', [FollowController::class, 'followersUser']); // Danh sách những người theo dõi user được chỉ định
 

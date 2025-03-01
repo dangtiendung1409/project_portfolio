@@ -2,13 +2,11 @@
     <Layout>
         <template v-slot:content="slotProps">
             <!-- Nếu user của ảnh bị block, hiển thị placeholder -->
-            <div v-if="isPhotoUserBlocked" class="blocked-container">
-                <div class="blocked-content">
+                <div v-if="isPhotoUserBlocked" class="blocked-content">
                     <i class="fa-solid fa-circle-xmark blocked-icon"></i>
                     <h2>Something went wrong</h2>
                     <p>Please refresh the page to try again.</p>
                 </div>
-            </div>
             <div v-else class="site-section">
                 <div>
                     <div class="row">
@@ -631,23 +629,28 @@ export default {
 </script>
 <style src="../public/front_assets/css/details.css"></style>
 <style scoped>
-.blocked-container {
+.blocked-content {
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 400px; /* Hoặc 100vh tuỳ ý */
-    background-color: #f8f8f8;
-}
-
-.blocked-content {
+    height: 100vh; /* Chiếm toàn bộ chiều cao màn hình */
     text-align: center;
-    color: #555;
+    background-color: #f5f5f5;
 }
-
 .blocked-icon {
     font-size: 50px;
+    color: #ff4d4f; /* Màu đỏ để nổi bật */
+    margin-bottom: 20px;
+}
+.blocked-content h2 {
+    font-size: 28px;
+    color: #333;
     margin-bottom: 10px;
-    color: #999;
+}
+.blocked-content p {
+    font-size: 16px;
+    color: #666;
 }
 
 .icon-btn {

@@ -12,6 +12,7 @@ import AddGallery from "./frontTemplate/MyAccount/AddGallery.vue";
 import EditGallery from "./frontTemplate/MyAccount/EditGallery.vue";
 import PhotoDetail from "./frontTemplate/PhotoDetail.vue";
 import MyProfile from "./frontTemplate/MyProfile.vue";
+import GalleryDetailsUser from "./frontTemplate/GalleryDetailsUser.vue";
 import Category from "./frontTemplate/Category.vue";
 import Search from "./frontTemplate/Search.vue";
 import DetailsCategory from "./frontTemplate/DetailsCategory.vue";
@@ -22,6 +23,7 @@ const routes = [
     { name: 'Index', path: '/', component: Index },
     { name: 'PhotoDetail', path: '/photoDetail/:token', component: PhotoDetail },
     { name: 'DetailsCategory', path: '/detailsCategory', component: DetailsCategory },
+    { name: 'GalleryDetailsUser',  path: '/galleryDetailsUser/:galleries_code', component: GalleryDetailsUser },
     { name: 'Category', path: '/categories', component: Category },
     { name: 'Search', path: '/search', component: Search },
     { name: 'MyProfile', path: '/myProfile/:username', component: MyProfile },

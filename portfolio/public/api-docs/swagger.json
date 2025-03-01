@@ -1377,6 +1377,162 @@
               }
           }
       },
+      "/gallery-details-user/{galleries_code}": {
+          "get": {
+              "tags": [
+                  "Profile user"
+              ],
+              "summary": "Get gallery details for a user",
+              "description": "Retrieve gallery details including gallery info, photos and the gallery owner information based on the provided galleries_code.",
+              "operationId": "getGalleryDetailUser",
+              "produces": [
+                  "application/json"
+              ],
+              "parameters": [
+                  {
+                      "name": "galleries_code",
+                      "in": "path",
+                      "description": "The unique code identifying the gallery",
+                      "required": true,
+                      "type": "string",
+                      "example": "abc123"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "Successfully retrieved gallery details",
+                      "schema": {
+                          "type": "object",
+                          "properties": {
+                              "success": {
+                                  "type": "boolean",
+                                  "example": true
+                              },
+                              "data": {
+                                  "type": "object",
+                                  "properties": {
+                                      "id": {
+                                          "type": "integer",
+                                          "example": 1
+                                      },
+                                      "galleries_name": {
+                                          "type": "string",
+                                          "example": "Gallery Name"
+                                      },
+                                      "galleries_description": {
+                                          "type": "string",
+                                          "example": "Description of the gallery"
+                                      },
+                                      "user_id": {
+                                          "type": "integer",
+                                          "example": 1
+                                      },
+                                      "visibility": {
+                                          "type": "string",
+                                          "example": "public"
+                                      },
+                                      "galleries_code": {
+                                          "type": "string",
+                                          "example": "abc123"
+                                      },
+                                      "user": {
+                                          "type": "object",
+                                          "properties": {
+                                              "id": {
+                                                  "type": "integer",
+                                                  "example": 1
+                                              },
+                                              "username": {
+                                                  "type": "string",
+                                                  "example": "Dietmar"
+                                              },
+                                              "name": {
+                                                  "type": "string",
+                                                  "example": "Dietmar Simon"
+                                              },
+                                              "email": {
+                                                  "type": "string",
+                                                  "example": "dietmar@example.com"
+                                              }
+                                          }
+                                      },
+                                      "photo": {
+                                          "type": "array",
+                                          "items": {
+                                              "type": "object",
+                                              "properties": {
+                                                  "id": {
+                                                      "type": "integer",
+                                                      "example": 1
+                                                  },
+                                                  "title": {
+                                                      "type": "string",
+                                                      "example": "Photo Title"
+                                                  },
+                                                  "description": {
+                                                      "type": "string",
+                                                      "example": "Photo description"
+                                                  },
+                                                  "upload_date": {
+                                                      "type": "string",
+                                                      "format": "date-time",
+                                                      "example": "2025-02-27T10:00:00Z"
+                                                  },
+                                                  "location": {
+                                                      "type": "string",
+                                                      "example": "New York"
+                                                  },
+                                                  "image_url": {
+                                                      "type": "string",
+                                                      "example": "https://example.com/photo.jpg"
+                                                  },
+                                                  "user": {
+                                                      "type": "object",
+                                                      "properties": {
+                                                          "id": {
+                                                              "type": "integer",
+                                                              "example": 1
+                                                          },
+                                                          "username": {
+                                                              "type": "string",
+                                                              "example": "Dietmar"
+                                                          },
+                                                          "name": {
+                                                              "type": "string",
+                                                              "example": "Dietmar Simon"
+                                                          }
+                                                      }
+                                                  }
+                                              }
+                                          }
+                                      }
+                                  }
+                              }
+                          }
+                      }
+                  },
+                  "404": {
+                      "description": "Gallery not found",
+                      "schema": {
+                          "type": "object",
+                          "properties": {
+                              "success": {
+                                  "type": "boolean",
+                                  "example": false
+                              },
+                              "message": {
+                                  "type": "string",
+                                  "example": "Gallery not found"
+                              }
+                          }
+                      }
+                  },
+                  "500": {
+                      "description": "Internal server error"
+                  }
+              }
+          }
+      },
       "/approved-photos": {
           "get": {
               "tags": ["AccountUser"],

@@ -5,7 +5,7 @@
             v-for="gallery in galleries"
             :key="gallery.id"
             :data-visibility="gallery.visibility"
-            @click="$emit('goToGalleryDetails', gallery.galleries_code)"
+            @click="goToGalleryDetails(gallery.galleries_code)"
         >
             <div class="gallery-info">
                 <h4>{{ gallery.galleries_name }}</h4>
@@ -90,6 +90,11 @@ export default {
         activeDropdown: {
             type: String,
             default: null
+        }
+    },
+    methods: {
+        goToGalleryDetails(galleries_code) {
+            this.$router.push({ name: 'GalleryDetailsUser', params: { galleries_code } });
         }
     }
 };
