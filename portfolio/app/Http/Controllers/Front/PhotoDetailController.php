@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Front;
 
 use App\Http\Controllers\Controller;
 use App\Models\Comment;
+use App\Models\Follow;
 use App\Models\Notification;
 use App\Models\Photo;
 use App\Models\User;
@@ -66,6 +67,40 @@ class PhotoDetailController extends Controller
             Log::error('Error fetching photo details: ' . $e->getMessage());
             return response()->json(['message' => 'Internal Server Error'], 500);
         }
+    }
+    public function getPhotoLikes($token)
+    {
+        // Tìm photo dựa vào photo_token và eager load mối quan hệ likes.user
+        $photo = Photo::where('photo_token', $token)
+            ->with(['likes.user'])
+            ->first();
+
+        if (!$photo) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Photo not found'
+            ], 404);
+        }
+
+        // Đếm tổng số like của photo đó
+        $totalLikes = $photo->likes()->count();
+
+        // Lấy thông tin các user đã like và thêm followers_count cho mỗi user
+        $likedUsers = $photo->likes->map(function($like) {
+            $user = $like->user;
+            // Tính số lượng followers cho user bằng cách đếm số bản ghi trong Follow có following_id = user->id
+            $followersCount = Follow::where('following_id', $user->id)->count();
+            return array_merge($user->toArray(), ['followers_count' => $followersCount]);
+        });
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'photo_token'  => $photo->photo_token,
+                'total_likes'  => $totalLikes,
+                'liked_users'  => $likedUsers
+            ]
+        ], 200);
     }
     public function getCommentsByPhotoToken($token)
     {

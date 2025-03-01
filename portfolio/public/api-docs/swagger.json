@@ -304,7 +304,7 @@
       "/getPhotoDetail/{token}": {
           "get": {
               "tags": [
-                  "HomePage"
+                  "Photo Detail"
               ],
               "summary": "Get Photo Detail by Token",
               "operationId": "getPhotoDetail",
@@ -348,6 +348,89 @@
                   },
                   "404": {
                       "description": "Photo detail not found"
+                  },
+                  "500": {
+                      "description": "Internal server error"
+                  }
+              }
+          }
+      },
+      "/photo-likes/{token}": {
+          "get": {
+              "tags": [
+                  "Photo Detail"
+              ],
+              "summary": "Get total likes and liked users for a photo by token",
+              "description": "Retrieve the total number of likes for a photo along with the list of users who liked the photo, based on the provided photo_token.",
+              "operationId": "getPhotoLikes",
+              "produces": [
+                  "application/json"
+              ],
+              "parameters": [
+                  {
+                      "name": "token",
+                      "in": "path",
+                      "description": "Unique token representing the photo",
+                      "required": true,
+                      "type": "string"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "Photo likes details retrieved successfully",
+                      "schema": {
+                          "type": "object",
+                          "properties": {
+                              "photo_token": {
+                                  "type": "string",
+                                  "example": "76907e80-ec6a-43fb-9f6e-871945afd153"
+                              },
+                              "total_likes": {
+                                  "type": "integer",
+                                  "example": 25
+                              },
+                              "liked_users": {
+                                  "type": "array",
+                                  "items": {
+                                      "type": "object",
+                                      "properties": {
+                                          "id": {
+                                              "type": "integer",
+                                              "example": 5
+                                          },
+                                          "username": {
+                                              "type": "string",
+                                              "example": "john_doe"
+                                          },
+                                          "name": {
+                                              "type": "string",
+                                              "example": "John Doe"
+                                          },
+                                          "profile_picture": {
+                                              "type": "string",
+                                              "example": "/images/avatars/user_5.jpeg"
+                                          }
+                                      }
+                                  }
+                              }
+                          }
+                      }
+                  },
+                  "404": {
+                      "description": "Photo not found",
+                      "schema": {
+                          "type": "object",
+                          "properties": {
+                              "success": {
+                                  "type": "boolean",
+                                  "example": false
+                              },
+                              "message": {
+                                  "type": "string",
+                                  "example": "Photo not found"
+                              }
+                          }
+                      }
                   },
                   "500": {
                       "description": "Internal server error"
@@ -1282,6 +1365,74 @@
                   },
                   "404": {
                       "description": "User not found or no photos available"
+                  },
+                  "500": {
+                      "description": "Internal server error"
+                  }
+              }
+          }
+      },
+      "/total-likes/{username}": {
+          "get": {
+              "tags": [
+                  "Profile user"
+              ],
+              "summary": "Get total likes for all approved photos of a user",
+              "description": "Retrieve the total number of likes from all photos belonging to the specified user where photo_status is 'approved' and privacy_status is 0.",
+              "operationId": "getTotalLikesByUsername",
+              "produces": [
+                  "application/json"
+              ],
+              "parameters": [
+                  {
+                      "name": "username",
+                      "in": "path",
+                      "description": "Unique username representing the user",
+                      "required": true,
+                      "type": "string"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "Total likes retrieved successfully",
+                      "schema": {
+                          "type": "object",
+                          "properties": {
+                              "success": {
+                                  "type": "boolean",
+                                  "example": true
+                              },
+                              "data": {
+                                  "type": "object",
+                                  "properties": {
+                                      "username": {
+                                          "type": "string",
+                                          "example": "john_doe"
+                                      },
+                                      "total_likes": {
+                                          "type": "integer",
+                                          "example": 42
+                                      }
+                                  }
+                              }
+                          }
+                      }
+                  },
+                  "404": {
+                      "description": "User not found or no photos available",
+                      "schema": {
+                          "type": "object",
+                          "properties": {
+                              "success": {
+                                  "type": "boolean",
+                                  "example": false
+                              },
+                              "message": {
+                                  "type": "string",
+                                  "example": "User not found"
+                              }
+                          }
+                      }
                   },
                   "500": {
                       "description": "Internal server error"

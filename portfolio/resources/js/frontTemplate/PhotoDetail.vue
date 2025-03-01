@@ -157,9 +157,9 @@
                                     <ul class="list-unstyled">
                                         <li><i class="fa-solid fa-location-dot"></i> {{ photoDetail.location }}</li>
                                         <li><i class="fa-solid fa-calendar-days"></i>  {{ formatDate(photoDetail.upload_date) }}</li>
-                                        <li>
+                                        <li @click="showLikesPopup">
                                             <i class="fa-regular fa-heart"></i>
-                                            400 <span>Likes</span>
+                                            {{ formattedPhotoLikes }} <span>Likes</span>
                                             <span class="arrow">&gt;</span>
                                         </li>
                                         <li><i class="fa-regular fa-eye"></i> {{ formattedViews }} <span>Impressions</span></li>
@@ -277,6 +277,31 @@
                 :photo-id="selectedPhotoId"
                 @close="closeAddToGalleryModal"
             />
+            <div v-if="likesPopupVisible" class="popup-overlay" @click.self="closeLikesPopup">
+                <div class="popup-content">
+                    <div class="popup-header">
+                        <h3>Liked by</h3>
+                        <button @click="closeLikesPopup" class="popup-close">×</button>
+                    </div>
+                    <div v-if="likedUsers.length > 0" class="popup-list">
+                        <div v-for="user in likedUsers" :key="user.id" class="popup-item">
+                            <router-link :to="{ name: 'MyProfile', params: { username: user.username } }">
+                                <img :src="user.profile_picture ? `http://127.0.0.1:8000/images/avatars/${user.profile_picture.split('/').pop()}` : '/images/imageUserDefault.png'" alt="Avatar" class="popup-avatar" />
+                            </router-link>
+                            <div class="popup-user-info">
+                                <span class="popup-username">{{ user.username }}</span>
+                                <span class="popup-followers">{{ user.followers_count || 0 }} Followers</span>
+                            </div>
+                            <button v-if="userStore.user && user.id !== userStore.user.id"
+                                    @click.stop="toggleFollowUser(user.username)"
+                                    class="popup-follow-button">
+                                {{ followStore.followingList.includes(user.id) ? 'Unfollow' : 'Follow' }}
+                            </button>
+                        </div>
+                    </div>
+                    <div v-else class="popup-no-data">No likes found.</div>
+                </div>
+            </div>
         </template>
     </Layout>
 </template>
@@ -331,6 +356,9 @@ export default {
             showAddToGallery: false,
             selectedPhotoId: null,
             isPhotoUserBlocked: false,
+            photoLikesCount: 0,
+            likesPopupVisible: false,
+            likedUsers: [],
         };
     },
     watch: {
@@ -362,6 +390,18 @@ export default {
             }
             return views;
         },
+        formattedPhotoLikes() {
+            const likes = this.photoLikesCount;
+            if (likes >= 1000000) {
+                return (likes / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+            } else if (likes >= 1000) {
+                return (likes / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
+            }
+            return likes;
+        },
+        followStore() {
+            return useFollowStore();
+        },
         userStore() {
             return useUserStore();
         },
@@ -387,6 +427,8 @@ export default {
                 await followStore.fetchFollowingList();
             }
             await this.fetchPhotoDetail(token);
+
+            await this.fetchPhotoLikes(token);
 
             // 2. Fetch danh sách user bị block
             const blockStore = useBlockStore();
@@ -415,6 +457,100 @@ export default {
                 console.error("Error fetching photo details:", error);
             }
         },
+        async fetchPhotoLikes(token) {
+            try {
+                const response = await axios.get(getUrlList().getPhotoLikes(token));
+                if (response.data.success) {
+                    this.photoLikesCount = response.data.data.total_likes;
+                } else {
+                    console.error(response.data.message);
+                    this.photoLikesCount = 0;
+                }
+            } catch (error) {
+                console.error("Error fetching photo likes:", error);
+                this.photoLikesCount = 0;
+            }
+        },
+        async showLikesPopup() {
+            try {
+                const token = this.$route.params.token;
+                const response = await axios.get(getUrlList().getPhotoLikes(token));
+                if (response.data.success) {
+                    this.likedUsers = response.data.data.liked_users;
+                    this.likesPopupVisible = true;
+                } else {
+                    console.error(response.data.message);
+                }
+            } catch (error) {
+                console.error("Error fetching liked users:", error);
+            }
+        },
+        closeLikesPopup() {
+            this.likesPopupVisible = false;
+        },
+        //Dùng trong các danh sách như popup hiển thị danh sách liked users
+        async toggleFollowUser(username) {
+            // Kiểm tra đăng nhập trước
+            const authStore = useAuthStore();
+            await authStore.checkLoginStatus();
+            if (!authStore.isLoggedIn) {
+                this.$router.push({ name: 'Login' });
+                return;
+            }
+            try {
+                // Lấy thông tin user dựa vào username
+                const userData = await axios.get(getUrlList().getUserByUserName(username));
+                const userId = userData.data.id;
+                // Nếu đã theo dõi, hiện modal xác nhận unfollow
+                if (this.followStore.followingList.includes(userId)) {
+                    Modal.confirm({
+                        title: 'Are you sure you want to unfollow this user',
+                        icon: h(ExclamationCircleOutlined),
+                        content: `This will unfollow the photographer. You will no longer see their content in your For You feed.`,
+                        onOk: async () => {
+                            try {
+                                await this.followStore.unfollowUser(userId);
+                                notification.success({
+                                    message: 'Success',
+                                    description: `You have unfollowed ${username}.`,
+                                    placement: 'topRight',
+                                    duration: 3,
+                                });
+                            } catch (error) {
+                                console.error('Error unfollowing user:', error);
+                                notification.error({
+                                    message: 'Error',
+                                    description: `Failed to unfollow ${username}.`,
+                                    placement: 'topRight',
+                                    duration: 3,
+                                });
+                            }
+                        },
+                        onCancel() {
+                            // Không làm gì nếu hủy
+                        },
+                    });
+                } else {
+                    // Nếu chưa theo dõi, thực hiện follow luôn
+                    await this.followStore.followUser(userId);
+                    notification.success({
+                        message: 'Success',
+                        description: `You are now following ${username}.`,
+                        placement: 'topRight',
+                        duration: 3,
+                    });
+                }
+            } catch (error) {
+                console.error('Error toggling follow for user:', error);
+                notification.error({
+                    message: 'Error',
+                    description: `Failed to toggle follow for ${username}.`,
+                    placement: 'topRight',
+                    duration: 3,
+                });
+            }
+        },
+        // Dùng cho trường hợp cụ thể khi thao tác với user của ảnh chi tiết
         async toggleFollow() {
             if (!await this.checkLogin()) return;
 
@@ -765,5 +901,113 @@ export default {
 .dropdown-content li:hover i {
     color: whitesmoke;
     background-color: #1890ff;
+}
+/* Style cho popup */
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.popup-content {
+    background-color: white;
+    border-radius: 12px; /* Tăng độ cong */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); /* Bóng lớn hơn */
+    width: 500px; /* Mở rộng độ rộng */
+    max-height: 90vh; /* Tăng chiều cao tối đa */
+    overflow-y: auto;
+    position: relative;
+}
+
+.popup-header {
+    padding: 15px 20px; /* Tăng padding */
+    border-bottom: 2px solid #eee; /* Dày hơn */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.popup-header h3 {
+    margin: 0;
+    font-size: 20px; /* Tăng kích thước chữ */
+    color: #333;
+    font-weight: bold;
+}
+
+.popup-close {
+    background: none;
+    border: none;
+    font-size: 34px; /* Tăng kích thước nút đóng */
+    cursor: pointer;
+    color: #666;
+    padding: 0;
+    line-height: 1;
+    width: 24px;
+    height: 24px;
+}
+
+.popup-list {
+    padding: 15px; /* Tăng padding */
+}
+
+.popup-item {
+    display: flex;
+    align-items: center;
+    padding: 15px 0; /* Tăng padding */
+    border-bottom: 2px solid #eee; /* Dày hơn */
+}
+
+.popup-avatar {
+    width: 40px; /* Tăng kích thước avatar */
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 15px; /* Tăng khoảng cách */
+}
+
+.popup-user-info {
+    flex-grow: 1;
+}
+
+.popup-username {
+    font-size: 16px; /* Tăng kích thước chữ */
+    color: #333;
+    display: block;
+    font-weight: bold;
+}
+
+.popup-followers {
+    font-size: 14px; /* Tăng kích thước chữ */
+    color: #666;
+    display: block;
+}
+
+.popup-follow-button {
+    background-color: #007bff;
+    border: none;
+    border-radius: 24px; /* Tăng độ cong */
+    color: white;
+    padding: 8px 16px; /* Tăng padding */
+    font-size: 14px; /* Tăng kích thước chữ */
+    cursor: pointer;
+    margin-left: 15px; /* Tăng khoảng cách */
+}
+
+.popup-follow-button:hover {
+    background-color: #0056b3;
+}
+
+.popup-no-data {
+    padding: 30px; /* Tăng padding */
+    text-align: center;
+    color: #666;
+    font-size: 16px; /* Tăng kích thước chữ */
 }
 </style>

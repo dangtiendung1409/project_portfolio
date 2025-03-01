@@ -37,11 +37,14 @@ const baseUrl = 'http://127.0.0.1:8000/api';
           editGallery: `${baseUrl}/update-gallery`,
           deleteGallery: `${baseUrl}/delete-gallery`,
           deletePhotoFromGallery: (galleries_code, photo_id) => `${baseUrl}/gallery/${galleries_code}/photo/${photo_id}`,
+
           // photo details
           getPhotoDetail : `${baseUrl}/getPhotoDetail`,
           getCommentsByPhotoToken: `${baseUrl}/comments`,
+          getPhotoLikes: (token) => `${baseUrl}/photo-likes/${token}`,
           postComment: `${baseUrl}/comments`,
           deleteComment: (commentId) => `${baseUrl}/comments/${commentId}`,
+
           // add photo
           addPhoto : `${baseUrl}/add-photos`,
           //edit photo
@@ -57,7 +60,7 @@ const baseUrl = 'http://127.0.0.1:8000/api';
           getPhotosByUserName: (username) => `${baseUrl}/photos-by-username/${username}`,
           getGalleriesByUserName: (username) => `${baseUrl}/galleries-by-username/${username}`,
           getGalleryDetailUser: (galleries_code) => `${baseUrl}/gallery-details-user/${galleries_code}`,
-
+          getTotalLikes: (username) => `${baseUrl}/total-likes/${username}`,
           // category
           getPhotosByCategorySlugs: (slugs) => `${baseUrl}/categories/photos?slugs=${slugs}`,
 

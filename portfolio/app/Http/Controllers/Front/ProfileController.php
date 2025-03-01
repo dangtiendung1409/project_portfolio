@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Front;
 
 use App\Http\Controllers\Controller;
 use App\Models\Gallery;
+use App\Models\Like;
 use App\Models\Photo;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -36,21 +37,71 @@ class ProfileController extends Controller
             return response()->json(['error' => 'User not found'], 404);
         }
     }
+    public function getTotalLikesByUsername($username)
+    {
+        $user = \App\Models\User::where('username', $username)->first();
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not found'
+            ], 404);
+        }
+
+        // Tính tổng số like của tất cả ảnh của user thỏa mãn điều kiện:
+        // photo_status = 'approved' và privacy_status = 0
+        $totalLikes = Like::whereHas('photo', function ($query) use ($user) {
+            $query->where('user_id', $user->id)
+                ->where('photo_status', 'approved')
+                ->where('privacy_status', 0);
+        })->count();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'username'    => $user->username,
+                'total_likes' => $totalLikes,
+            ]
+        ]);
+    }
+
     public function getGalleriesByUserName($username)
     {
         $user = User::where('username', $username)->first();
 
-        if ($user) {
+        if (!$user) {
+            return response()->json(['error' => 'User not found'], 404);
+        }
+
+        try {
+            // Lấy user hiện tại để kiểm tra danh sách người bị chặn
+            $currentUser = JWTAuth::parseToken()->authenticate();
+            $blockedUserIds = $currentUser->blockedUsers()->pluck('blocked_id');
+
             $galleries = Gallery::where('user_id', $user->id)
                 ->where('visibility', 0)
-                ->with(['photo', 'user']) // Thêm 'user' để lấy thông tin user
+                ->with([
+                    'user',
+                    'photo' => function ($q) use ($blockedUserIds) {
+                        if ($blockedUserIds->isNotEmpty()) {
+                            $q->whereNotIn('user_id', $blockedUserIds);
+                        }
+                    }
+                ])
                 ->get();
 
             return response()->json($galleries);
-        } else {
-            return response()->json(['error' => 'User not found'], 404);
+        } catch (\Exception $e) {
+            // Nếu không có token hoặc xảy ra lỗi, trả về gallery mà không lọc các ảnh bị chặn
+            $galleries = Gallery::where('user_id', $user->id)
+                ->where('visibility', 0)
+                ->with(['user', 'photo'])
+                ->get();
+
+            return response()->json($galleries);
         }
     }
+
     public function getGalleryDetailUser($galleries_code)
     {
         try {

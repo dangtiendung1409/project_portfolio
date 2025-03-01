@@ -56,7 +56,7 @@
                         <div class="profile-stats">
                             <span @click="showFollowersPopup"><strong>{{ userFollowersCount }}</strong> Followers</span>
                             <span @click="showFollowingPopup"><strong>{{ userFollowingCount }}</strong> Following</span>
-                            <span><strong>2.1M</strong> Photo Likes</span>
+                            <span><strong>{{ formattedPhotoLikes }}</strong> Photo Likes</span>
                         </div>
                     </div>
                 </div>
@@ -92,7 +92,9 @@
             </div>
             <div v-if="followersData.length > 0" class="popup-list">
                 <div v-for="follower in followersData" :key="follower.id" class="popup-item">
+                    <router-link :to="{ name: 'MyProfile', params: { username: follower.username } }">
                     <img :src="follower.profile_picture ? `http://127.0.0.1:8000/images/avatars/${follower.profile_picture.split('/').pop()}` : '/images/imageUserDefault.png'" alt="Avatar" class="popup-avatar" />
+                    </router-link>
                     <div class="popup-user-info">
                         <span class="popup-username">{{ follower.username }}</span>
                         <span class="popup-followers">{{ follower.followers_count || 0 }} Followers</span>
@@ -114,7 +116,9 @@
             </div>
             <div v-if="followingData.length > 0" class="popup-list">
                 <div v-for="following in followingData" :key="following.id" class="popup-item">
+                    <router-link :to="{ name: 'MyProfile', params: { username: following.username } }">
                     <img :src="following.profile_picture ? `http://127.0.0.1:8000/images/avatars/${following.profile_picture.split('/').pop()}` : '/images/imageUserDefault.png'" alt="Avatar" class="popup-avatar" />
+                    </router-link>
                     <div class="popup-user-info">
                         <span class="popup-username">{{ following.username }}</span>
                         <span class="popup-followers">{{ following.followers_count || 0 }} Followers</span>
@@ -159,6 +163,7 @@ export default {
             user: {},
             photos: [],
             galleries: [],
+            photoLikesCount: 0,
             isBioExpanded: false,
             showUpdateModal: false,
             selectedUserId: null,
@@ -204,6 +209,16 @@ export default {
         followingData() {
             return this.followStore.userFollowingList;
         },
+        formattedPhotoLikes() {
+            const likes = this.photoLikesCount;
+            if (likes >= 1000000) {
+                return (likes / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+            } else if (likes >= 1000) {
+                return (likes / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
+            } else {
+                return likes;
+            }
+        },
     },
     watch: {
         '$route.params.username': {
@@ -239,6 +254,8 @@ export default {
             const username = this.$route.params.username;
             await followStore.fetchUserFollowersList(username);
             await followStore.fetchUserFollowingList(username);
+
+            await this.fetchTotalLikes();
         },
         toggleDropdown(id) {
             this.activeDropdown = this.activeDropdown === id ? null : id;
@@ -250,6 +267,20 @@ export default {
                 this.user = response.data;
             } catch (error) {
                 console.error('Error fetching user data:', error);
+            }
+        },
+        async fetchTotalLikes() {
+            const username = this.$route.params.username;
+            try {
+                const response = await axios.get(getUrlList().getTotalLikes(username));
+                if (response.data.success) {
+                    this.photoLikesCount = response.data.data.total_likes;
+                } else {
+                    this.photoLikesCount = 0;
+                }
+            } catch (error) {
+                console.error('Error fetching total likes:', error);
+                this.photoLikesCount = 0;
             }
         },
         async checkIfBlocked() {
@@ -348,7 +379,12 @@ export default {
         async fetchGalleries() {
             const username = this.$route.params.username;
             try {
-                const response = await axios.get(getUrlList().getGalleriesByUserName(username));
+                const token = localStorage.getItem("token");
+                let headers = {};
+                if (token) {
+                    headers = { Authorization: `Bearer ${token}` };
+                }
+                const response = await axios.get(getUrlList().getGalleriesByUserName(username), { headers });
                 this.galleries = response.data;
             } catch (error) {
                 console.error('Error fetching galleries:', error);
