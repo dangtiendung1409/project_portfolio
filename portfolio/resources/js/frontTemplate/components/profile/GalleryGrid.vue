@@ -62,24 +62,18 @@
                 />
                 <h4>{{ gallery.user?.username || 'Anonymous' }}</h4>
                 <div class="footer-buttons">
-                    <i class="fa-regular fa-heart"></i>
+                     <span class="icon-heart2" @click.stop="toggleLikeGallery(gallery)" >
+                       <i :class="[gallery.liked ? 'fas' : 'fa-regular', 'fa-heart', { liked: gallery.liked }]"></i>
+                     </span>
                 </div>
-            </div>
-            <div v-if="activeDropdown === 'dropdown-' + gallery.id" class="dropdown-content show" @click.stop>
-                <ul>
-                    <li @click="$emit('editGallery', gallery.galleries_code)">
-                        <i class="fas fa-edit"></i> Edit Gallery
-                    </li>
-                    <li @click="$emit('deleteGallery', gallery)">
-                        <i class="fas fa-trash-alt"></i> Delete Gallery
-                    </li>
-                </ul>
             </div>
         </div>
     </div>
 </template>
 
 <script>
+import { useLikeStore } from '@/stores/likeStore';
+import { useAuthStore } from '@/stores/authStore';
 export default {
     name: "GalleryGrid",
     props: {
@@ -92,9 +86,56 @@ export default {
             default: null
         }
     },
+    computed: {
+        likeStore() {
+            return useLikeStore();
+        },
+        authStore() {
+            return useAuthStore();
+        },
+
+    },
+    mounted() {
+        this.updateLikedState();
+    },
+    watch: {
+        galleries: {
+            handler() {
+                this.updateLikedState();
+            },
+            deep: true,
+            immediate: true
+        }
+    },
     methods: {
         goToGalleryDetails(galleries_code) {
             this.$router.push({ name: 'GalleryDetailsUser', params: { galleries_code } });
+        },
+        async toggleLikeGallery(gallery) {
+            // Kiểm tra đăng nhập
+            if (!this.authStore.isLoggedIn) {
+                this.$router.push({ name: 'Login' });
+                return;
+            }
+            try {
+                if (gallery.liked) {
+                    // Nếu đã like, gọi API unlike gallery
+                    await this.likeStore.unlikeGallery(gallery.id);
+                    gallery.liked = false;
+                } else {
+                    // Nếu chưa like, gọi API like gallery
+                    await this.likeStore.likeGallery(gallery.id, gallery.user ? gallery.user.id : null);
+                    gallery.liked = true;
+                }
+            } catch (error) {
+                console.error('Failed to toggle like on gallery:', error);
+            }
+        },
+        updateLikedState() {
+            // Cập nhật trạng thái liked cho từng gallery dựa vào store.likedGalleries
+            this.galleries.forEach(gallery => {
+                gallery.liked = this.likeStore.likedGalleries.includes(gallery.id);
+            });
         }
     }
 };
@@ -285,5 +326,8 @@ export default {
 .dropdown-content li:hover i {
     color: whitesmoke;
     background-color: #1890ff;
+}
+.icon-heart2 .fa-heart.liked {
+    color: #ff5a5f; /* Màu khi đã like */
 }
 </style>

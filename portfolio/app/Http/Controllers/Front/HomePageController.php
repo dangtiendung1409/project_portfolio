@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Front;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Models\Gallery;
 use App\Models\Like;
 use App\Models\Notification;
 use App\Models\Photo;
@@ -201,6 +202,74 @@ class HomePageController extends Controller
 
         return response()->json(['message' => 'Photo unliked successfully'], 200);
     }
+    public function likeGallery(Request $request)
+    {
+        $user = Auth::user(); // Người đang đăng nhập
+        $galleryId = $request->input('gallery_id');
+        $galleryUserId = $request->input('gallery_user_id'); // Nhận gallery_user_id từ API nếu có
+
+        // Nếu không có gallery_user_id, lấy thông tin gallery để xác định chủ sở hữu
+        if (!$galleryUserId) {
+            $gallery = Gallery::find($galleryId);
+            if (!$gallery) {
+                return response()->json(['message' => 'Gallery not found'], 404);
+            }
+            $galleryUserId = $gallery->user_id;
+        }
+
+        // Kiểm tra xem like cho gallery này đã tồn tại chưa
+        $like = Like::where('user_id', $user->id)
+            ->where('gallery_id', $galleryId)
+            ->first();
+
+        if (!$like) {
+            // Tạo like mới cho gallery
+            $like = Like::create([
+                'user_id'    => $user->id,
+                'gallery_id' => $galleryId,
+                'like_date'  => now(),
+            ]);
+
+            // Nếu gallery không thuộc về người dùng hiện tại, tạo thông báo
+            if ($galleryUserId !== $user->id) {
+                Notification::create([
+                    'user_id'           => $user->id,
+                    'recipient_id'      => $galleryUserId, // Chủ sở hữu gallery
+                    'like_id'           => $like->id,
+                    'comment_id'        => null,
+                    'gallery_id'        => $galleryId,     // Gắn gallery_id cho thông báo
+                    'type'              => 3,              // Ví dụ: 1 đại diện cho like gallery (0 là like photo)
+                    'content'           => "{$user->username} liked your gallery.",
+                    'is_read'           => false,
+                    'notification_date' => now(),
+                ]);
+            }
+        }
+
+        return response()->json(['message' => 'Gallery liked successfully'], 200);
+    }
+
+    public function unlikeGallery(Request $request)
+    {
+        $user = Auth::user();
+        $galleryId = $request->input('gallery_id');
+
+        // Lấy bản ghi like cho gallery
+        $like = Like::where('user_id', $user->id)
+            ->where('gallery_id', $galleryId)
+            ->first();
+
+        if ($like) {
+            // Xóa thông báo liên quan
+            Notification::where('like_id', $like->id)->delete();
+
+            // Xóa like
+            $like->delete();
+        }
+
+        return response()->json(['message' => 'Gallery unliked successfully'], 200);
+    }
+
     public function getUserNotifications()
     {
         $user = Auth::user();

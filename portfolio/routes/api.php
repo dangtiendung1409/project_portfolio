@@ -70,9 +70,12 @@ Route::middleware('auth:api')->group(function () {
 
     // like
     Route::get('/liked-photos', [AccountUserController::class, 'getLikedPhotos']);
-    Route::delete('/like/{photo_id}', [AccountUserController::class, 'deleteLike']);
+    Route::delete('/like/{like_id}', [AccountUserController::class, 'deleteLike']);
     Route::post('/like-photo', [HomePageController::class, 'likePhoto']);
     Route::post('/unlike-photo', [HomePageController::class, 'unlikePhoto']);
+    Route::post('/like-gallery', [HomePageController::class, 'likeGallery']);
+    Route::post('/unlike-gallery', [HomePageController::class, 'unlikeGallery']);
+
 
     // gallery
     Route::post('/add-gallery', [AccountUserController::class, 'addGallery']);

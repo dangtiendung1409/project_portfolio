@@ -159,20 +159,21 @@ class AccountUserController extends Controller
     // like photo
     public function getLikedPhotos(Request $request)
     {
-        // Lấy user_id từ token đã xác thực
         $user = Auth::user();
-        $likedPhotos = Like::where('user_id', $user->id)
+        $likedItems = Like::where('user_id', $user->id)
             ->with([
                 'photo.user',
+                'gallery.user',
+                'gallery.photo'
             ])
             ->orderBy('like_date', 'desc')
             ->get();
 
         return response()->json([
-            'data' => $likedPhotos
+            'data' => $likedItems
         ]);
     }
-    public function deleteLike(Request $request, $photo_id)
+    public function deleteLike(Request $request, $like_id)
     {
         $user = Auth::user();
 
@@ -180,21 +181,26 @@ class AccountUserController extends Controller
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
-        // Tìm like dựa trên user_id và photo_id
-        $like = Like::where('user_id', $user->id)->where('photo_id', $photo_id)->first();
+        // Tìm like dựa trên user_id và id của lượt thích
+        $like = Like::where('user_id', $user->id)
+            ->where('id', $like_id)
+            ->first();
 
         if (!$like) {
             return response()->json(['message' => 'Like not found'], 404);
         }
 
-        // Xóa các thông báo liên quan đến like này
+        // Xóa các thông báo liên quan đến lượt thích này
         Notification::where('like_id', $like->id)->delete();
 
-        // Xóa like
+        // Xóa lượt thích
         $like->delete();
 
+        // Xác định thông điệp dựa trên loại lượt thích
+        $message = $like->photo_id ? 'Like on photo deleted successfully!' : 'Like on gallery deleted successfully!';
+
         return response()->json([
-            'message' => 'Photo deleted successfully!',
+            'message' => $message,
         ], 200);
     }
 

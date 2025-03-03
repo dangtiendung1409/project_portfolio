@@ -8,6 +8,22 @@
                         <header class="header">
                             <div class="header-content">
                                 <span>Likes</span>
+                                <p class="header-subtitle">
+                                    <span>{{ headerSubtitle }}</span>
+                                </p>
+                            </div>
+                            <div class="tabs">
+                                <!-- Khi click, thay đổi activeTab -->
+                                <span class="tab-item"
+                                      :class="{ active: activeTab === 'photo' }"
+                                      @click="activeTab = 'photo'">
+                                      Photo
+                                 </span>
+                                <span class="tab-item"
+                                      :class="{ active: activeTab === 'gallery' }"
+                                      @click="activeTab = 'gallery'">
+                                     Gallery
+                                 </span>
                             </div>
                         </header>
                         <div class="sort-select">
@@ -27,69 +43,33 @@
                                 </select>
                             </div>
                         </div>
-                        <div v-if="likedPhotos.length === 0" class="empty-likes">
-                            <h2>Add photos to your likes</h2>
-                            <p>Browse and like photos to curate your own collection.</p>
-                            <button class="add-photo-button" @click="goToAddPhoto">
-                                Add like photos
-                            </button>
-                        </div>
-                        <div v-else class="photo-gallery">
-                            <div v-for="like in likedPhotos" :key="like.id" class="photo-item">
-                                <div class="photo-overlay">
-                                    <router-link :to="{ name: 'PhotoDetail', params: { token: like.photoToken } }">
-                                        <img :src="like.imageUrl" alt="photo" class="photo-image" />
-                                    </router-link>
-                                    <div class="photo-details">
-                                        <img
-                                            :src="like.userAvatar"
-                                            alt="User Avatar"
-                                            class="user-avatar"
-                                        />
-                                        <span class="user-name2">{{ like.username }}</span>
-                                        <span class="icon-heart2" @click="showDeleteLikeConfirm(like)">
-                                            <i class="fa-solid fa-trash-can"></i>
-                                        </span>
-                                        <button
-                                            class="btn-options"
-                                            @click.stop="toggleDropdown('dropdown-' + like.id, $event)"
-                                            :class="{'active': activeDropdown === 'dropdown-' + like.id}"
-                                        >
-                                            <i class="fa-solid fa-ellipsis"></i>
-                                        </button>
-                                    </div>
-                                    <div v-if="activeDropdown === 'dropdown-' + like.id" class="dropdown-content show"  @click.stop>
-                                        <ul>
-                                            <li @click="openAddToGalleryModal(like.photoId)">
-                                                <i class="fa-solid fa-plus"></i> Add to Gallery
-                                            </li>
-                                            <li>
-                                                <i class="fa-solid fa-flag"></i> Report this photo
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <PhotoLikeGrid
+                            v-if="activeTab === 'photo'"
+                            :likedPhotos="likedPhotos"
+                            @delete-like="deleteLikePhoto"
+                        />
+
+                        <!-- Nếu tab Gallery đang active -->
+                        <GalleryLikeGrid
+                            v-else-if="activeTab === 'gallery'"
+                            :likedGalleries="likedGalleries"
+                            @delete-like="deleteLikeGallery"
+                        />
                     </main>
                 </div>
             </div>
         </template>
     </Layout>
-    <AddToGalleryModal
-        :is-visible="showAddToGallery"
-        :photo-id="selectedPhotoId"
-        @close="closeAddToGalleryModal"
-    />
 </template>
 
 
 <script>
 import axios from 'axios';
 import getUrlList from '../../provider.js';
-import AddToGalleryModal from '../components/AddToGalleryModal.vue';
 import Layout from '../Layout.vue';
 import Sidebar from './components/Sidebar.vue';
+import PhotoLikeGrid from './components/like/PhotoLikeGrid.vue';
+import GalleryLikeGrid from './components/like/GalleryLikeGrid.vue';
 import '@assets/css/account.css';
 import { Modal, notification } from 'ant-design-vue';
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue';
@@ -100,97 +80,151 @@ export default {
     components: {
         Layout,
         Sidebar,
-        AddToGalleryModal,
+        PhotoLikeGrid,
+        GalleryLikeGrid
     },
     data() {
         return {
             likedPhotos: [],
+            likedGalleries: [],
             activeDropdown: null,
-            showAddToGallery: false,
-            selectedPhotoId: null,
+            activeTab: 'photo',
+
         };
     },
     mounted() {
-        this.fetchLikedPhotos();
+        this.fetchLikedData();
+    },
+    computed: {
+        headerSubtitle() {
+            if (this.activeTab === 'gallery') {
+                return `${this.likedGalleries.length} galleries`;
+            } else if (this.activeTab === 'photo') {
+                return `${this.likedPhotos.length} photos`;
+            } else {
+                if (this.likedGalleries.length > 0) {
+                    return `${this.likedGalleries.length} galleries`;
+                } else if (this.likedPhotos.length > 0) {
+                    return `${this.likedPhotos.length} photos`;
+                } else {
+                    return '';
+                }
+            }
+        }
     },
     methods: {
-        toggleDropdown(id) {
-            this.activeDropdown = this.activeDropdown === id ? null : id;
-        },
-        async fetchLikedPhotos() {
+        async fetchLikedData() {
             const token = localStorage.getItem('token');
             if (!token) {
-                console.error('No token found');
+                console.error('Không tìm thấy token');
                 return;
             }
-
             try {
                 const response = await axios.get(getUrlList().getLikedPhotos, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
 
-                // Ánh xạ dữ liệu trả về từ API
-                this.likedPhotos = response.data.data.map((like) => ({
-                    id: like.id,
-                    photoId: like.photo?.id || null,
-                    photoToken: like.photo?.photo_token || null,
-                    imageUrl: like.photo?.image_url || '/images/default-photo.png',
-                    username: like.photo?.user?.username || 'Unknown User',
-                    userAvatar: like.photo?.user?.profile_picture || '/images/imageUserDefault.png',
-                }));
+                this.likedPhotos = [];
+                this.likedGalleries = [];
+
+                response.data.data.forEach((like) => {
+                    if (like.photo_id) {
+                        this.likedPhotos.push({
+                            id: like.id,
+                            photoId: like.photo?.id || null,
+                            photoToken: like.photo?.photo_token || null,
+                            imageUrl: like.photo?.image_url || '/images/default-photo.png',
+                            name: like.photo?.user?.name || 'Người dùng không xác định',
+                            userAvatar: like.photo?.user?.profile_picture ? `http://127.0.0.1:8000${like.photo?.user?.profile_picture}` : '/images/imageUserDefault.png',
+                        });
+                    } else if (like.gallery_id) {
+                        this.likedGalleries.push({
+                            id: like.id,
+                            galleryId: like.gallery?.id || null,
+                            galleriesName: like.gallery?.galleries_name || 'Không có tên',
+                            galleriesCode: like.gallery?.galleries_code || null,
+                            galleriesPhoto: like.gallery?.photo || [],
+                            username: like.gallery?.user?.username || 'Người dùng không xác định',
+                            userAvatar: like.gallery?.user?.profile_picture ? `http://127.0.0.1:8000${like.gallery?.user?.profile_picture}` : '/images/imageUserDefault.png',
+                        });
+                    }
+                });
+
+                console.log('Dữ liệu Liked Galleries:', this.likedGalleries);
             } catch (error) {
-                console.error('Error fetching liked photos:', error);
+                console.error('Lỗi khi lấy dữ liệu liked:', error);
             }
         },
-        showDeleteLikeConfirm(like) {
+        async deleteLikePhoto(like) {
             Modal.confirm({
                 title: 'Are you sure you want to delete this like?',
                 icon: h(ExclamationCircleOutlined),
-                content: `This action will remove the like from the photo by ${like.username}.`,
+                content: `Likes from photos of ${like.name} will be deleted.`,
                 okText: 'Yes',
                 cancelText: 'No',
-                onOk: () => this.deleteLike(like.photoId),
+                onOk: async () => {
+                    const token = localStorage.getItem('token');
+                    if (!token) {
+                        notification.error({
+                            message: 'Lỗi',
+                            description: 'Token not found, please log in.',
+                        });
+                        return;
+                    }
+                    try {
+                        const response = await axios.delete(getUrlList().deleteLike(like.id), {
+                            headers: { Authorization: `Bearer ${token}` },
+                        });
+                        notification.success({
+                            message: 'Success',
+                            description: response.data.message,
+                        });
+                        this.likedPhotos = this.likedPhotos.filter(item => item.id !== like.id);
+                    } catch (error) {
+                        console.error('Error when deleting likes:', error);
+                        notification.error({
+                            message: 'Error',
+                            description: error.response?.data?.message || 'Likes cannot be deleted.',
+                        });
+                    }
+                },
             });
         },
-        async deleteLike(photoId) {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                notification.error({
-                    message: 'Error',
-                    description: 'No token found, please login.',
-                });
-                return;
-            }
-
-            try {
-                const response = await axios.delete(getUrlList().deleteLike(photoId), {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-
-                notification.success({
-                    message: 'Success',
-                    description: response.data.message,
-                });
-
-                // Loại bỏ ảnh đã bị xoá khỏi danh sách likedPhotos
-                this.likedPhotos = this.likedPhotos.filter((item) => item.photoId !== photoId);
-            } catch (error) {
-                console.error('Error deleting like:', error);
-                notification.error({
-                    message: 'Error',
-                    description: error.response?.data?.message || 'Failed to delete like.',
-                });
-            }
-        },
-        goToAddPhoto() {
-            this.$router.push('/');
-        },
-        openAddToGalleryModal(photoId) {
-            this.selectedPhotoId = photoId;
-            this.showAddToGallery = true; // Mở modal
-        },
-        closeAddToGalleryModal() {
-            this.showAddToGallery = false; // Đóng modal
+        async deleteLikeGallery(like) {
+            // Sử dụng Modal.confirm để hỏi lại người dùng trước khi xoá
+            Modal.confirm({
+                title: 'Are you sure you want to delete this like?',
+                icon: h(ExclamationCircleOutlined),
+                content: `Likes from gallery "${like.galleriesName}" will be deleted.`,
+                okText: 'Yes',
+                cancelText: 'No',
+                onOk: async () => {
+                    const token = localStorage.getItem('token');
+                    if (!token) {
+                        notification.error({
+                            message: 'Error',
+                            description: 'Token not found, please log in.',
+                        });
+                        return;
+                    }
+                    try {
+                        const response = await axios.delete(getUrlList().deleteLike(like.id), {
+                            headers: { Authorization: `Bearer ${token}` },
+                        });
+                        notification.success({
+                            message: 'Success',
+                            description: response.data.message,
+                        });
+                        this.likedGalleries = this.likedGalleries.filter((item) => item.id !== like.id);
+                    } catch (error) {
+                        console.error('Error deleting likes:', error);
+                        notification.error({
+                            message: 'Lỗi',
+                            description: error.response?.data?.message || 'Likes cannot be deleted.',
+                        });
+                    }
+                },
+            });
         },
     },
 };
@@ -207,63 +241,30 @@ main {
     flex-direction: column;
     overflow: hidden;
 }
-.empty-likes {
+.tabs {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    height: 400px; /* Chiều cao cho vùng trống */
-    color: #777;
+    gap: 5px;
+    margin-top: 10px;
 }
-
-.empty-likes h2 {
-    font-size: 24px;
-    margin-bottom: 10px;
-    color: #333;
-}
-
-.empty-likes p {
-    font-size: 16px;
-    color: #555;
-}
-.add-photo-button {
-    padding: 10px 20px;
-    background-color: #1890ff;
-    color: white;
-    border: none;
-    border-radius: 5px;
+.tab-item {
     cursor: pointer;
-    font-size: 16px;
-}
-.user-name2 {
-    font-size: 18px;
-    color: #fff;
-    margin-right: auto;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 120px;
-}
-
-.icon-heart2, .icon-dots2 {
-    flex-grow: 0;
-    margin-left: 10px;
-    font-size: 18px;
-    margin-right: 10px;
-    position: relative;
-}
-
-.icon-heart2:hover {
-    color: #ff5a5f;
-}
-.btn-options {
-    background: none;
-    border: none;
     color: gray;
-    cursor: pointer;
-    font-size: 20px;
-    margin-left: 10px;
+    font-size: 16px;
+    position: relative;
+    padding-bottom: 5px;
+}
+.tab-item.active {
+    color: #0870D1;
+    font-weight: bold;
+}
+.tab-item.active::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: #0870D1;
 }
 .btn-options.active i {
     color: whitesmoke;
@@ -271,55 +272,6 @@ main {
     border-radius: 50%;
     padding: 5px;
 }
-.create-gallery-button:focus,
-.btn-options:focus {
-    outline: none;
-}
 
-.dropdown-content {
-    margin-left: 60px;
-}
-.dropdown-content ul {
-    list-style: none;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    margin: 0;
-}
 
-.dropdown-content li {
-    padding: 15px 15px 15px 25px;
-    display: flex;
-    align-items: center;
-    color: #222222;
-    white-space: nowrap;
-    z-index: 1000;
-}
-
-.dropdown-content li:hover {
-    color: whitesmoke; /* Màu chữ khi hover */
-    background-color: #1890ff; /* Màu nền khi hover */
-}
-
-.dropdown-content li i {
-    margin-right: 8px;
-}
-
-.dropdown-content li:hover i {
-    color: whitesmoke;
-    background-color: #1890ff;
-}
-.photo-image {
-     height: 200px;
-     width: 250px;
-     object-fit: cover;
- }
-
-/* Thêm CSS cho trạng thái active */
-.icon-dots2 .fa-ellipsis-h.active {
-    color: whitesmoke;
-    background-color: #1890ff;
-    border-radius: 50%;
-    padding: 5px;
-}
 </style>

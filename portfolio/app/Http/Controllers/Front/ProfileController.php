@@ -124,6 +124,11 @@ class ProfileController extends Controller
                 return response()->json(['success' => false, 'message' => 'Gallery not found'], 404);
             }
 
+            // Tính tổng số like của gallery
+            $totalLikes = \App\Models\Like::where('gallery_id', $gallery->id)->count();
+            // Gắn thêm trường total_likes vào gallery
+            $gallery->total_likes = $totalLikes;
+
             return response()->json(['success' => true, 'data' => $gallery], 200);
         } catch (\Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
             return response()->json(['success' => false, 'message' => 'Invalid token'], 401);
@@ -137,6 +142,10 @@ class ProfileController extends Controller
             if (!$gallery) {
                 return response()->json(['success' => false, 'message' => 'Gallery not found'], 404);
             }
+
+            // Tính tổng số like trong catch
+            $totalLikes = Like::where('gallery_id', $gallery->id)->count();
+            $gallery->total_likes = $totalLikes;
 
             return response()->json(['success' => true, 'data' => $gallery], 200);
         }

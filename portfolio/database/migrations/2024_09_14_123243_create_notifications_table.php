@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('like_id')->nullable()->constrained('likes');
             $table->foreignId('comment_id')->nullable()->constrained('comments');
             $table->foreignId('photo_id')->nullable()->constrained('photos');
-            // type 0 = like , type 1 = comment , type 2 = follow
+            // type 0 = like photo, type 1 = comment , type 2 = follow , type 3 = like gallery
             $table->unsignedTinyInteger('type');
             $table->text('content');
             $table->boolean('is_read')->default(false);

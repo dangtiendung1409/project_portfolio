@@ -2392,6 +2392,242 @@
               }
           }
       },
+      "/like-photo": {
+          "post": {
+              "tags": ["Like"],
+              "summary": "Add a like to a photo",
+              "operationId": "likePhoto",
+              "consumes": ["application/json"],
+              "produces": ["application/json"],
+              "parameters": [
+                  {
+                      "name": "Authorization",
+                      "in": "header",
+                      "description": "Bearer token for authentication",
+                      "required": true,
+                      "type": "string"
+                  },
+                  {
+                      "in": "body",
+                      "name": "body",
+                      "description": "Payload for liking a photo",
+                      "required": true,
+                      "schema": {
+                          "type": "object",
+                          "properties": {
+                              "photo_id": {
+                                  "type": "integer",
+                                  "example": 123
+                              },
+                              "photo_user_id": {
+                                  "type": "integer",
+                                  "example": 456
+                              }
+                          },
+                          "required": ["photo_id"]
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "Photo liked successfully",
+                      "schema": {
+                          "type": "object",
+                          "properties": {
+                              "message": {
+                                  "type": "string",
+                                  "example": "Photo liked successfully"
+                              }
+                          }
+                      }
+                  },
+                  "401": {
+                      "description": "Unauthorized"
+                  },
+                  "404": {
+                      "description": "Photo not found or Like already exists"
+                  },
+                  "500": {
+                      "description": "Internal server error"
+                  }
+              }
+          }
+      },
+      "/unlike-photo": {
+          "post": {
+              "tags": ["Like"],
+              "summary": "Remove a like from a photo",
+              "operationId": "unlikePhoto",
+              "consumes": ["application/json"],
+              "produces": ["application/json"],
+              "parameters": [
+                  {
+                      "name": "Authorization",
+                      "in": "header",
+                      "description": "Bearer token for authentication",
+                      "required": true,
+                      "type": "string"
+                  },
+                  {
+                      "in": "body",
+                      "name": "body",
+                      "description": "Payload for unliking a photo",
+                      "required": true,
+                      "schema": {
+                          "type": "object",
+                          "properties": {
+                              "photo_id": {
+                                  "type": "integer",
+                                  "example": 123
+                              }
+                          },
+                          "required": ["photo_id"]
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "Photo unliked successfully",
+                      "schema": {
+                          "type": "object",
+                          "properties": {
+                              "message": {
+                                  "type": "string",
+                                  "example": "Photo unliked successfully"
+                              }
+                          }
+                      }
+                  },
+                  "401": {
+                      "description": "Unauthorized"
+                  },
+                  "404": {
+                      "description": "Like not found"
+                  },
+                  "500": {
+                      "description": "Internal server error"
+                  }
+              }
+          }
+      },
+      "/like-gallery": {
+          "post": {
+              "tags": ["Like"],
+              "summary": "Add a like to a gallery",
+              "operationId": "likeGallery",
+              "consumes": ["application/json"],
+              "produces": ["application/json"],
+              "parameters": [
+                  {
+                      "name": "Authorization",
+                      "in": "header",
+                      "description": "Bearer token for authentication",
+                      "required": true,
+                      "type": "string"
+                  },
+                  {
+                      "in": "body",
+                      "name": "body",
+                      "description": "Payload for liking a gallery",
+                      "required": true,
+                      "schema": {
+                          "type": "object",
+                          "properties": {
+                              "gallery_id": {
+                                  "type": "integer",
+                                  "example": 789
+                              },
+                              "gallery_user_id": {
+                                  "type": "integer",
+                                  "example": 456
+                              }
+                          },
+                          "required": ["gallery_id"]
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "Gallery liked successfully",
+                      "schema": {
+                          "type": "object",
+                          "properties": {
+                              "message": {
+                                  "type": "string",
+                                  "example": "Gallery liked successfully"
+                              }
+                          }
+                      }
+                  },
+                  "401": {
+                      "description": "Unauthorized"
+                  },
+                  "404": {
+                      "description": "Gallery not found or Like already exists"
+                  },
+                  "500": {
+                      "description": "Internal server error"
+                  }
+              }
+          }
+      },
+      "/unlike-gallery": {
+          "post": {
+              "tags": ["Like"],
+              "summary": "Remove a like from a gallery",
+              "operationId": "unlikeGallery",
+              "consumes": ["application/json"],
+              "produces": ["application/json"],
+              "parameters": [
+                  {
+                      "name": "Authorization",
+                      "in": "header",
+                      "description": "Bearer token for authentication",
+                      "required": true,
+                      "type": "string"
+                  },
+                  {
+                      "in": "body",
+                      "name": "body",
+                      "description": "Payload for unliking a gallery",
+                      "required": true,
+                      "schema": {
+                          "type": "object",
+                          "properties": {
+                              "gallery_id": {
+                                  "type": "integer",
+                                  "example": 789
+                              }
+                          },
+                          "required": ["gallery_id"]
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "Gallery unliked successfully",
+                      "schema": {
+                          "type": "object",
+                          "properties": {
+                              "message": {
+                                  "type": "string",
+                                  "example": "Gallery unliked successfully"
+                              }
+                          }
+                      }
+                  },
+                  "401": {
+                      "description": "Unauthorized"
+                  },
+                  "404": {
+                      "description": "Like not found"
+                  },
+                  "500": {
+                      "description": "Internal server error"
+                  }
+              }
+          }
+      },
       "/add-photos": {
           "post": {
               "tags": ["Photo"],

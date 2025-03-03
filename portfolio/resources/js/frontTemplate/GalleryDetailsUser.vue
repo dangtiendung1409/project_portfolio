@@ -12,7 +12,10 @@
                 <h1 class="gallery-title">{{ gallery.galleries_name || 'no title' }}</h1>
                 <h1 class="gallery-title">{{ gallery.galleries_description || 'no description' }}</h1>
                 <div class="icon-container">
-                    <span class="icon"><i class="fas fa-heart"></i> 54 Likes</span>
+                     <span class="icon" @click="toggleLikeGallery">
+            <i :class="[gallery.liked ? 'fas' : 'fa-regular', 'fa-heart', { liked: gallery.liked }]"></i>
+            {{ gallery.total_likes }} Likes
+          </span>
                     <span class="icon" @click="copyUrl"><i class="fa-solid fa-share-nodes"></i></span>
                     <i class="fa-regular fa-flag"></i>
                 </div>
@@ -196,6 +199,11 @@ export default {
         },
         updateLikedState() {
             const likeStore = useLikeStore();
+            if (this.gallery) {
+                // Gán trạng thái liked cho gallery (dựa vào store.likedGalleries)
+                this.gallery.liked = likeStore.likedGalleries.includes(this.gallery.id);
+            }
+            // Nếu gallery có mảng photo, cũng cập nhật trạng thái liked cho từng photo
             if (this.gallery.photo) {
                 this.gallery.photo.forEach(photo => {
                     photo.liked = likeStore.likedPhotos.includes(photo.id);
@@ -235,6 +243,31 @@ export default {
                 notification.error({
                     message: 'Error',
                     description: 'Failed to toggle like.',
+                    placement: 'topRight',
+                    duration: 3,
+                });
+            }
+        },
+        async toggleLikeGallery() {
+            if (!await this.checkLogin()) return;
+            const likeStore = useLikeStore();
+            try {
+                if (this.gallery.liked) {
+                    await likeStore.unlikeGallery(this.gallery.id);
+                    this.gallery.liked = false;
+                    // Giảm tổng số like
+                    this.gallery.total_likes = Math.max((this.gallery.total_likes || 1) - 1, 0);
+                } else {
+                    await likeStore.likeGallery(this.gallery.id, this.gallery.user ? this.gallery.user.id : null);
+                    this.gallery.liked = true;
+                    // Tăng tổng số like
+                    this.gallery.total_likes = (this.gallery.total_likes || 0) + 1;
+                }
+            } catch (error) {
+                console.error('Failed to toggle like on gallery:', error);
+                notification.error({
+                    message: 'Error',
+                    description: 'Failed to toggle like on gallery.',
                     placement: 'topRight',
                     duration: 3,
                 });
@@ -481,11 +514,8 @@ export default {
     font-size: 20px;
     cursor: pointer;
 }
-.icon:hover {
-    color: #007bff;
-}
-.icon:first-child i {
-    color: #ff0000;
+.icon .fa-heart.liked {
+    color: #ff5a5f; /* Màu khi đã like */
 }
 .user-info {
     display: flex;
@@ -565,10 +595,6 @@ export default {
     margin-left: 15px;
     cursor: pointer;
     flex-shrink: 0;
-}
-.icon-heart:hover,
-.icon-dots:hover {
-    color: #ff5a5f;
 }
 
 .icon-heart .fa-heart.liked {

@@ -61,17 +61,25 @@
                     </div>
                 </div>
                 <div class="tabs" v-if="!isBlocked && (photos.length > 0 || galleries.length > 0)">
-                    <a class="tab" :class="{ active: activeTab === 'photos' }" @click.prevent="activeTab = 'photos'" v-if="photos.length > 0">
+                    <a class="tab"
+                       :class="{ active: activeContent === 'photos' }"
+                       @click.prevent="activeTab = 'photos'"
+                       v-if="photos.length > 0">
                         Photos <span>{{ photos.length }}</span>
                     </a>
-                    <a class="tab" :class="{ active: activeTab === 'galleries' }" @click.prevent="activeTab = 'galleries'" v-if="galleries.length > 0">
+                    <a class="tab"
+                       :class="{ active: activeContent === 'galleries' }"
+                       @click.prevent="activeTab = 'galleries'"
+                       v-if="galleries.length > 0">
                         Galleries <span>{{ galleries.length }}</span>
                     </a>
                 </div>
-                <div v-if="activeTab === 'photos' && !isBlocked">
+                <!-- Nếu activeContent là photos -->
+                <div v-if="activeContent === 'photos' && !isBlocked">
                     <PhotoGrid :photos="photos" :checkLogin="checkLogin" />
                 </div>
-                <div v-else-if="activeTab === 'galleries' && !isBlocked">
+                <!-- Nếu activeContent là galleries -->
+                <div v-else-if="activeContent === 'galleries' && !isBlocked">
                     <GalleryGrid :galleries="galleries" />
                 </div>
             </div>
@@ -158,7 +166,7 @@ export default {
     },
     data() {
         return {
-            activeTab: "photos",
+            activeTab: null,
             activeDropdown: null,
             user: {},
             photos: [],
@@ -175,6 +183,20 @@ export default {
         };
     },
     computed: {
+        activeContent() {
+            // Nếu activeTab đã được chọn, sử dụng activeTab
+            if (this.activeTab) {
+                return this.activeTab;
+            }
+            // Nếu chưa có activeTab, ưu tiên hiển thị photos nếu có, còn không thì galleries
+            if (this.photos && this.photos.length > 0) {
+                return 'photos';
+            } else if (this.galleries && this.galleries.length > 0) {
+                return 'galleries';
+            } else {
+                return null;
+            }
+        },
         profilePictureUrl() {
             return this.user.profile_picture ? `http://127.0.0.1:8000/images/avatars/${this.user.profile_picture.split('/').pop()}` : '/images/imageUserDefault.png';
         },
