@@ -51,12 +51,14 @@
 
             <!-- Footer của gallery -->
             <div class="gallery-footer" @click.stop>
+                <router-link :to="{ name: 'MyProfile', params: { username: like.username } }">
                 <img
                     class="user-avatar"
                     :src="like.userAvatar || '/images/imageUserDefault.png'"
                     alt="User Avatar"
                 />
-                <h4>{{ like.username || 'Người dùng không xác định' }}</h4>
+                </router-link>
+                <h4>{{ like.name || 'Unknown' }}</h4>
                 <div class="footer-buttons">
                     <button class="btn-options"  @click="showDeleteLikeConfirm(like)">
                         <i class="fa-solid fa-trash-can"></i>

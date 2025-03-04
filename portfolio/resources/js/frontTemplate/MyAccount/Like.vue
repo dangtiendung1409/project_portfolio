@@ -134,6 +134,7 @@ export default {
                             photoId: like.photo?.id || null,
                             photoToken: like.photo?.photo_token || null,
                             imageUrl: like.photo?.image_url || '/images/default-photo.png',
+                            userName: like.photo?.user?.username || 'abc',
                             name: like.photo?.user?.name || 'Người dùng không xác định',
                             userAvatar: like.photo?.user?.profile_picture ? `http://127.0.0.1:8000${like.photo?.user?.profile_picture}` : '/images/imageUserDefault.png',
                         });
@@ -144,7 +145,8 @@ export default {
                             galleriesName: like.gallery?.galleries_name || 'Không có tên',
                             galleriesCode: like.gallery?.galleries_code || null,
                             galleriesPhoto: like.gallery?.photo || [],
-                            username: like.gallery?.user?.username || 'Người dùng không xác định',
+                            username: like.gallery?.user?.username || 'Unknown',
+                            name: like.gallery?.user?.name || 'Unknown',
                             userAvatar: like.gallery?.user?.profile_picture ? `http://127.0.0.1:8000${like.gallery?.user?.profile_picture}` : '/images/imageUserDefault.png',
                         });
                     }

@@ -3,7 +3,7 @@ import { useAuthStore } from './stores/authStore.js';
 import Index from './frontTemplate/Index.vue';
 import MyPhoto from './frontTemplate/MyAccount/MyPhoto.vue';
 import AddPhotos from './frontTemplate/AddPhotos.vue';
-import MyAccount from "./frontTemplate/MyAccount/MyAccount.vue";
+import ListUserBlock from "./frontTemplate/MyAccount/ListUserBlock.vue";
 import ChangePassword from "./frontTemplate/MyAccount/ChangePassword.vue";
 import Like from "./frontTemplate/MyAccount/Like.vue";
 import MyGallery from "./frontTemplate/MyAccount/MyGallery.vue";
@@ -36,7 +36,7 @@ const routes = [
     { name: 'EditGallery', path: '/editGallery/:galleries_code', component: EditGallery, meta: { requiresAuth: true } },
 
     { name: 'Like', path: '/like', component: Like, meta: { requiresAuth: true } },
-    { name: 'MyAccount', path: '/myAccount', component: MyAccount, meta: { requiresAuth: true } },
+    { name: 'ListUserBlock', path: '/listUserBlock', component: ListUserBlock, meta: { requiresAuth: true } },
     { name: 'ChangePassword', path: '/changePassword', component: ChangePassword, meta: { requiresAuth: true } },
     { name: 'Login', path: '/login', component: Login },
     { name: 'Register', path: '/register', component: Register },

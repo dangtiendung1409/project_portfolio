@@ -314,15 +314,10 @@ export default {
             if (!await this.checkLogin()) return;
             const blockStore = useBlockStore();
             if (this.isBlocked) {
-                await blockStore.unblockUser(this.user.id);
-                this.isBlocked = false;
-                notification.success({
-                    message: 'Success',
-                    description: `${this.user.username} is unblocked.`,
-                    placement: 'topRight',
-                    duration: 3,
-                });
+                // Gọi modal xác nhận trước khi bỏ chặn
+                this.confirmUnblockUser();
             } else {
+                // Nếu chặn người dùng, không cần xác nhận
                 await blockStore.blockUser(this.user.id);
                 this.isBlocked = true;
                 this.isFollowing = false;
@@ -333,6 +328,27 @@ export default {
                     duration: 3,
                 });
             }
+        },
+        confirmUnblockUser() {
+            Modal.confirm({
+                title: 'Are you sure you want to block this user?',
+                icon: h(ExclamationCircleOutlined),
+                content: `You will unblock ${this.user.username}. They will be able to interact with you and view your content.`,
+                okText: 'Yes',
+                cancelText: 'No',
+                onOk: async () => {
+                    const blockStore = useBlockStore();
+                    await blockStore.unblockUser(this.user.id);
+                    this.isBlocked = false;
+                    notification.success({
+                        message: 'Success',
+                        description: `${this.user.username} is unblocked.`,
+                        placement: 'topRight',
+                        duration: 3,
+                    });
+                },
+                onCancel() {},
+            });
         },
         openUpdateProfileModal(id) {
             this.selectedUserId = id;

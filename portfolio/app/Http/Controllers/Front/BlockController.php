@@ -99,10 +99,11 @@ class BlockController extends Controller
     public function getBlockedUsers()
     {
         $blockedUsers = Block::where('blocker_id', Auth::id())
-            ->with('blocked:id,username,profile_picture')
+            ->with('blocked') // Lấy tất cả thông tin của user bị block
             ->get()
             ->pluck('blocked');
 
         return response()->json($blockedUsers, 200);
     }
+
 }

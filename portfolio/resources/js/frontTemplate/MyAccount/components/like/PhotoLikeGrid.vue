@@ -13,7 +13,9 @@
                     <img :src="like.imageUrl" alt="photo" class="photo-image" />
                 </router-link>
                 <div class="photo-details">
+                    <router-link :to="{ name: 'MyProfile', params: { username: like.userName } }">
                     <img :src="like.userAvatar" alt="User Avatar" class="user-avatar" />
+                    </router-link>
                     <span class="user-name2">{{ like.name }}</span>
                     <span class="icon-heart2" @click="showDeleteLikeConfirm(like)">
                         <i class="fa-solid fa-trash-can"></i>

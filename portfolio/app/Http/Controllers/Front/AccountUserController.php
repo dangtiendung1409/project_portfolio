@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Front;
 
 use App\Http\Controllers\Controller;
+use App\Models\Block;
 use App\Models\Comment;
 use App\Models\Gallery;
 use App\Models\Like;
@@ -160,6 +161,13 @@ class AccountUserController extends Controller
     public function getLikedPhotos(Request $request)
     {
         $user = Auth::user();
+
+        // Lấy danh sách ID của những người bị chặn bởi người dùng hiện tại
+        $blockedUserIds = Block::where('blocker_id', $user->id)
+            ->pluck('blocked_id')
+            ->toArray();
+
+        // Lấy tất cả lượt thích của người dùng hiện tại
         $likedItems = Like::where('user_id', $user->id)
             ->with([
                 'photo.user',
@@ -169,8 +177,24 @@ class AccountUserController extends Controller
             ->orderBy('like_date', 'desc')
             ->get();
 
+        // Lọc các lượt thích để loại bỏ những lượt thích liên quan đến người bị chặn
+        $filteredLikedItems = $likedItems->filter(function ($like) use ($blockedUserIds) {
+            // Nếu là lượt thích ảnh (photo_id không null)
+            if ($like->photo_id) {
+                // Kiểm tra xem người sở hữu ảnh có bị chặn không
+                return !in_array($like->photo->user_id, $blockedUserIds);
+            }
+            // Nếu là lượt thích gallery (gallery_id không null)
+            if ($like->gallery_id) {
+                // Kiểm tra xem người sở hữu gallery có bị chặn không
+                return !in_array($like->gallery->user_id, $blockedUserIds);
+            }
+            // Nếu không phải ảnh hoặc gallery (trường hợp không hợp lệ), loại bỏ
+            return false;
+        });
+
         return response()->json([
-            'data' => $likedItems
+            'data' => $filteredLikedItems->values() // Sử dụng values() để reset lại key của mảng sau khi lọc
         ]);
     }
     public function deleteLike(Request $request, $like_id)

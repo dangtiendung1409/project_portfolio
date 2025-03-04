@@ -51,7 +51,7 @@ export default {
                 { path: '/myPhotos', icon: 'fas fa-camera', label: 'My Photo' },
                 { path: '/myGallery', icon: 'fas fa-images', label: 'Galleries' },
                 { path: '/Like', icon: 'fas fa-heart', label: 'Like' },
-                { path: '/MyAccount', icon: 'fas fa-user', label: 'Profile' },
+                { path: '/listUserBlock', icon: 'fa-solid fa-lock', label: 'Privacy' },
                 { path: '/ChangePassword', icon: 'fas fa-key', label: 'Change Password' },
             ],
             showUpdateModal: false,
