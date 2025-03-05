@@ -30,9 +30,8 @@
                         <i class="fas" :class="item.following ? 'fa-user-minus' : 'fa-user-plus'"></i>
                         {{ item.following ? 'Unfollow' : 'Follow' }}
                     </li>
-                    <li v-if="item.user && userStore.user && item.user.id !== userStore.user.id" @click="handleClick('reportPhoto', item.id)">
-                        <i class="fas fa-flag"></i>
-                        Report This Photo
+                    <li v-if="item.user && userStore.user && item.user.id !== userStore.user.id" @click="handleClick('reportPhoto', item.id, item.user.id)">
+                        <i class="fas fa-flag"></i> Report This Photo
                     </li>
                 </ul>
             </div>
@@ -43,11 +42,19 @@
         :photo-id="selectedPhotoId"
         @close="closeAddToGalleryModal"
     />
+    <ReportModal
+        :is-visible="showReportModal"
+        :title="'Report Photo'"
+        :photo-id="selectedPhotoId"
+        :violator-id="selectedViolatorId"
+        @close="closeReportModal"
+    />
 </template>
 
 <script>
 import lazyDirective from '../../lazy.js';
 import AddToGalleryModal from "../components/AddToGalleryModal.vue";
+import ReportModal from "../components/ReportModal.vue";
 import { useLikeStore } from '@/stores/likeStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useFollowStore } from '@/stores/followStore';
@@ -63,6 +70,7 @@ export default {
     },
     components: {
         AddToGalleryModal,
+        ReportModal,
     },
     props: {
         photos: {
@@ -74,7 +82,9 @@ export default {
         return {
             activeDropdown: null, // Biến lưu trữ dropdown đang mở
             showAddToGallery: false,
+            showReportModal: false,
             selectedPhotoId: null,
+            selectedViolatorId: null,
         };
     },
     async mounted() {
@@ -109,7 +119,7 @@ export default {
             }
             return true;
         },
-        async handleClick(action, itemId) {
+        async handleClick(action, itemId, violatorId) {
             if (!await this.checkLogin()) {
                 return; // Nếu chưa đăng nhập, dừng thực hiện các hành động khác
             }
@@ -125,7 +135,7 @@ export default {
                     this.followUser(itemId);
                     break;
                 case 'reportPhoto':
-                    this.reportPhoto(itemId);
+                    this.openReportModal(itemId, violatorId); // Sử dụng violatorId đã được truyền vào
                     break;
                 default:
                     console.error('Unknown action:', action);
@@ -272,6 +282,16 @@ export default {
         },
         closeAddToGalleryModal() {
             this.showAddToGallery = false; // Đóng modal
+        },
+        openReportModal(photoId, violatorId) {
+            this.selectedPhotoId = photoId;
+            this.selectedViolatorId = violatorId;
+            this.showReportModal = true;
+        },
+        closeReportModal() {
+            this.showReportModal = false;
+            this.selectedPhotoId = null;
+            this.selectedViolatorId = null;
         },
     },
     created() {

@@ -13,9 +13,12 @@ return new class extends Migration
     {
         Schema::create('reports', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('photo_id')->constrained('photos')->onDelete('cascade');
             $table->foreignId('reporter_id')->constrained('users')->onDelete('cascade'); // người báo cáo
             $table->foreignId('violator_id')->constrained('users')->onDelete('cascade'); // người đăng ảnh (người bị tố cáo)
+            $table->foreignId('photo_id')->nullable()->constrained('photos')->onDelete('cascade');
+            $table->foreignId('comment_id')->nullable()->constrained('comments')->onDelete('cascade');
+            $table->foreignId('gallery_id')->nullable()->constrained('galleries')->onDelete('cascade');
+            $table->integer('type')->default(0)->comment('0: Photo, 1: Comment, 2: Gallery');
             $table->text('report_reason');
             $table->dateTime('report_date');
             $table->string('status', 50);

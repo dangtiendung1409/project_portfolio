@@ -2953,6 +2953,92 @@
               }
           }
       },
+      "/report": {
+          "post": {
+              "tags": ["Report"],
+              "summary": "Report a photo, comment, or gallery",
+              "operationId": "reportContent",
+              "consumes": ["application/json"],
+              "produces": ["application/json"],
+              "parameters": [
+                  {
+                      "name": "Authorization",
+                      "in": "header",
+                      "description": "Bearer token for authentication",
+                      "required": true,
+                      "type": "string"
+                  },
+                  {
+                      "in": "body",
+                      "name": "body",
+                      "description": "Payload for reporting content",
+                      "required": true,
+                      "schema": {
+                          "type": "object",
+                          "properties": {
+                              "reporter_id": {
+                                  "type": "integer",
+                                  "example": 1
+                              },
+                              "violator_id": {
+                                  "type": "integer",
+                                  "example": 2
+                              },
+                              "report_reason": {
+                                  "type": "string",
+                                  "example": "Inappropriate content"
+                              },
+                              "photo_id": {
+                                  "type": "integer",
+                                  "example": 123,
+                                  "nullable": true
+                              },
+                              "comment_id": {
+                                  "type": "integer",
+                                  "example": 456,
+                                  "nullable": true
+                              },
+                              "gallery_id": {
+                                  "type": "integer",
+                                  "example": 789,
+                                  "nullable": true
+                              }
+                          },
+                          "required": ["reporter_id", "violator_id", "report_reason"]
+                      }
+                  }
+              ],
+              "responses": {
+                  "201": {
+                      "description": "Report submitted successfully",
+                      "schema": {
+                          "type": "object",
+                          "properties": {
+                              "message": {
+                                  "type": "string",
+                                  "example": "Báo cáo đã được gửi thành công"
+                              },
+                              "report": {
+                                  "$ref": "#/definitions/Report"
+                              }
+                          }
+                      }
+                  },
+                  "400": {
+                      "description": "Invalid request, missing required fields"
+                  },
+                  "401": {
+                      "description": "Unauthorized"
+                  },
+                  "422": {
+                      "description": "Validation error"
+                  },
+                  "500": {
+                      "description": "Internal server error"
+                  }
+              }
+          }
+      },
       "/search-photos": {
           "get": {
               "tags": [
@@ -3058,7 +3144,7 @@
               }
           }
       }
-},
+  },
 
   "securityDefinitions": {
     "APIKeyHeader": {

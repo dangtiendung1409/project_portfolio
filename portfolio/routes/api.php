@@ -11,6 +11,7 @@ use App\Http\Controllers\Front\CategoryController;
 use App\Http\Controllers\Front\SearchController;
 use App\Http\Controllers\Front\FollowController;
 use App\Http\Controllers\Front\BlockController;
+use App\Http\Controllers\Front\ReportController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -108,6 +109,9 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/block', [BlockController::class, 'blockUser']);
     Route::post('/unblock', [BlockController::class, 'unblockUser']);
     Route::get('/blocked-users', [BlockController::class, 'getBlockedUsers']); // Lấy danh sách người bị chặn bởi user login
+
+    // report
+    Route::post('/report', [ReportController::class, 'store']);
 
     // Auth user
     Route::get('/user', [AuthUserController::class, 'getUser']);
