@@ -136,18 +136,29 @@
                             <div class="info-container">
                                 <!-- Header with Icons in a Separate Div -->
                                 <div class="icon-wrapper">
-                                    <button class="btn icon-btn" @click="handleAction('toggleLike', photoDetail)">
+                                    <button class="btn icon-btn" @click="handleClick('toggleLike', photoDetail)">
                                         <i :class="['fa-heart', photoDetail.liked ? 'fas liked' : 'far']"></i>
                                     </button>
-                                    <button class="btn icon-btn" @click="handleAction('share')">
+                                    <button class="btn icon-btn" @click="copyUrlToClipboard">
                                         <i class="fa-solid fa-share-nodes"></i>
                                     </button>
-                                    <button class="btn icon-btn" @click="handleAction('addToGallery', photoDetail.id)">
+                                    <button class="btn icon-btn" @click="handleClick('addToGallery', photoDetail.id)">
                                         <i class="fas fa-plus"></i>
                                     </button>
-                                    <button class="btn icon-btn">
+                                    <button v-if="photoDetail.user.id !== userStore.user.id" class="btn icon-btn" @click.stop="toggleDropdown('dropdown-' + photoDetail.id, $event)"
+                                            :class="{'active': activeDropdown === 'dropdown-' + photoDetail.id}">
                                         <i class="fa-solid fa-ellipsis"></i>
                                     </button>
+                                    <div style="margin-top: 60px; margin-left: 40px" v-if="activeDropdown === 'dropdown-' + photoDetail.id" class="dropdown-content show" @click.stop>
+                                        <ul>
+                                            <li @click="handleClick('reportPhoto', photoDetail.id, photoDetail.user.id)">
+                                                <i class="fa-regular fa-flag"></i> Report this photo
+                                            </li>
+                                            <li>
+                                                <i class="fas fa-user-slash"></i> Block User
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </div>
 
                                 <!-- Details Section -->
@@ -277,6 +288,13 @@
                 :photo-id="selectedPhotoId"
                 @close="closeAddToGalleryModal"
             />
+            <ReportModal
+                :is-visible="showReportModal"
+                :title="'Report Photo'"
+                :photo-id="selectedPhotoId"
+                :violator-id="selectedViolatorId"
+                @close="closeReportModal"
+            />
             <div v-if="likesPopupVisible" class="popup-overlay" @click.self="closeLikesPopup">
                 <div class="popup-content">
                     <div class="popup-header">
@@ -316,6 +334,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { useUserStore } from '@/stores/userStore';
 import { useBlockStore } from '@/stores/blockStore';
 import AddToGalleryModal from './components/AddToGalleryModal.vue';
+import ReportModal from "./components/ReportModal.vue";
 import { storeToRefs } from 'pinia';
 import { Modal,notification } from 'ant-design-vue';
 import { h } from 'vue';
@@ -326,6 +345,7 @@ export default {
     components: {
         Layout,
         AddToGalleryModal,
+        ReportModal,
     },
     data() {
         return {
@@ -359,6 +379,8 @@ export default {
             photoLikesCount: 0,
             likesPopupVisible: false,
             likedUsers: [],
+            showReportModal: false,
+            selectedViolatorId: null,
         };
     },
     watch: {
@@ -469,20 +491,6 @@ export default {
             } catch (error) {
                 console.error("Error fetching photo likes:", error);
                 this.photoLikesCount = 0;
-            }
-        },
-        async showLikesPopup() {
-            try {
-                const token = this.$route.params.token;
-                const response = await axios.get(getUrlList().getPhotoLikes(token));
-                if (response.data.success) {
-                    this.likedUsers = response.data.data.liked_users;
-                    this.likesPopupVisible = true;
-                } else {
-                    console.error(response.data.message);
-                }
-            } catch (error) {
-                console.error("Error fetching liked users:", error);
             }
         },
         closeLikesPopup() {
@@ -610,6 +618,42 @@ export default {
                 }
             }
         },
+        // like ảnh chi tiết
+        async showLikesPopup() {
+            try {
+                const token = this.$route.params.token;
+                const response = await axios.get(getUrlList().getPhotoLikes(token));
+                if (response.data.success) {
+                    this.likedUsers = response.data.data.liked_users;
+                    this.likesPopupVisible = true;
+                } else {
+                    console.error(response.data.message);
+                }
+            } catch (error) {
+                console.error("Error fetching liked users:", error);
+            }
+        },
+        async toggleLike(item) {
+            const photo_id = item.id; // ID của ảnh
+            const photo_user_id = item.user.id; // ID của người sở hữu ảnh
+            const likeStore = useLikeStore();
+
+            try {
+                if (item.liked) {
+                    await likeStore.unlikePhoto(photo_id);
+                } else {
+                    await likeStore.likePhoto(photo_id, photo_user_id); // Gửi thêm photo_user_id
+                }
+                item.liked = !item.liked; // Đảo ngược trạng thái liked
+            } catch (error) {
+                console.error('Failed to toggle like:', error);
+            }
+        },
+        updateLikedState() {
+            const likeStore = useLikeStore();
+            this.photoDetail.liked = likeStore.likedPhotos.includes(this.photoDetail.id); // Cập nhật trạng thái liked của ảnh chi tiết
+        },
+        // comment
         async postComment() {
             if (!this.newComment.trim()) {
                 return;
@@ -640,7 +684,6 @@ export default {
             const photoToken = this.$route.params.token;
             await commentStore.deleteComment(commentId, photoToken);
         },
-
         cancelComment() {
             this.newComment = ''; // Xóa nội dung
             this.showButtons = false; // Ẩn nút
@@ -648,9 +691,8 @@ export default {
         toggleComments() {
             this.showAllComments = !this.showAllComments;
         },
-        toggleDropdown(id) {
-            this.activeDropdown = this.activeDropdown === id ? null : id;
-        },
+
+        // category
         async fetchCategories() {
             try {
                 const response = await axios.get(getUrlList().getCategories);
@@ -659,6 +701,8 @@ export default {
                 console.error("Error fetching categories:", error);
             }
         },
+
+        // check login
         async checkLogin() {
             const authStore = useAuthStore();
             await authStore.checkLoginStatus();
@@ -668,24 +712,46 @@ export default {
             }
             return true;
         },
-        async handleAction(action, payload) {
+        async handleClick(action, itemId, violatorId) {
             if (!await this.checkLogin()) {
-                return;
+                return; // Nếu chưa đăng nhập, dừng thực hiện các hành động khác
             }
 
             switch (action) {
-                case 'toggleLike':
-                    this.toggleLike(payload);
-                    break;
                 case 'addToGallery':
-                    this.openAddToGalleryModal(payload);
+                    this.openAddToGalleryModal(itemId);
                     break;
-                case 'share':
-                    this.sharePhoto();
+                case 'blockUser':
+                    this.blockUser(itemId);
+                    break;
+                case 'followUser':
+                    this.followUser(itemId);
+                    break;
+                case 'reportPhoto':
+                    this.openReportModal(itemId, violatorId); // Sử dụng violatorId đã được truyền vào
                     break;
                 default:
                     console.error('Unknown action:', action);
             }
+        },
+        copyUrlToClipboard() {
+            const url = window.location.href; // Lấy URL hiện tại của trình duyệt
+            navigator.clipboard.writeText(url).then(() => {
+                notification.success({
+                    message: 'Success',
+                    description: 'URL has been copied to the clipboard.',
+                    placement: 'topRight',
+                    duration: 3,
+                });
+            }).catch(err => {
+                console.error('Failed to copy URL:', err);
+                notification.error({
+                    message: 'Error',
+                    description: 'Failed to copy URL.',
+                    placement: 'topRight',
+                    duration: 3,
+                });
+            });
         },
         openFullScreen() {
             const img = document.createElement('img');
@@ -733,32 +799,28 @@ export default {
                 return `${days} day${days > 1 ? 's' : ''} ago`;
             }
         },
-        async toggleLike(item) {
-            const photo_id = item.id; // ID của ảnh
-            const photo_user_id = item.user.id; // ID của người sở hữu ảnh
-            const likeStore = useLikeStore();
+        toggleDropdown(id) {
+            this.activeDropdown = this.activeDropdown === id ? null : id;
+        },
 
-            try {
-                if (item.liked) {
-                    await likeStore.unlikePhoto(photo_id);
-                } else {
-                    await likeStore.likePhoto(photo_id, photo_user_id); // Gửi thêm photo_user_id
-                }
-                item.liked = !item.liked; // Đảo ngược trạng thái liked
-            } catch (error) {
-                console.error('Failed to toggle like:', error);
-            }
-        },
-        updateLikedState() {
-            const likeStore = useLikeStore();
-            this.photoDetail.liked = likeStore.likedPhotos.includes(this.photoDetail.id); // Cập nhật trạng thái liked của ảnh chi tiết
-        },
+        // open gallery modal
         openAddToGalleryModal(photoId) {
             this.selectedPhotoId = photoId;
             this.showAddToGallery = true; // Mở modal
         },
         closeAddToGalleryModal() {
             this.showAddToGallery = false; // Đóng modal
+        },
+
+        openReportModal(photoId, violatorId) {
+            this.selectedPhotoId = photoId;
+            this.selectedViolatorId = violatorId;
+            this.showReportModal = true;
+        },
+        closeReportModal() {
+            this.showReportModal = false;
+            this.selectedPhotoId = null;
+            this.selectedViolatorId = null;
         },
     },
 };

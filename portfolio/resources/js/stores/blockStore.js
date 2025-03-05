@@ -13,15 +13,6 @@ export const useBlockStore = defineStore('block', {
         // Lấy danh sách những người bị chặn
         async fetchBlockedUsers() {
             const token = localStorage.getItem('token');
-            if (!token) {
-                notification.error({
-                    message: 'Lỗi',
-                    description: 'Không tìm thấy token, vui lòng đăng nhập.',
-                    placement: 'topRight',
-                    duration: 3,
-                });
-                return;
-            }
 
             try {
                 const response = await axios.get(getUrlList().getBlockedUsers, {
