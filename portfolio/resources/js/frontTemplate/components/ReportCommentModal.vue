@@ -2,35 +2,23 @@
     <div v-if="isVisible" class="modal-overlay">
         <div class="modal-content">
             <span class="modal-close" @click="closeModal">×</span>
-            <h2 class="modal-title">{{ title }}</h2>
+            <h2 class="modal-title">Report Comment</h2>
             <div class="report-options">
                 <label class="report-option">
-                    <input type="radio" v-model="selectedReason" value="Should be tagged as adult content" />
-                    Should be tagged as adult content
+                    <input type="radio" v-model="selectedReason" value="Harassment or hate speech" />
+                    Harassment or hate speech
                 </label>
                 <label class="report-option">
-                    <input type="radio" v-model="selectedReason" value="Offensive (rude, obscene)" />
-                    Offensive (rude, obscene)
+                    <input type="radio" v-model="selectedReason" value="Spam or misleading" />
+                    Spam or misleading
                 </label>
                 <label class="report-option">
-                    <input type="radio" v-model="selectedReason" value="Spam (ads, self-promotion)" />
-                    Spam (ads, self-promotion)
+                    <input type="radio" v-model="selectedReason" value="Violence or harmful behavior" />
+                    Violence or harmful behavior
                 </label>
                 <label class="report-option">
-                    <input type="radio" v-model="selectedReason" value="Off topic (trolling)" />
-                    Off topic (trolling)
-                </label>
-                <label class="report-option">
-                    <input type="radio" v-model="selectedReason" value="Copyright (plagiarism, stealing)" />
-                    Copyright (plagiarism, stealing)
-                </label>
-                <label class="report-option">
-                    <input type="radio" v-model="selectedReason" value="Wrong content (illustration, 3D)" />
-                    Wrong content (illustration, 3D)
-                </label>
-                <label class="report-option">
-                    <input type="radio" v-model="selectedReason" value="Spam or abusive messages" />
-                    Spam or abusive messages
+                    <input type="radio" v-model="selectedReason" value="Other" />
+                    Other
                 </label>
                 <div v-if="showDetailInput" class="detail-input">
                     <label for="detailReason">Tell us why to help us better understand:</label>
@@ -56,7 +44,7 @@ import { useUserStore } from '../../stores/userStore';
 import { notification } from 'ant-design-vue';
 
 export default {
-    name: 'ReportModal',
+    name: 'ReportCommentModal',
     props: {
         isVisible: {
             type: Boolean,
@@ -66,15 +54,7 @@ export default {
             type: String,
             required: true,
         },
-        photoId: {
-            type: Number,
-            default: null,
-        },
         commentId: {
-            type: Number,
-            default: null,
-        },
-        galleryId: {
             type: Number,
             default: null,
         },
@@ -97,8 +77,7 @@ export default {
             return useUserStore();
         },
         showDetailInput() {
-            return this.selectedReason === 'Copyright (plagiarism, stealing)' ||
-                this.selectedReason === 'Spam or abusive messages';
+            return this.selectedReason === 'Other';
         }
     },
     methods: {
@@ -108,7 +87,6 @@ export default {
             this.$emit('close');
         },
         async submitReport() {
-            // Kiểm tra nếu chưa chọn lý do
             if (!this.selectedReason) {
                 notification.error({
                     message: 'Error',
@@ -119,7 +97,6 @@ export default {
                 return;
             }
 
-            // Kiểm tra nếu cần chi tiết nhưng chưa nhập
             if (this.showDetailInput && !this.detailReason.trim()) {
                 notification.error({
                     message: 'Error',
@@ -131,7 +108,6 @@ export default {
             }
 
             try {
-                // Lấy thông tin người dùng
                 await this.userStore.fetchUserData();
                 const reporterId = this.userStore.user?.id;
 
@@ -139,24 +115,19 @@ export default {
                     throw new Error('User information not found.');
                 }
 
-                // Xác định giá trị reason
                 const reason = this.showDetailInput ? this.detailReason : this.selectedReason;
 
-                // Tạo payload để gửi
                 const payload = {
                     reporterId,
                     violatorId: this.violatorId,
-                    reason,  // Giá trị reason đã được xác định
-                    photoId: this.photoId,
+                    reason,
                     commentId: this.commentId,
-                    galleryId: this.galleryId,
                 };
 
-                // Gửi báo cáo
                 await this.reportStore.reportContent(payload);
                 this.closeModal();
             } catch (error) {
-                // Xử lý lỗi (đã được xử lý trong reportStore)
+                // Handle error (already handled in reportStore)
             }
         }
     }

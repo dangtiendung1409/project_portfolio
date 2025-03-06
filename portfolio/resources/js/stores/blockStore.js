@@ -27,12 +27,6 @@ export const useBlockStore = defineStore('block', {
 
             } catch (error) {
                 console.error('Error fetching blocked users:', error);
-                notification.error({
-                    message: 'Lỗi',
-                    description: error.response?.data?.message || 'Không thể lấy danh sách người bị chặn.',
-                    placement: 'topRight',
-                    duration: 3,
-                });
             }
         },
 

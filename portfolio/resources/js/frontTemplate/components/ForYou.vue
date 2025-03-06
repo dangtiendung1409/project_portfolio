@@ -42,9 +42,8 @@
         :photo-id="selectedPhotoId"
         @close="closeAddToGalleryModal"
     />
-    <ReportModal
+    <ReportPhotoModal
         :is-visible="showReportModal"
-        :title="'Report Photo'"
         :photo-id="selectedPhotoId"
         :violator-id="selectedViolatorId"
         @close="closeReportModal"
@@ -54,7 +53,7 @@
 <script>
 import lazyDirective from '../../lazy.js';
 import AddToGalleryModal from "../components/AddToGalleryModal.vue";
-import ReportModal from "../components/ReportModal.vue";
+import ReportPhotoModal from "../components/ReportPhotoModal.vue";
 import { useLikeStore } from '@/stores/likeStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useFollowStore } from '@/stores/followStore';
@@ -70,7 +69,7 @@ export default {
     },
     components: {
         AddToGalleryModal,
-        ReportModal,
+        ReportPhotoModal
     },
     props: {
         photos: {

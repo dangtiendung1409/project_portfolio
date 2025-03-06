@@ -154,7 +154,7 @@
                                             <li @click="handleClick('reportPhoto', photoDetail.id, photoDetail.user.id)">
                                                 <i class="fa-regular fa-flag"></i> Report this photo
                                             </li>
-                                            <li>
+                                            <li @click="toggleBlockUser(photoDetail.user)">
                                                 <i class="fas fa-user-slash"></i> Block User
                                             </li>
                                         </ul>
@@ -237,14 +237,14 @@
                                                  class="comment-avatar" />
                                             <div class="comment-content">
                                                 <div class="comment-header">
-                                                    <span class="comment-author">{{ comment?.user?.username || 'Unknown User' }}</span>
+                                                    <span class="comment-author">{{ comment?.user?.name || 'Unknown User' }}</span>
                                                     <i class="fa-solid fa-ellipsis comment-options"
                                                        @click.stop="toggleDropdown('dropdown-' + comment.id, $event)"
                                                        :class="{'active': activeDropdown === 'dropdown-' + comment.id}"></i>
                                                 </div>
                                                 <div v-if="activeDropdown === 'dropdown-' + comment.id" class="dropdown-content show" @click.stop>
                                                     <ul>
-                                                        <li v-if="comment.user.id !== userStore.user.id">
+                                                        <li v-if="comment.user.id !== userStore.user.id" @click="handleClick('reportComment', comment.id, comment.user.id)">
                                                             <i class="fa-regular fa-flag"></i> Report
                                                         </li>
                                                         <li v-if="comment.user.id === userStore.user.id" @click="showDeleteConfirm(comment)">
@@ -264,8 +264,6 @@
                                         </button>
                                     </div>
                                 </div>
-
-
                                 <!-- Categories Section -->
                                 <div class="categories-section">
                                     <h5 class="categories-header">
@@ -288,12 +286,17 @@
                 :photo-id="selectedPhotoId"
                 @close="closeAddToGalleryModal"
             />
-            <ReportModal
+            <ReportPhotoModal
                 :is-visible="showReportModal"
-                :title="'Report Photo'"
                 :photo-id="selectedPhotoId"
                 :violator-id="selectedViolatorId"
                 @close="closeReportModal"
+            />
+            <ReportCommentModal
+                :is-visible="showReportCommentModal"
+                :comment-id="selectedCommentId"
+                :violator-id="selectedViolatorId"
+                @close="closeReportCommentModal"
             />
             <div v-if="likesPopupVisible" class="popup-overlay" @click.self="closeLikesPopup">
                 <div class="popup-content">
@@ -334,7 +337,8 @@ import { useAuthStore } from '@/stores/authStore';
 import { useUserStore } from '@/stores/userStore';
 import { useBlockStore } from '@/stores/blockStore';
 import AddToGalleryModal from './components/AddToGalleryModal.vue';
-import ReportModal from "./components/ReportModal.vue";
+import ReportPhotoModal from "./components/ReportPhotoModal.vue";
+import ReportCommentModal from "./components/ReportCommentModal.vue";
 import { storeToRefs } from 'pinia';
 import { Modal,notification } from 'ant-design-vue';
 import { h } from 'vue';
@@ -345,7 +349,8 @@ export default {
     components: {
         Layout,
         AddToGalleryModal,
-        ReportModal,
+        ReportPhotoModal,
+        ReportCommentModal,
     },
     data() {
         return {
@@ -380,6 +385,8 @@ export default {
             likesPopupVisible: false,
             likedUsers: [],
             showReportModal: false,
+            selectedCommentId: null,
+            showReportCommentModal: false,
             selectedViolatorId: null,
         };
     },
@@ -653,6 +660,38 @@ export default {
             const likeStore = useLikeStore();
             this.photoDetail.liked = likeStore.likedPhotos.includes(this.photoDetail.id); // Cập nhật trạng thái liked của ảnh chi tiết
         },
+
+        // blcok user
+        async toggleBlockUser(user) {
+            if (!await this.checkLogin()) return;
+
+            const blockStore = useBlockStore();
+            const userId = user.id;
+
+            try {
+                if (blockStore.blockedUsers.includes(userId)) {
+                    await blockStore.unblockUser(userId);
+                    notification.success({
+                        message: 'Success',
+                        description: `${user.username} is unblocked.`,
+                        placement: 'topRight',
+                        duration: 3,
+                    });
+                } else {
+                    await blockStore.blockUser(userId);
+                    notification.success({
+                        message: 'Success',
+                        description: `${user.username} has been blocked. All their related content will not be visible going forward.`,
+                        placement: 'topRight',
+                        duration: 3,
+                    });
+                }
+
+                this.$router.push({ name: 'Index' });
+            } catch (error) {
+                console.error("Error toggling block:", error);
+            }
+        },
         // comment
         async postComment() {
             if (!this.newComment.trim()) {
@@ -712,23 +751,23 @@ export default {
             }
             return true;
         },
-        async handleClick(action, itemId, violatorId) {
+        async handleClick(action, id, violatorId) {
             if (!await this.checkLogin()) {
-                return; // Nếu chưa đăng nhập, dừng thực hiện các hành động khác
+                return;
             }
 
             switch (action) {
+                case 'toggleLike':
+                    this.toggleLike(id); // id là photoDetail
+                    break;
                 case 'addToGallery':
-                    this.openAddToGalleryModal(itemId);
-                    break;
-                case 'blockUser':
-                    this.blockUser(itemId);
-                    break;
-                case 'followUser':
-                    this.followUser(itemId);
+                    this.openAddToGalleryModal(id); // id là photoId
                     break;
                 case 'reportPhoto':
-                    this.openReportModal(itemId, violatorId); // Sử dụng violatorId đã được truyền vào
+                    this.openReportModal(id, violatorId); // id là photoId, violatorId là userId
+                    break;
+                case 'reportComment':
+                    this.openReportCommentModal(id, violatorId); // id là commentId, violatorId là userId
                     break;
                 default:
                     console.error('Unknown action:', action);
@@ -820,6 +859,16 @@ export default {
         closeReportModal() {
             this.showReportModal = false;
             this.selectedPhotoId = null;
+            this.selectedViolatorId = null;
+        },
+        openReportCommentModal(commentId, violatorId) {
+            this.selectedCommentId = commentId;
+            this.selectedViolatorId = violatorId;
+            this.showReportCommentModal = true;
+        },
+        closeReportCommentModal() {
+            this.showReportCommentModal = false;
+            this.selectedCommentId = null;
             this.selectedViolatorId = null;
         },
     },
