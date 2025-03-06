@@ -17,7 +17,7 @@
             {{ gallery.total_likes }} Likes
           </span>
                     <span class="icon" @click="copyUrl"><i class="fa-solid fa-share-nodes"></i></span>
-                    <i class="fa-regular fa-flag"></i>
+                    <span class="icon" @click="openReportGalleryModal"><i class="fa-regular fa-flag"></i></span>
                 </div>
 
                 <!-- Thông tin chủ gallery -->
@@ -81,7 +81,7 @@
                                 </li>
                                 <li
                                     v-if="photo.user && userStore.user && photo.user.id !== userStore.user.id"
-                                    @click="handleClick('reportPhoto', photo.id)"
+                                    @click="handleClick('reportPhoto', photo.id, photo.user.id)"
                                 >
                                     <i class="fa-solid fa-flag"></i> Report this photo
                                 </li>
@@ -100,6 +100,18 @@
                     :photo-id="selectedPhotoId"
                     @close="closeAddToGalleryModal"
                 />
+                <ReportGalleryModal
+                    :is-visible="showReportGalleryModal"
+                    :gallery-id="gallery.id"
+                    :violator-id="gallery.user ? gallery.user.id : null"
+                    @close="closeReportGalleryModal"
+                />
+                <ReportPhotoModal
+                    :is-visible="showReportPhotoModal"
+                    :photo-id="selectedPhotoId"
+                    :violator-id="selectedViolatorId"
+                    @close="closeReportPhotoModal"
+                />
             </div>
         </template>
     </Layout>
@@ -110,6 +122,8 @@ import Layout from './Layout.vue';
 import axios from 'axios';
 import getUrlList from '../provider.js';
 import AddToGalleryModal from "./components/AddToGalleryModal.vue";
+import ReportGalleryModal from "./components/ReportGalleryModal.vue";
+import ReportPhotoModal from "./components/ReportPhotoModal.vue";
 import { useLikeStore } from '@/stores/likeStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useFollowStore } from '@/stores/followStore';
@@ -121,13 +135,21 @@ import { h } from 'vue';
 
 export default {
     name: "GalleryDetailsUser",
-    components: { Layout, AddToGalleryModal },
+    components: {
+        Layout,
+        AddToGalleryModal ,
+        ReportGalleryModal,
+        ReportPhotoModal
+    },
     data() {
         return {
             gallery: {},
             activeDropdown: null,
             showAddToGallery: false,
             selectedPhotoId: null,
+            showReportGalleryModal: false,
+            showReportPhotoModal: false,
+            selectedViolatorId: null,
         };
     },
     async mounted() {
@@ -385,19 +407,32 @@ export default {
         closeAddToGalleryModal() {
             this.showAddToGallery = false;
         },
-        handleClick(action, photoId) {
+        openReportGalleryModal() {
+            if (!this.checkLogin()) return;
+            this.showReportGalleryModal = true;
+        },
+        closeReportGalleryModal() {
+            this.showReportGalleryModal = false;
+        },
+        openReportPhotoModal(photoId, violatorId) {
+            if (!this.checkLogin()) return;
+            this.selectedPhotoId = photoId;
+            this.selectedViolatorId = violatorId;
+            this.showReportPhotoModal = true;
+        },
+        closeReportPhotoModal() {
+            this.showReportPhotoModal = false;
+            this.selectedPhotoId = null;
+            this.selectedViolatorId = null;
+        },
+        handleClick(action, photoId, violatorId) {
             if (!this.checkLogin()) return;
             switch (action) {
                 case 'addToGallery':
                     this.openAddToGalleryModal(photoId);
                     break;
                 case 'reportPhoto':
-                    notification.success({
-                        message: 'Success',
-                        description: 'Photo reported successfully.',
-                        placement: 'topRight',
-                        duration: 3,
-                    });
+                    this.openReportPhotoModal(photoId, violatorId);
                     break;
                 default:
                     console.error('Unknown action:', action);

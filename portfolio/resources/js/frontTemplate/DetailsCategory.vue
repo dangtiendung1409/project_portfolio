@@ -78,7 +78,7 @@
                                 <router-link :to="{ name: 'MyProfile', params: { username: image.user.username } }">
                                     <img class="user-image2" :src="getProfilePicture(image.user.profile_picture)" style="width: 30px; height: 30px">
                                 </router-link>
-                                <span class="user-name2">{{ image.user.username }}</span>
+                                <span class="user-name2">{{ image.user.name }}</span>
                                 <span class="icon-heart2" @click="toggleLike(image)">
                                     <i :class="['fas', 'fa-heart', { 'liked': image.liked }]"></i>
                                 </span>
@@ -97,7 +97,7 @@
                                     <i class="fas" :class="image.following ? 'fa-user-minus' : 'fa-user-plus'"></i>
                                     {{ image.following ? 'Unfollow' : 'Follow' }}
                                 </li>
-                                <li v-if="image.user && userStore.user && image.user.id !== userStore.user.id" @click="handleClick('reportPhoto', image.id)"><i class="fas fa-flag"></i>
+                                <li v-if="image.user && userStore.user && image.user.id !== userStore.user.id" @click="handleClick('reportPhoto', image.id, image.user.id)"><i class="fas fa-flag"></i>
                                     Report This Photo
                                 </li>
                             </ul>
@@ -112,6 +112,12 @@
         :photo-id="selectedPhotoId"
         @close="closeAddToGalleryModal"
     />
+    <ReportPhotoModal
+        :is-visible="showReportModal"
+        :photo-id="selectedPhotoId"
+        :violator-id="selectedViolatorId"
+        @close="closeReportModal"
+    />
 </template>
 
 <script>
@@ -119,6 +125,7 @@ import Layout from './Layout.vue';
 import axios from 'axios';
 import getUrlList from '../provider.js';
 import AddToGalleryModal from "./components/AddToGalleryModal.vue";
+import ReportPhotoModal from "./components/ReportPhotoModal.vue";
 import { useLikeStore } from '@/stores/likeStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useBlockStore } from '@/stores/blockStore';
@@ -132,6 +139,7 @@ export default {
     components: {
         Layout,
         AddToGalleryModal,
+        ReportPhotoModal,
     },
     data() {
         return {
@@ -144,6 +152,8 @@ export default {
             images: [],
             showAddToGallery: false,
             selectedPhotoId: null,
+            showReportModal: false,
+            selectedViolatorId: null,
         };
     },
     async created() {
@@ -387,7 +397,7 @@ export default {
                 console.error('Failed to toggle like:', error);
             }
         },
-        async handleClick(action, itemId) {
+        async handleClick(action, itemId, violatorId) {
             if (!await this.checkLogin()) {
                 return; // Nếu chưa đăng nhập, dừng thực hiện các hành động khác
             }
@@ -403,7 +413,7 @@ export default {
                     this.followUser(itemId);
                     break;
                 case 'reportPhoto':
-                    this.reportPhoto(itemId);
+                    this.openReportModal(itemId, violatorId);
                     break;
                 default:
                     console.error('Unknown action:', action);
@@ -421,6 +431,16 @@ export default {
         },
         closeAddToGalleryModal() {
             this.showAddToGallery = false; // Đóng modal
+        },
+        openReportModal(photoId, violatorId) {
+            this.selectedPhotoId = photoId;
+            this.selectedViolatorId = violatorId;
+            this.showReportModal = true;
+        },
+        closeReportModal() {
+            this.showReportModal = false;
+            this.selectedPhotoId = null;
+            this.selectedViolatorId = null;
         },
         clearFilters() {
             this.selectedFilters = [];

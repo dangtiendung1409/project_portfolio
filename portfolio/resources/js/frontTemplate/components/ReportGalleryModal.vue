@@ -2,8 +2,16 @@
     <div v-if="isVisible" class="modal-overlay">
         <div class="modal-content">
             <span class="modal-close" @click="closeModal">×</span>
-            <h2 class="modal-title">Report Comment</h2>
+            <h2 class="modal-title">Report Gallery</h2>
             <div class="report-options">
+                <label class="report-option">
+                    <input type="radio" v-model="selectedReason" value="Contains inappropriate content" />
+                    Contains inappropriate content
+                </label>
+                <label class="report-option">
+                    <input type="radio" v-model="selectedReason" value="Copyright infringement" />
+                    Copyright infringement
+                </label>
                 <label class="report-option">
                     <input type="radio" v-model="selectedReason" value="Spam or misleading content" />
                     Spam or misleading content
@@ -13,32 +21,20 @@
                     Hateful or abusive content
                 </label>
                 <label class="report-option">
-                    <input type="radio" v-model="selectedReason" value="Harassment or hate speech" />
-                    Harassment or hate speech
+                    <input type="radio" v-model="selectedReason" value="Duplicate content" />
+                    Duplicate content
                 </label>
                 <label class="report-option">
-                    <input type="radio" v-model="selectedReason" value="Spam or misleading" />
-                    Spam or misleading
+                    <input type="radio" v-model="selectedReason" value="Misleading title or description" />
+                    Misleading title or description
                 </label>
                 <label class="report-option">
-                    <input type="radio" v-model="selectedReason" value="Violence or harmful behavior" />
-                    Violence or harmful behavior
+                    <input type="radio" v-model="selectedReason" value="Contains stolen photos" />
+                    Contains stolen photos
                 </label>
                 <label class="report-option">
-                    <input type="radio" v-model="selectedReason" value="Personal attacks or threats" />
-                    Personal attacks or threats
-                </label>
-                <label class="report-option">
-                    <input type="radio" v-model="selectedReason" value="False information" />
-                    False information
-                </label>
-                <label class="report-option">
-                    <input type="radio" v-model="selectedReason" value="Offensive language" />
-                    Offensive language
-                </label>
-                <label class="report-option">
-                    <input type="radio" v-model="selectedReason" value="Other" />
-                    Other
+                    <input type="radio" v-model="selectedReason" value="Inappropriate collection" />
+                    Inappropriate collection
                 </label>
                 <div v-if="showDetailInput" class="detail-input">
                     <label for="detailReason">Tell us why to help us better understand:</label>
@@ -64,19 +60,15 @@ import { useUserStore } from '../../stores/userStore';
 import { notification } from 'ant-design-vue';
 
 export default {
-    name: 'ReportCommentModal',
+    name: 'ReportGalleryModal',
     props: {
         isVisible: {
             type: Boolean,
             required: true,
         },
-        title: {
-            type: String,
-            required: true,
-        },
-        commentId: {
+        galleryId: {
             type: Number,
-            default: null,
+            required: true,
         },
         violatorId: {
             type: Number,
@@ -97,7 +89,8 @@ export default {
             return useUserStore();
         },
         showDetailInput() {
-            return this.selectedReason === 'Other';
+            return this.selectedReason === 'Copyright infringement' ||
+                this.selectedReason === 'Hateful or abusive content';
         }
     },
     methods: {
@@ -130,25 +123,19 @@ export default {
             try {
                 await this.userStore.fetchUserData();
                 const reporterId = this.userStore.user?.id;
-
-                if (!reporterId) {
-                    throw new Error('User information not found.');
-                }
+                if (!reporterId) throw new Error('User information not found.');
 
                 const reason = this.showDetailInput ? this.detailReason : this.selectedReason;
-
                 const payload = {
                     reporterId,
                     violatorId: this.violatorId,
                     reason,
-                    commentId: this.commentId,
+                    galleryId: this.galleryId,
                 };
 
                 await this.reportStore.reportContent(payload);
                 this.closeModal();
-            } catch (error) {
-                // Handle error (already handled in reportStore)
-            }
+            } catch (error) {}
         }
     }
 };

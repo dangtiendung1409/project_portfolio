@@ -27,18 +27,18 @@ class ReportController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        // Xác định type dựa trên dữ liệu được gửi
+        // Xác định type dựa trên giá trị không null
         $type = null;
-        if ($request->has('photo_id')) {
+        if ($request->filled('photo_id')) {
             $type = 0;
-        } elseif ($request->has('comment_id')) {
+        } elseif ($request->filled('comment_id')) {
             $type = 1;
-        } elseif ($request->has('gallery_id')) {
+        } elseif ($request->filled('gallery_id')) {
             $type = 2;
         }
 
         if ($type === null) {
-            return response()->json(['error' => 'You must provide at least one of the following IDs: photo_id, comment_id, gallery_id'], 400);
+            return response()->json(['error' => 'You must provide at least one of the following IDs: photo_id, comment_id, gallery_id with a valid value'], 400);
         }
 
         // Tạo bản ghi report
