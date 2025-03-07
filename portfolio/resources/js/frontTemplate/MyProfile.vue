@@ -2,6 +2,7 @@
     <Layout>
         <template v-slot:content="slotProps">
             <div class="site-section">
+                <!-- Phần profile info không thay đổi -->
                 <div class="cover-photo">
                     <img :src="coverPhotoUrl" alt="Cover Photo" class="cover-img" />
                 </div>
@@ -12,7 +13,7 @@
                     <div class="screen-right-icons">
                         <i @click="openUpdateProfileModal(user.id)" class="fa-solid fa-pencil" v-if="isMyProfile"></i>
                         <i class="fa-solid fa-share-nodes" @click="copyProfileLink"></i>
-                        <i class="fa-solid fa-ellipsis" @click.stop="toggleDropdown('dropdown-' + user.id, $event)"
+                        <i class="fa-solid fa-ellipsis" @click.stop="toggleDropdown('dropdown-' + user.id)"
                            :class="{'active': activeDropdown === 'dropdown-' + user.id}"></i>
                     </div>
                     <div v-if="activeDropdown === 'dropdown-' + user.id" class="dropdown-content show" @click.stop>
@@ -42,7 +43,6 @@
                         <button v-if="!isMyProfile && !isBlocked" @click="toggleFollow" class="follow-button">
                             {{ isFollowing ? 'Unfollow' : 'Follow' }}
                         </button>
-
                         <p class="profile-bio">
                             <span v-if="user.bio">
                                 <span v-if="isBioExpanded">{{ user.bio }}</span>
@@ -61,24 +61,16 @@
                     </div>
                 </div>
                 <div class="tabs" v-if="!isBlocked && (photos.length > 0 || galleries.length > 0)">
-                    <a class="tab"
-                       :class="{ active: activeContent === 'photos' }"
-                       @click.prevent="activeTab = 'photos'"
-                       v-if="photos.length > 0">
+                    <a class="tab" :class="{ active: activeContent === 'photos' }" @click.prevent="activeTab = 'photos'" v-if="photos.length > 0">
                         Photos <span>{{ photos.length }}</span>
                     </a>
-                    <a class="tab"
-                       :class="{ active: activeContent === 'galleries' }"
-                       @click.prevent="activeTab = 'galleries'"
-                       v-if="galleries.length > 0">
+                    <a class="tab" :class="{ active: activeContent === 'galleries' }" @click.prevent="activeTab = 'galleries'" v-if="galleries.length > 0">
                         Galleries <span>{{ galleries.length }}</span>
                     </a>
                 </div>
-                <!-- Nếu activeContent là photos -->
                 <div v-if="activeContent === 'photos' && !isBlocked">
                     <PhotoGrid :photos="photos" :checkLogin="checkLogin" />
                 </div>
-                <!-- Nếu activeContent là galleries -->
                 <div v-else-if="activeContent === 'galleries' && !isBlocked">
                     <GalleryGrid :galleries="galleries" />
                 </div>
@@ -101,10 +93,10 @@
             <div v-if="followersData.length > 0" class="popup-list">
                 <div v-for="follower in followersData" :key="follower.id" class="popup-item">
                     <router-link :to="{ name: 'MyProfile', params: { username: follower.username } }">
-                    <img :src="follower.profile_picture ? `http://127.0.0.1:8000/images/avatars/${follower.profile_picture.split('/').pop()}` : '/images/imageUserDefault.png'" alt="Avatar" class="popup-avatar" />
+                        <img :src="follower.profile_picture ? `http://127.0.0.1:8000/images/avatars/${follower.profile_picture.split('/').pop()}` : '/images/imageUserDefault.png'" alt="Avatar" class="popup-avatar" />
                     </router-link>
                     <div class="popup-user-info">
-                        <span class="popup-username">{{ follower.username }}</span>
+                        <span class="popup-username">{{ follower.name }}</span>
                         <span class="popup-followers">{{ follower.followers_count || 0 }} Followers</span>
                     </div>
                     <button @click.stop="toggleFollowUser(follower.username)" class="popup-follow-button">
@@ -125,10 +117,10 @@
             <div v-if="followingData.length > 0" class="popup-list">
                 <div v-for="following in followingData" :key="following.id" class="popup-item">
                     <router-link :to="{ name: 'MyProfile', params: { username: following.username } }">
-                    <img :src="following.profile_picture ? `http://127.0.0.1:8000/images/avatars/${following.profile_picture.split('/').pop()}` : '/images/imageUserDefault.png'" alt="Avatar" class="popup-avatar" />
+                        <img :src="following.profile_picture ? `http://127.0.0.1:8000/images/avatars/${following.profile_picture.split('/').pop()}` : '/images/imageUserDefault.png'" alt="Avatar" class="popup-avatar" />
                     </router-link>
                     <div class="popup-user-info">
-                        <span class="popup-username">{{ following.username }}</span>
+                        <span class="popup-username">{{ following.name }}</span>
                         <span class="popup-followers">{{ following.followers_count || 0 }} Followers</span>
                     </div>
                     <button @click.stop="toggleFollowUser(following.username)" class="popup-follow-button">
@@ -184,11 +176,9 @@ export default {
     },
     computed: {
         activeContent() {
-            // Nếu activeTab đã được chọn, sử dụng activeTab
             if (this.activeTab) {
                 return this.activeTab;
             }
-            // Nếu chưa có activeTab, ưu tiên hiển thị photos nếu có, còn không thì galleries
             if (this.photos && this.photos.length > 0) {
                 return 'photos';
             } else if (this.galleries && this.galleries.length > 0) {
@@ -276,7 +266,7 @@ export default {
             const username = this.$route.params.username;
             await followStore.fetchUserFollowersList(username);
             await followStore.fetchUserFollowingList(username);
-
+            await followStore.fetchFollowingList(); // Làm mới danh sách người mà người dùng hiện tại theo dõi
             await this.fetchTotalLikes();
         },
         toggleDropdown(id) {
@@ -314,10 +304,8 @@ export default {
             if (!await this.checkLogin()) return;
             const blockStore = useBlockStore();
             if (this.isBlocked) {
-                // Gọi modal xác nhận trước khi bỏ chặn
                 this.confirmUnblockUser();
             } else {
-                // Nếu chặn người dùng, không cần xác nhận
                 await blockStore.blockUser(this.user.id);
                 this.isBlocked = true;
                 this.isFollowing = false;
@@ -331,7 +319,7 @@ export default {
         },
         confirmUnblockUser() {
             Modal.confirm({
-                title: 'Are you sure you want to block this user?',
+                title: 'Are you sure you want to unblock this user?',
                 icon: h(ExclamationCircleOutlined),
                 content: `You will unblock ${this.user.username}. They will be able to interact with you and view your content.`,
                 okText: 'Yes',
@@ -454,7 +442,7 @@ export default {
             const userStore = useUserStore();
             await userStore.fetchUserData();
             const authUser = userStore.user;
-            if (authUser.username === this.$route.params.username) {
+            if (authUser && authUser.username === this.$route.params.username) {
                 this.isMyProfile = true;
             }
         },
@@ -503,10 +491,11 @@ export default {
                         duration: 3,
                     });
                 }
-                // Làm mới danh sách followers/following sau khi thay đổi
+                // Làm mới danh sách sau khi thay đổi
                 const profileUsername = this.$route.params.username;
                 await followStore.fetchUserFollowersList(profileUsername);
                 await followStore.fetchUserFollowingList(profileUsername);
+                await followStore.fetchFollowingList(); // Cập nhật danh sách người mà bạn đang theo dõi
             } catch (error) {
                 console.error('Error toggling follow for user:', error);
                 notification.error({
@@ -517,23 +506,10 @@ export default {
                 });
             }
         },
-        async fetchUserByUsername(username) {
-            try {
-                const response = await axios.get(getUrlList().getUserByUserName(username));
-                return {
-                    id: response.data.id,
-                    username: response.data.username,
-                    profile_picture: response.data.profile_picture,
-                    followers_count: response.data.followers_count || 0 // Lấy trực tiếp từ API
-                };
-            } catch (error) {
-                console.error(`Error fetching user data for ${username}:`, error);
-                return null;
-            }
-        },
     }
 };
 </script>
+
 
 <style scoped>
 .dropdown-content {

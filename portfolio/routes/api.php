@@ -40,6 +40,9 @@ Route::get('/tags', [HomePageController::class, 'getAllTags']);
 Route::get('/getPhotoDetail/{token}', [PhotoDetailController::class, 'getPhotoDetail']);
 Route::get('/comments/{token}', [PhotoDetailController::class, 'getCommentsByPhotoToken']);
 Route::get('/photo-likes/{token}', [PhotoDetailController::class, 'getPhotoLikes']);
+Route::get('/related-photos/{token}', [PhotoDetailController::class, 'getRelatedPhotos']);
+Route::get('/related-galleries/{token}', [PhotoDetailController::class, 'getRelatedGalleries']);
+
 
 //Profile user
 Route::get('/user-by-username/{username}', [ProfileController::class, 'getUserByUserName']);

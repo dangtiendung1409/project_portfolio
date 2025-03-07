@@ -355,6 +355,133 @@
               }
           }
       },
+      "/related-photos/{token}": {
+          "get": {
+              "tags": [
+                  "Photo Detail"
+              ],
+              "summary": "Get Related Photos by Token",
+              "operationId": "getRelatedPhotos",
+              "produces": [
+                  "application/json"
+              ],
+              "parameters": [
+                  {
+                      "name": "token",
+                      "in": "path",
+                      "description": "Unique token representing the photo",
+                      "required": true,
+                      "type": "string"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "Related photos retrieved successfully",
+                      "schema": {
+                          "type": "array",
+                          "items": {
+                              "type": "object",
+                              "properties": {
+                                  "id": {
+                                      "type": "integer"
+                                  },
+                                  "image_url": {
+                                      "type": "string"
+                                  },
+                                  "description": {
+                                      "type": "string"
+                                  },
+                                  "category_id": {
+                                      "type": "integer"
+                                  },
+                                  "created_at": {
+                                      "type": "string",
+                                      "format": "date-time"
+                                  },
+                                  "updated_at": {
+                                      "type": "string",
+                                      "format": "date-time"
+                                  }
+                              }
+                          }
+                      }
+                  },
+                  "404": {
+                      "description": "No related photos found"
+                  },
+                  "500": {
+                      "description": "Internal server error"
+                  }
+              }
+          }
+      },
+      "/related-galleries/{token}": {
+          "get": {
+              "tags": [
+                  "Photo Detail"
+              ],
+              "summary": "Get Related Galleries by Token",
+              "operationId": "getRelatedGalleries",
+              "produces": [
+                  "application/json"
+              ],
+              "parameters": [
+                  {
+                      "name": "token",
+                      "in": "path",
+                      "description": "Unique token representing the photo",
+                      "required": true,
+                      "type": "string"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "Related galleries retrieved successfully",
+                      "schema": {
+                          "type": "array",
+                          "items": {
+                              "type": "object",
+                              "properties": {
+                                  "id": {
+                                      "type": "integer"
+                                  },
+                                  "galleries_name": {
+                                      "type": "string"
+                                  },
+                                  "galleries_description": {
+                                      "type": "string"
+                                  },
+                                  "user_id": {
+                                      "type": "integer"
+                                  },
+                                  "visibility": {
+                                      "type": "string"
+                                  },
+                                  "galleries_code": {
+                                      "type": "string"
+                                  },
+                                  "created_at": {
+                                      "type": "string",
+                                      "format": "date-time"
+                                  },
+                                  "updated_at": {
+                                      "type": "string",
+                                      "format": "date-time"
+                                  }
+                              }
+                          }
+                      }
+                  },
+                  "404": {
+                      "description": "No related galleries found"
+                  },
+                  "500": {
+                      "description": "Internal server error"
+                  }
+              }
+          }
+      },
+
       "/photo-likes/{token}": {
           "get": {
               "tags": [

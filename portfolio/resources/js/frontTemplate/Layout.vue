@@ -57,7 +57,7 @@
                         <div class="notification-header">Notifications</div>
                         <div v-for="(notification, index) in displayedNotifications" :key="notification.id"
                              :class="['notification-item', { 'unread': !notification.read }]">
-                            <img :src="`/${notification.image}`" alt="User" class="notification-image">
+                            <img :src="`${notification.image}`" alt="User" class="notification-image">
                             <div class="notification-content">
                                 <p class="notification-message"
                                    @click="navigateToPhoto(notification.photoToken, notification.id, notification.type)">

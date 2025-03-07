@@ -51,7 +51,7 @@
                 <img
                     v-if="gallery.user && gallery.user.profile_picture"
                     class="user-avatar"
-                    :src="`http://127.0.0.1:8000/${gallery.user.profile_picture}`"
+                    :src="`http://127.0.0.1:8000${gallery.user.profile_picture}`"
                     alt="User Avatar"
                 />
                 <img

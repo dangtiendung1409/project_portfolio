@@ -18,7 +18,6 @@ class UserSeeder extends Seeder
         $firstNames = ['John', 'Jane', 'Mike', 'Emily', 'Chris', 'Anna', 'Tom', 'Sophia', 'David', 'Olivia'];
         $lastNames = ['Smith', 'Johnson', 'Brown', 'Williams', 'Jones', 'Miller', 'Davis', 'Garcia', 'Martinez', 'Wilson'];
         $profilePictures = range(1, 100);
-        shuffle($profilePictures);
         $coverPhotos = range(1, 20);
         $bios = [
             'Passionate about technology and innovation.',
@@ -42,16 +41,20 @@ class UserSeeder extends Seeder
             'Aspiring writer working on a novel.',
             'Tea connoisseur who enjoys quiet evenings with a book.'
         ];
+
+        shuffle($profilePictures); // Trộn ngẫu nhiên danh sách ảnh đại diện
+        shuffle($coverPhotos); // Trộn ngẫu nhiên danh sách ảnh bìa
+
         $users = [
             [
                 'username' => 'admin',
-                'name' => 'admin',
+                'name' => 'Admin',
                 'email' => 'admin@gmail.com',
                 'password' => Hash::make('12345'),
                 'profile_picture' => '/images/avatars/user_0.jpeg',
                 'location' => 'Hanoi, Vietnam',
                 'cover_photo' => '/images/covers/covers_0.jpeg',
-                'bio' => 'I love animal and beauty scene.',
+                'bio' => 'I love animals and beautiful scenery.',
                 'created_at' => now(),
                 'role_id' => 1,
             ]
@@ -60,7 +63,7 @@ class UserSeeder extends Seeder
         $usedUsernames = ['admin'];
         $usedEmails = ['admin@gmail.com'];
 
-        for ($i = 0; $i < 100; $i++) {
+        for ($i = 0; $i < 200; $i++) {
             do {
                 $firstName = $firstNames[array_rand($firstNames)];
                 $lastName = $lastNames[array_rand($lastNames)];
@@ -74,14 +77,28 @@ class UserSeeder extends Seeder
             $usedUsernames[] = $username;
             $usedEmails[] = $email;
 
+            // Lấy ngẫu nhiên ảnh đại diện, nếu hết danh sách thì lấy lại từ đầu
+            if (empty($profilePictures)) {
+                $profilePictures = range(1, 100);
+                shuffle($profilePictures);
+            }
+            $profilePicture = array_pop($profilePictures);
+
+            // Lấy ngẫu nhiên ảnh bìa, nếu hết danh sách thì lấy lại từ đầu
+            if (empty($coverPhotos)) {
+                $coverPhotos = range(1, 20);
+                shuffle($coverPhotos);
+            }
+            $coverPhoto = array_pop($coverPhotos);
+
             $users[] = [
                 'username' => $username,
                 'name' => $firstName . ' ' . $lastName,
                 'email' => $email,
                 'password' => Hash::make('12345'),
-                'profile_picture' => '/images/avatars/user_' . array_pop($profilePictures) . '.jpeg',
+                'profile_picture' => "/images/avatars/user_{$profilePicture}.jpeg",
                 'location' => $locations[array_rand($locations)],
-                'cover_photo' => '/images/covers/covers_' . $coverPhotos[array_rand($coverPhotos)] . '.jpeg',
+                'cover_photo' => "/images/covers/covers_{$coverPhoto}.jpeg",
                 'bio' => $bios[array_rand($bios)],
                 'created_at' => now(),
                 'role_id' => 2,

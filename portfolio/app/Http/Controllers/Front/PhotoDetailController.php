@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Front;
 use App\Http\Controllers\Controller;
 use App\Models\Comment;
 use App\Models\Follow;
+use App\Models\Gallery;
 use App\Models\Notification;
 use App\Models\Photo;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Tymon\JWTAuth\Facades\JWTAuth;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use Illuminate\Support\Facades\Config;
@@ -202,6 +204,188 @@ class PhotoDetailController extends Controller
             return response()->json(['message' => 'Internal Server Error'], 500);
         }
     }
+    public function getRelatedPhotos($token)
+    {
+        // Tìm ảnh chi tiết theo token
+        $photo = Photo::where('photo_token', $token)->first();
 
+        if (!$photo) {
+            return response()->json(['message' => 'Photo not found'], 404);
+        }
+
+        // Lấy danh sách tag của ảnh
+        $tagIds = $photo->tags()->pluck('tags.id')->toArray();
+
+        try {
+            // Lấy user hiện tại để kiểm tra danh sách người bị chặn
+            $currentUser = JWTAuth::parseToken()->authenticate();
+            $blockedUserIds = $currentUser->blockedUsers()->pluck('blocked_id');
+
+            // Tìm ảnh có tag tương tự và không thuộc về người dùng bị chặn
+            $relatedPhotos = Photo::whereHas('tags', function ($query) use ($tagIds) {
+                $query->whereIn('tags.id', $tagIds);
+            })
+                ->where('id', '!=', $photo->id) // Loại trừ ảnh gốc
+                ->whereNotIn('user_id', $blockedUserIds) // Loại trừ ảnh của người dùng bị chặn
+                ->with('user') // Lấy toàn bộ thông tin user
+                ->limit(10)
+                ->get();
+
+            // Nếu không đủ 10 ảnh, lấy thêm từ category
+            if ($relatedPhotos->count() < 10) {
+                $remaining = 10 - $relatedPhotos->count();
+                $categoryPhotos = Photo::where('category_id', $photo->category_id)
+                    ->where('id', '!=', $photo->id)
+                    ->whereNotIn('user_id', $blockedUserIds) // Loại trừ ảnh của người dùng bị chặn
+                    ->with('user') // Lấy toàn bộ thông tin user
+                    ->limit($remaining)
+                    ->get();
+
+                $relatedPhotos = $relatedPhotos->merge($categoryPhotos);
+            }
+
+            return response()->json($relatedPhotos);
+        } catch (\Exception $e) {
+            // Nếu không có token hoặc xảy ra lỗi, trả về ảnh mà không lọc người dùng bị chặn
+            $relatedPhotos = Photo::whereHas('tags', function ($query) use ($tagIds) {
+                $query->whereIn('tags.id', $tagIds);
+            })
+                ->where('id', '!=', $photo->id)
+                ->with('user')
+                ->limit(10)
+                ->get();
+
+            if ($relatedPhotos->count() < 10) {
+                $remaining = 10 - $relatedPhotos->count();
+                $categoryPhotos = Photo::where('category_id', $photo->category_id)
+                    ->where('id', '!=', $photo->id)
+                    ->with('user')
+                    ->limit($remaining)
+                    ->get();
+
+                $relatedPhotos = $relatedPhotos->merge($categoryPhotos);
+            }
+
+            return response()->json($relatedPhotos);
+        }
+    }
+    public function getRelatedGalleries($token)
+    {
+        // Tìm ảnh chi tiết theo token
+        $photo = Photo::where('photo_token', $token)->first();
+
+        if (!$photo) {
+            return response()->json(['message' => 'Photo not found'], 404);
+        }
+
+        // Lấy danh sách tag của ảnh
+        $tagIds = $photo->tags()->pluck('tags.id')->toArray();
+
+        try {
+            // Lấy user hiện tại để kiểm tra danh sách người bị chặn
+            $currentUser = JWTAuth::parseToken()->authenticate();
+            $blockedUserIds = $currentUser->blockedUsers()->pluck('blocked_id');
+
+            // Tìm gallery có ảnh chứa tag tương tự, visibility = 0, và không thuộc về người dùng bị chặn
+            $relatedGalleries = Gallery::where('visibility', 0) // Lọc gallery public
+            ->whereNotIn('user_id', $blockedUserIds) // Loại trừ gallery của người dùng bị chặn
+            ->whereHas('photo.tags', function ($query) use ($tagIds) {
+                $query->whereIn('tags.id', $tagIds);
+            })
+                ->with([
+                    'photo' => function ($query) use ($blockedUserIds) {
+                        $query->select('photos.id', 'photos.image_url')
+                            ->whereNotIn('user_id', $blockedUserIds); // Loại trừ ảnh của người dùng bị chặn
+                    },
+                    'user' => function ($query) {
+                        $query->select('id', 'username', 'name', 'profile_picture');
+                    }
+                ])
+                ->get()
+                ->filter(function ($gallery) {
+                    return $gallery->photo->count() >= 4; // Chỉ lấy gallery có từ 4 ảnh trở lên (sau khi lọc)
+                })
+                ->take(3) // Giới hạn 3 gallery
+                ->map(function ($gallery) {
+                    return [
+                        'id' => $gallery->id,
+                        'galleries_name' => $gallery->galleries_name,
+                        'galleries_description' => $gallery->galleries_description,
+                        'user_id' => $gallery->user_id,
+                        'visibility' => $gallery->visibility,
+                        'galleries_code' => $gallery->galleries_code,
+                        'created_at' => $gallery->created_at,
+                        'updated_at' => $gallery->updated_at,
+                        'photos' => $gallery->photo->map(function ($photo) {
+                            return [
+                                'id' => $photo->id,
+                                'image_url' => $photo->image_url
+                            ];
+                        }),
+                        'user' => [
+                            'id' => $gallery->user->id,
+                            'username' => $gallery->user->username,
+                            'name' => $gallery->user->name,
+                            'profile_picture' => $gallery->user->profile_picture
+                        ]
+                    ];
+                });
+
+            if ($relatedGalleries->isEmpty()) {
+                return response()->json(['message' => 'No related galleries found'], 404);
+            }
+
+            return response()->json($relatedGalleries);
+        } catch (\Exception $e) {
+            // Nếu không có token hoặc lỗi, trả về gallery mà không lọc người dùng bị chặn
+            $relatedGalleries = Gallery::where('visibility', 0)
+                ->whereHas('photo.tags', function ($query) use ($tagIds) {
+                    $query->whereIn('tags.id', $tagIds);
+                })
+                ->with([
+                    'photo' => function ($query) {
+                        $query->select('photos.id', 'photos.image_url');
+                    },
+                    'user' => function ($query) {
+                        $query->select('id', 'username', 'name', 'profile_picture');
+                    }
+                ])
+                ->get()
+                ->filter(function ($gallery) {
+                    return $gallery->photo->count() >= 4;
+                })
+                ->take(3)
+                ->map(function ($gallery) {
+                    return [
+                        'id' => $gallery->id,
+                        'galleries_name' => $gallery->galleries_name,
+                        'galleries_description' => $gallery->galleries_description,
+                        'user_id' => $gallery->user_id,
+                        'visibility' => $gallery->visibility,
+                        'galleries_code' => $gallery->galleries_code,
+                        'created_at' => $gallery->created_at,
+                        'updated_at' => $gallery->updated_at,
+                        'photos' => $gallery->photo->map(function ($photo) {
+                            return [
+                                'id' => $photo->id,
+                                'image_url' => $photo->image_url
+                            ];
+                        }),
+                        'user' => [
+                            'id' => $gallery->user->id,
+                            'username' => $gallery->user->username,
+                            'name' => $gallery->user->name,
+                            'profile_picture' => $gallery->user->profile_picture
+                        ]
+                    ];
+                });
+
+            if ($relatedGalleries->isEmpty()) {
+                return response()->json(['message' => 'No related galleries found'], 404);
+            }
+
+            return response()->json($relatedGalleries);
+        }
+    }
 
 }

@@ -41,6 +41,7 @@ export const useFollowStore = defineStore('follow', {
                     this.userFollowingList = response.data.map(user => ({
                         id: user.id,
                         username: user.username,
+                        name: user.name,
                         profile_picture: user.profile_picture,
                         followers_count: user.followers_count || 0 // Giả sử API có followers_count, nếu không thì mặc định 0
                     }));
@@ -62,6 +63,7 @@ export const useFollowStore = defineStore('follow', {
                     this.userFollowersList = response.data.map(user => ({
                         id: user.id,
                         username: user.username,
+                        name: user.name,
                         profile_picture: user.profile_picture,
                         followers_count: user.followers_count || 0 // Giả sử API có followers_count, nếu không thì mặc định 0
                     }));

@@ -46,6 +46,8 @@ const baseUrl = 'http://127.0.0.1:8000/api';
           getPhotoLikes: (token) => `${baseUrl}/photo-likes/${token}`,
           postComment: `${baseUrl}/comments`,
           deleteComment: (commentId) => `${baseUrl}/comments/${commentId}`,
+          getRelatedPhotos: (token) => `${baseUrl}/related-photos/${token}`,
+          getRelatedGalleries: (token) => `${baseUrl}/related-galleries/${token}`,
 
           // add photo
           addPhoto : `${baseUrl}/add-photos`,

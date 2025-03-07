@@ -22,8 +22,6 @@ class DatabaseSeeder extends Seeder
             CommentSeeder::class,
             FollowSeeder::class,
             GalleriesSeeder::class,
-            GalleriesPhotosSeeder::class,
-            NotificationSeeder::class,
             ReportSeeder::class,
         ]);
     }

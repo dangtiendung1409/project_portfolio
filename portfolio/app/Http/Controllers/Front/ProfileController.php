@@ -39,7 +39,7 @@ class ProfileController extends Controller
     }
     public function getTotalLikesByUsername($username)
     {
-        $user = \App\Models\User::where('username', $username)->first();
+        $user = User::where('username', $username)->first();
 
         if (!$user) {
             return response()->json([

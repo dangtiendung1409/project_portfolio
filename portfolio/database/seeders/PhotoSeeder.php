@@ -54,7 +54,7 @@ class PhotoSeeder extends Seeder
 
         // Tạo dữ liệu cho bảng 'photos'
         $photos = [];
-        for ($i = 1; $i <= 500; $i++) {
+        for ($i = 1; $i <= 300; $i++) {
             $photos[] = [
                 'title' => generateRandomTitle(),
                 'description' => generateRandomDescription(),
@@ -66,6 +66,7 @@ class PhotoSeeder extends Seeder
                 'photo_token' => (string) Str::uuid(), // Tạo UUID ngẫu nhiên
                 'user_id' => rand(1, 100),
                 'category_id' => rand(1, 30),
+                'total_views' => rand(50, 150),
             ];
         }
 
