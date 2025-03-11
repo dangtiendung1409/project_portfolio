@@ -17,24 +17,33 @@ class LikeSeeder extends Seeder
 
         $userIds = DB::table('users')->pluck('id')->toArray();
         $users = DB::table('users')->pluck('name', 'id')->toArray(); // Lấy user_id => user_name
-        $photoIds = DB::table('photos')->pluck('id')->toArray();
-        $galleryIds = DB::table('galleries')->pluck('id')->toArray();
+
+        //  Chỉ lấy ảnh có privacy_status = 0
+        $photoIds = DB::table('photos')
+            ->where('privacy_status', 0)
+            ->pluck('id')
+            ->toArray();
+
+        //  Chỉ lấy gallery có visibility = 0
+        $galleryIds = DB::table('galleries')
+            ->where('visibility', 0)
+            ->pluck('id')
+            ->toArray();
 
         $notifications = [];
 
         // Chỉ 30% ảnh sẽ có like
         $photoIdsWithLikes = $faker->randomElements($photoIds, round(count($photoIds) * 0.3));
 
-        // Duyệt qua từng photo được chọn để có like
         foreach ($photoIdsWithLikes as $photoId) {
-            $numLikes = rand(10, 40); // Giảm số like trong khoảng 10-40
+            $numLikes = rand(10, 40);
             $likedUsers = $faker->randomElements($userIds, $numLikes);
 
             foreach ($likedUsers as $userId) {
                 $likeId = DB::table('likes')->insertGetId([
                     'user_id' => $userId,
                     'photo_id' => $photoId,
-                    'gallery_id' => null, // Chỉ like photo thì gallery_id = null
+                    'gallery_id' => null,
                     'like_date' => now(),
                 ]);
 
@@ -47,7 +56,7 @@ class LikeSeeder extends Seeder
                         'like_id' => $likeId,
                         'photo_id' => $photoId,
                         'type' => 0, // Like photo
-                        'content' => "{$users[$userId]} liked your photo.", // Truyền tên user
+                        'content' => "{$users[$userId]} liked your photo.",
                         'is_read' => 0,
                         'notification_date' => now(),
                     ];
@@ -55,18 +64,18 @@ class LikeSeeder extends Seeder
             }
         }
 
-        // Chỉ 30% gallery sẽ có like
-        $galleryIdsWithLikes = $faker->randomElements($galleryIds, round(count($galleryIds) * 0.3));
+        // Chọn ngẫu nhiên 50 gallery có like (hoặc tất cả nếu ít hơn 50)
+        $galleryIdsWithLikes = $faker->randomElements($galleryIds, min(50, count($galleryIds)));
 
-        // Duyệt qua từng gallery được chọn để có like
+
         foreach ($galleryIdsWithLikes as $galleryId) {
-            $numLikes = rand(10, 40); // Giảm số like trong khoảng 10-40
+            $numLikes = rand(10, 40);
             $likedUsers = $faker->randomElements($userIds, $numLikes);
 
             foreach ($likedUsers as $userId) {
                 $likeId = DB::table('likes')->insertGetId([
                     'user_id' => $userId,
-                    'photo_id' => null, // Chỉ like gallery thì photo_id = null
+                    'photo_id' => null,
                     'gallery_id' => $galleryId,
                     'like_date' => now(),
                 ]);
@@ -80,7 +89,7 @@ class LikeSeeder extends Seeder
                         'like_id' => $likeId,
                         'photo_id' => null,
                         'type' => 3, // Like gallery
-                        'content' => "{$users[$userId]} liked your gallery.", // Truyền tên user
+                        'content' => "{$users[$userId]} liked your gallery.",
                         'is_read' => 0,
                         'notification_date' => now(),
                     ];

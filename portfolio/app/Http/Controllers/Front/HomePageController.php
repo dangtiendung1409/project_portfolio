@@ -184,6 +184,152 @@ class HomePageController extends Controller
         return response()->json(['message' => 'Photo liked successfully'], 200);
     }
 
+    public function topLikedPhotos()
+    {
+        try {
+            // Lấy user hiện tại để kiểm tra danh sách người bị chặn
+            $currentUser = JWTAuth::parseToken()->authenticate();
+            $blockedUserIds = $currentUser->blockedUsers()->pluck('blocked_id');
+        } catch (\Exception $e) {
+            // Nếu không có token, không lọc người bị chặn
+            $blockedUserIds = [];
+        }
+
+        // Lấy danh sách ảnh nhiều like nhất kèm theo toàn bộ thông tin user
+        $photos = Photo::with(['user']) // Lấy toàn bộ thông tin user của ảnh
+        ->withCount('likes') // Đếm số lượt like
+        ->whereNotIn('user_id', $blockedUserIds) // Bỏ qua ảnh của người bị chặn
+        ->where('photo_status', 'approved') // Chỉ lấy ảnh đã được duyệt
+        ->where('privacy_status', 0) // Chỉ lấy ảnh công khai
+        ->orderBy('likes_count', 'desc')
+            ->take(12)
+            ->get();
+
+        // Nếu chưa đủ 10 ảnh, lấy thêm ảnh hợp lệ khác để bù
+        if ($photos->count() < 12) {
+            $remaining = 12 - $photos->count();
+            $extraPhotos = Photo::with(['user']) // Lấy toàn bộ thông tin user của ảnh
+            ->withCount('likes')
+                ->whereNotIn('id', $photos->pluck('id')) // Không lấy ảnh đã có
+                ->whereNotIn('user_id', $blockedUserIds) // Bỏ qua ảnh của người bị chặn
+                ->where('photo_status', 'approved') // Chỉ lấy ảnh đã được duyệt
+                ->where('privacy_status', 0) // Chỉ lấy ảnh công khai
+                ->orderBy('likes_count', 'desc')
+                ->take($remaining)
+                ->get();
+
+            $photos = $photos->merge($extraPhotos);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $photos
+        ]);
+    }
+    public function getTopUsersWithPhotos()
+    {
+        try {
+            // Lấy user hiện tại để kiểm tra danh sách người bị chặn
+            $currentUser = JWTAuth::parseToken()->authenticate();
+            $blockedUserIds = $currentUser->blockedUsers()->pluck('blocked_id');
+        } catch (\Exception $e) {
+            // Nếu không có token, không lọc người bị chặn
+            $blockedUserIds = [];
+        }
+
+        // Lấy danh sách user có tổng số like ảnh cao nhất (bỏ qua người bị block)
+        $topUsers = User::select('users.id', 'users.username', 'users.name', 'users.profile_picture')
+            ->withCount([
+                'photos as total_likes' => function ($query) {
+                    $query->where('photo_status', 'approved')
+                        ->where('privacy_status', 0)
+                        ->join('likes', 'photos.id', '=', 'likes.photo_id');
+                }
+            ])
+            ->whereNotIn('id', $blockedUserIds) // Bỏ qua user bị block
+            ->orderByDesc('total_likes')
+            ->limit(12)
+            ->get();
+
+        // Nếu chưa đủ 10 user, lấy thêm user hợp lệ khác để bù
+        if ($topUsers->count() < 12) {
+            $remaining = 12 - $topUsers->count();
+            $extraUsers = User::select('users.id', 'users.username', 'users.name', 'users.profile_picture')
+                ->withCount([
+                    'photos as total_likes' => function ($query) {
+                        $query->where('photo_status', 'approved')
+                            ->where('privacy_status', 0)
+                            ->join('likes', 'photos.id', '=', 'likes.photo_id');
+                    }
+                ])
+                ->whereNotIn('id', $blockedUserIds) // Bỏ qua user bị block
+                ->whereNotIn('id', $topUsers->pluck('id')) // Không lấy user đã có
+                ->orderByDesc('total_likes')
+                ->limit($remaining)
+                ->get();
+
+            $topUsers = $topUsers->merge($extraUsers);
+        }
+
+        // Lấy danh sách ảnh của từng user trong danh sách top
+        $topUsers->each(function ($user) {
+            $user->photos = Photo::where('user_id', $user->id)
+                ->where('photo_status', 'approved')
+                ->where('privacy_status', 0)
+                ->withCount('likes')
+                ->get();
+        });
+
+        return response()->json([
+            'status' => 'success',
+            'top_users' => $topUsers
+        ]);
+    }
+    public function getTopCategories()
+    {
+        // Lấy 8 category có nhiều ảnh nhất
+        $categories = Category::withCount('photos')
+            ->orderByDesc('photos_count')
+            ->limit(8)
+            ->get();
+
+        return response()->json($categories);
+    }
+    public function getTopLikedGalleries()
+    {
+        try {
+            // Lấy user hiện tại để kiểm tra danh sách người bị chặn
+            $currentUser = JWTAuth::parseToken()->authenticate();
+            $blockedUserIds = $currentUser->blockedUsers()->pluck('blocked_id');
+        } catch (\Exception $e) {
+            $blockedUserIds = [];
+        }
+
+        // Lấy danh sách gallery có nhiều like nhất (bỏ qua gallery của user bị block)
+        $galleries = Gallery::where('visibility', 0)
+            ->whereNotIn('user_id', $blockedUserIds)
+            ->withCount('likes')
+            ->with([
+                'photo' => function ($query) {
+                    $query->select('photos.id', 'photos.image_url');
+                },
+                'user' => function ($query) {
+                    $query->select('id', 'username', 'name', 'profile_picture');
+                }
+            ])
+            ->orderByDesc('likes_count')
+            ->limit(9)
+            ->get()
+            ->each(function ($gallery) {
+                $gallery->photo->makeHidden(['pivot']);
+            });
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $galleries
+        ]);
+    }
+
     public function unlikePhoto(Request $request)
     {
         $user = Auth::user();

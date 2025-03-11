@@ -32,6 +32,10 @@ Route::post('/logout', [AuthUserController::class, 'logout']);
 // home page
 Route::get('/getPhotoData', [HomePageController::class, 'getImages']);
 Route::get('/getFollowData', [HomePageController::class, 'getFollows']);
+Route::get('/top-liked-photos', [HomePageController::class, 'topLikedPhotos']);
+Route::get('/top-users-with-photos', [HomePageController::class, 'getTopUsersWithPhotos']);
+Route::get('/top-categories', [HomePageController::class, 'getTopCategories']);
+Route::get('/top-liked-galleries', [HomePageController::class, 'getTopLikedGalleries']);
 Route::get('/categories', [HomePageController::class, 'getAllCategories']);
 Route::get('/tags', [HomePageController::class, 'getAllTags']);
 

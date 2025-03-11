@@ -23,7 +23,7 @@
                     </div>
 
                     <router-link :to="{ name: 'MyProfile', params: { username: user.username } }">
-                        <img :src="user.profile_picture" alt="User Image" class="profile-img" />
+                        <img  :src="user.profile_picture" alt="User Image" class="profile-img" />
                     </router-link>
                     <h4>{{ user.name }}</h4>
                     <button class="btn-follow" @click="toggleFollow(user)">

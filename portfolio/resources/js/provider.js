@@ -5,6 +5,10 @@ const baseUrl = 'http://127.0.0.1:8000/api';
           // home page
           getPhotoData : `${baseUrl}/getPhotoData`,
           getFollowData : `${baseUrl}/getFollowData`,
+          getTopLikedPhotos: `${baseUrl}/top-liked-photos`,
+          getTopUsersWithPhotos: `${baseUrl}/top-users-with-photos`,
+          getTopCategories: `${baseUrl}/top-categories`,
+          getTopLikedGalleries: `${baseUrl}/top-liked-galleries`,
 
           // like
           getLikedPhotos: `${baseUrl}/liked-photos`,

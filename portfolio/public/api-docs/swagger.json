@@ -301,6 +301,312 @@
               }
           }
       },
+      "/top-liked-photos": {
+          "get": {
+              "tags": [
+                  "HomePage"
+              ],
+              "summary": "Get Top 10 Most Liked Photos",
+              "operationId": "getTopLikedPhotos",
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "parameters": [
+                  {
+                      "name": "Authorization",
+                      "in": "header",
+                      "required": true,
+                      "type": "string",
+                      "description": "Bearer token for authentication"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "List of top 10 most liked photos",
+                      "content": {
+                          "application/json": {
+                              "schema": {
+                                  "type": "array",
+                                  "items": {
+                                      "type": "object",
+                                      "properties": {
+                                          "id": {
+                                              "type": "integer"
+                                          },
+                                          "title": {
+                                              "type": "string"
+                                          },
+                                          "image_url": {
+                                              "type": "string"
+                                          },
+                                          "total_likes": {
+                                              "type": "integer"
+                                          },
+                                          "upload_date": {
+                                              "type": "string",
+                                              "format": "date-time"
+                                          },
+                                          "user": {
+                                              "type": "object",
+                                              "properties": {
+                                                  "id": {
+                                                      "type": "integer"
+                                                  },
+                                                  "username": {
+                                                      "type": "string"
+                                                  },
+                                                  "profile_picture": {
+                                                      "type": "string"
+                                                  }
+                                              }
+                                          }
+                                      }
+                                  }
+                              }
+                          }
+                      }
+                  },
+                  "401": {
+                      "description": "Unauthorized - Invalid or missing token"
+                  },
+                  "500": {
+                      "description": "Internal server error"
+                  }
+              }
+          }
+      },
+      "/top-users-with-photos": {
+          "get": {
+              "tags": [
+                  "HomePage"
+              ],
+              "summary": "Get Top 10 Users with Most Liked Photos",
+              "operationId": "getTopUsersWithPhotos",
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "parameters": [
+                  {
+                      "name": "Authorization",
+                      "in": "header",
+                      "required": true,
+                      "type": "string",
+                      "description": "Bearer token for authentication"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "List of top 10 users with their most liked photos",
+                      "content": {
+                          "application/json": {
+                              "schema": {
+                                  "type": "array",
+                                  "items": {
+                                      "type": "object",
+                                      "properties": {
+                                          "id": {
+                                              "type": "integer"
+                                          },
+                                          "username": {
+                                              "type": "string"
+                                          },
+                                          "name": {
+                                              "type": "string"
+                                          },
+                                          "profile_picture": {
+                                              "type": "string"
+                                          },
+                                          "total_likes": {
+                                              "type": "integer"
+                                          },
+                                          "photos": {
+                                              "type": "array",
+                                              "items": {
+                                                  "type": "object",
+                                                  "properties": {
+                                                      "id": {
+                                                          "type": "integer"
+                                                      },
+                                                      "title": {
+                                                          "type": "string"
+                                                      },
+                                                      "image_url": {
+                                                          "type": "string"
+                                                      },
+                                                      "total_likes": {
+                                                          "type": "integer"
+                                                      },
+                                                      "upload_date": {
+                                                          "type": "string",
+                                                          "format": "date-time"
+                                                      }
+                                                  }
+                                              }
+                                          }
+                                      }
+                                  }
+                              }
+                          }
+                      }
+                  },
+                  "401": {
+                      "description": "Unauthorized - Invalid or missing token"
+                  },
+                  "500": {
+                      "description": "Internal server error"
+                  }
+              }
+          }
+      },
+      "/top-categories": {
+          "get": {
+              "tags": [
+                  "HomePage"
+              ],
+              "summary": "Get Top 8 Categories with Most Photos",
+              "operationId": "getTopCategories",
+              "produces": [
+                  "application/json"
+              ],
+              "responses": {
+                  "200": {
+                      "description": "List of top 8 categories with most photos",
+                      "content": {
+                          "application/json": {
+                              "schema": {
+                                  "type": "array",
+                                  "items": {
+                                      "type": "object",
+                                      "properties": {
+                                          "id": {
+                                              "type": "integer"
+                                          },
+                                          "category_name": {
+                                              "type": "string"
+                                          },
+                                          "slug": {
+                                              "type": "string"
+                                          },
+                                          "image": {
+                                              "type": "string"
+                                          },
+                                          "total_photos": {
+                                              "type": "integer"
+                                          }
+                                      }
+                                  }
+                              }
+                          }
+                      }
+                  },
+                  "500": {
+                      "description": "Internal server error"
+                  }
+              }
+          }
+      },
+      "/top-liked-galleries": {
+          "get": {
+              "tags": [
+                  "HomePage"
+              ],
+              "summary": "Get Top 10 Galleries with Most Likes",
+              "operationId": "getTopLikedGalleries",
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "parameters": [
+                  {
+                      "name": "Authorization",
+                      "in": "header",
+                      "required": true,
+                      "type": "string",
+                      "description": "Bearer token for authentication"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "List of top 10 galleries with their most liked photos",
+                      "content": {
+                          "application/json": {
+                              "schema": {
+                                  "type": "array",
+                                  "items": {
+                                      "type": "object",
+                                      "properties": {
+                                          "id": {
+                                              "type": "integer"
+                                          },
+                                          "galleries_name": {
+                                              "type": "string"
+                                          },
+                                          "slug": {
+                                              "type": "string"
+                                          },
+                                          "galleries_description": {
+                                              "type": "string"
+                                          },
+                                          "image": {
+                                              "type": "string"
+                                          },
+                                          "total_likes": {
+                                              "type": "integer"
+                                          },
+                                          "photos": {
+                                              "type": "array",
+                                              "items": {
+                                                  "type": "object",
+                                                  "properties": {
+                                                      "id": {
+                                                          "type": "integer"
+                                                      },
+                                                      "title": {
+                                                          "type": "string"
+                                                      },
+                                                      "image_url": {
+                                                          "type": "string"
+                                                      },
+                                                      "total_likes": {
+                                                          "type": "integer"
+                                                      },
+                                                      "upload_date": {
+                                                          "type": "string",
+                                                          "format": "date-time"
+                                                      }
+                                                  }
+                                              }
+                                          }
+                                      }
+                                  }
+                              }
+                          }
+                      }
+                  },
+                  "401": {
+                      "description": "Unauthorized - Invalid or missing token"
+                  },
+                  "500": {
+                      "description": "Internal server error"
+                  }
+              }
+          }
+      },
+
       "/getPhotoDetail/{token}": {
           "get": {
               "tags": [
@@ -481,7 +787,6 @@
               }
           }
       },
-
       "/photo-likes/{token}": {
           "get": {
               "tags": [

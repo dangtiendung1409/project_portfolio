@@ -44,7 +44,7 @@ class PhotoSeeder extends Seeder
         }
 
         // Danh sách trạng thái privacy
-        $privacyStatus = [0, 1]; // 0: private, 1: public
+        $privacyStatus = [0, 1]; // 1: private, 0: public
 
         // Danh sách hình ảnh ngẫu nhiên
         $imageNames = [];

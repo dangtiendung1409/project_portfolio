@@ -18,10 +18,10 @@ class DatabaseSeeder extends Seeder
             PhotoSeeder::class,
             TagSeeder::class,
             PhotoTagsSeeder::class,
+            GalleriesSeeder::class,
             LikeSeeder::class,
             CommentSeeder::class,
             FollowSeeder::class,
-            GalleriesSeeder::class,
             ReportSeeder::class,
         ]);
     }

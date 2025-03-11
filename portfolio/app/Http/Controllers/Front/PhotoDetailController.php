@@ -286,26 +286,28 @@ class PhotoDetailController extends Controller
             $currentUser = JWTAuth::parseToken()->authenticate();
             $blockedUserIds = $currentUser->blockedUsers()->pluck('blocked_id');
 
-            // Tìm gallery có ảnh chứa tag tương tự, visibility = 0, và không thuộc về người dùng bị chặn
-            $relatedGalleries = Gallery::where('visibility', 0) // Lọc gallery public
-            ->whereNotIn('user_id', $blockedUserIds) // Loại trừ gallery của người dùng bị chặn
-            ->whereHas('photo.tags', function ($query) use ($tagIds) {
-                $query->whereIn('tags.id', $tagIds);
-            })
+            // Lấy danh sách gallery phù hợp, xáo trộn ngẫu nhiên
+            $relatedGalleries = Gallery::where('visibility', 0)
+                ->whereNotIn('user_id', $blockedUserIds) // Loại trừ user bị block
+                ->whereHas('photo.tags', function ($query) use ($tagIds) {
+                    $query->whereIn('tags.id', $tagIds);
+                })
                 ->with([
                     'photo' => function ($query) use ($blockedUserIds) {
                         $query->select('photos.id', 'photos.image_url')
-                            ->whereNotIn('user_id', $blockedUserIds); // Loại trừ ảnh của người dùng bị chặn
+                            ->whereNotIn('user_id', $blockedUserIds);
                     },
                     'user' => function ($query) {
                         $query->select('id', 'username', 'name', 'profile_picture');
                     }
                 ])
+                ->inRandomOrder() // Ngẫu nhiên hóa danh sách
                 ->get()
                 ->filter(function ($gallery) {
-                    return $gallery->photo->count() >= 4; // Chỉ lấy gallery có từ 4 ảnh trở lên (sau khi lọc)
+                    return $gallery->photo->count() >= 4; // Chỉ lấy gallery có ít nhất 4 ảnh
                 })
-                ->take(3) // Giới hạn 3 gallery
+                ->shuffle() // Tiếp tục xáo trộn thêm lần nữa
+                ->take(3) // Chọn ra 3 gallery ngẫu nhiên
                 ->map(function ($gallery) {
                     return [
                         'id' => $gallery->id,
@@ -337,7 +339,7 @@ class PhotoDetailController extends Controller
 
             return response()->json($relatedGalleries);
         } catch (\Exception $e) {
-            // Nếu không có token hoặc lỗi, trả về gallery mà không lọc người dùng bị chặn
+            // Nếu lỗi hoặc không có token, trả về danh sách gallery không lọc user bị chặn
             $relatedGalleries = Gallery::where('visibility', 0)
                 ->whereHas('photo.tags', function ($query) use ($tagIds) {
                     $query->whereIn('tags.id', $tagIds);
@@ -350,10 +352,12 @@ class PhotoDetailController extends Controller
                         $query->select('id', 'username', 'name', 'profile_picture');
                     }
                 ])
+                ->inRandomOrder() // Ngẫu nhiên hóa danh sách
                 ->get()
                 ->filter(function ($gallery) {
                     return $gallery->photo->count() >= 4;
                 })
+                ->shuffle()
                 ->take(3)
                 ->map(function ($gallery) {
                     return [
@@ -387,5 +391,6 @@ class PhotoDetailController extends Controller
             return response()->json($relatedGalleries);
         }
     }
+
 
 }

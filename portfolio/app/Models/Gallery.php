@@ -14,7 +14,10 @@ class Gallery extends Model
     {
         return $this->belongsTo(User::class);
     }
-
+    public function likes()
+    {
+        return $this->hasMany(Like::class, 'gallery_id');
+    }
     public function photo()
     {
         return $this->belongsToMany(Photo::class, 'galleries_photos', 'galleries_id', 'photo_id');

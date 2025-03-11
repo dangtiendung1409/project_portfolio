@@ -788,13 +788,27 @@ button:hover {
     }
 }
 /*explore*/
-.item-explore {
-    border: none;
-    margin-bottom: 30px;
-    position: relative;
-    overflow: hidden;
+.popular-photos-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between; /* Cách đều trái phải */
+    width: 100%;
+    margin: 0 auto;
 }
 
+.item-explore {
+    position: relative;
+    width: 23%; /* Điều chỉnh để 4 ảnh vừa khít trong 1 dòng, trừ đi khoảng cách */
+    margin-bottom: 20px; /* Khoảng cách dưới */
+    padding: 0 10px; /* Khoảng cách trái phải */
+
+}
+.photo-wrapper {
+    position: relative;
+    width: 100%;
+    height: 200px; /* Chiều cao cố định cho ảnh */
+    overflow: hidden; /* Cắt bỏ phần tràn ra ngoài */
+}
 .item-explore .item-wrap {
     display: block;
     position: relative;
@@ -820,31 +834,77 @@ button:hover {
     transform: scale(1);
 }
 
-.item-explore .item-wrap > .work-info {
+.explore-info {
     position: absolute;
-    top: 50%;
+    bottom: 0;
+    left: 0;
     width: 100%;
-    text-align: center;
-    z-index: 3;
-    transform: translateY(-50%);
-    color: #fff;
+    height: 25%;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.6));
+    padding: 10px;
+    border-radius: 0 0 8px 8px;
     opacity: 0;
     visibility: hidden;
-    margin-top: 20px;
-    transition: .3s all ease;
+    transform: translateY(10px);
+    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out, transform 0.3s ease-in-out;
 }
 
-.item-explore .item-wrap > .work-info h3 {
-    font-size: 20px;
-    margin-bottom: 0;
+.item-explore:hover .explore-info {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
 }
 
-.item-explore .item-wrap > .work-info span {
-    font-size: 14px;
-    text-transform: uppercase;
-    letter-spacing: .2rem;
+.user-info2 {
+    display: flex;
+    align-items: center;
+    flex-direction: row;
 }
 
+.user-image2, .user-name2, .icon-heart2, .icon-dots2 {
+    pointer-events: auto;
+}
+
+.user-image2 {
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.user-name2 {
+    font-size: 18px;
+    color: #fff;
+    margin-right: auto;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 120px;
+}
+
+.icon-heart2, .icon-dots2 {
+    flex-grow: 0;
+    margin-left: 10px;
+    font-size: 18px;
+    margin-right: 10px;
+    position: relative;
+    color: #fff;
+}
+
+.icon-heart2:hover {
+    cursor: pointer;
+}
+
+.icon-heart2 .fa-heart {
+    color: #fff;
+}
+
+.icon-heart2 .fa-heart.liked {
+    color: #ff5a5f;
+}
+
+.icon-dots2 {
+    position: relative;
+    display: inline-block;
+}
 .item-explore .item-wrap:hover {
     text-decoration: none;
 }
@@ -881,10 +941,9 @@ button:hover {
 }
 .img-thin {
     width: 100%;
-    height: auto;
+    height: 200px;
     border-radius: 8px;
     transition: transform 0.3s;
-    height: auto;
 }
 
 .item-explore:hover .img-thin {
@@ -920,7 +979,7 @@ button:hover {
 
 .category-item img {
     width: 100%;
-    height: auto;
+    height: 200px;
     transition: none;
 }
 
@@ -965,7 +1024,11 @@ button:hover {
     font-size: 24px;
     margin: 0;
 }
-
+.profile-img {
+    display: block;
+    transform: translateY(-20px);
+    margin: 0 auto;
+}
 .following-content-2 {
     margin: 20px 0;
 }
@@ -975,7 +1038,7 @@ button:hover {
 
 .galleries-grid {
     display: flex;
-    justify-content: space-between;
+    flex-wrap: wrap;
     gap: 20px;
 }
 
@@ -1026,7 +1089,7 @@ button:hover {
 }
 .gallery-images img {
     width: 100%;
-    height: auto;
+    height: 100px;
     border-radius: 8px;
     transition: transform 0.3s;
 }

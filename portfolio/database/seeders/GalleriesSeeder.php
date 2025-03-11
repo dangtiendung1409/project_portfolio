@@ -14,7 +14,9 @@ class GalleriesSeeder extends Seeder
     public function run(): void
     {
         $users = DB::table('users')->pluck('id'); // Lấy danh sách user_id
-        $photos = DB::table('photos')->pluck('id'); // Lấy danh sách photo_id
+        $photos = DB::table('photos')
+            ->where('privacy_status', 0)
+            ->pluck('id');
         // Danh sách tên bộ sưu tập ngẫu nhiên
         $galleryNames = [
             'Amazing Landscapes', 'Urban Exploration', 'Wildlife Wonders',
@@ -45,7 +47,7 @@ class GalleriesSeeder extends Seeder
                     'galleries_name' => $galleryNames[array_rand($galleryNames)] . ' ' . Str::random(3),
                     'galleries_description' => $galleryDescriptions[array_rand($galleryDescriptions)],
                     'user_id' => $userId,
-                    'visibility' => rand(0, 1), // 0: Private, 1: Public
+                    'visibility' => 0, // 1: Private, 0: Public
                     'galleries_code' => Str::uuid(),
                     'created_at' => now(),
                     'updated_at' => now(),
