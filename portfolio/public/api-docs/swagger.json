@@ -606,6 +606,170 @@
               }
           }
       },
+      "/recent-followed-photos": {
+          "get": {
+              "tags": [
+                  "HomePage"
+              ],
+              "summary": "Get Recent Followed Users' Photos",
+              "operationId": "getRecentFollowedPhotos",
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "parameters": [
+                  {
+                      "name": "Authorization",
+                      "in": "header",
+                      "required": true,
+                      "type": "string",
+                      "description": "Bearer token for authentication"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "List of recent photos from followed users",
+                      "content": {
+                          "application/json": {
+                              "schema": {
+                                  "type": "array",
+                                  "items": {
+                                      "type": "object",
+                                      "properties": {
+                                          "id": {
+                                              "type": "integer"
+                                          },
+                                          "title": {
+                                              "type": "string"
+                                          },
+                                          "image_url": {
+                                              "type": "string"
+                                          },
+                                          "upload_date": {
+                                              "type": "string",
+                                              "format": "date-time"
+                                          },
+                                          "total_likes": {
+                                              "type": "integer"
+                                          },
+                                          "user": {
+                                              "type": "object",
+                                              "properties": {
+                                                  "id": {
+                                                      "type": "integer"
+                                                  },
+                                                  "name": {
+                                                      "type": "string"
+                                                  },
+                                                  "avatar": {
+                                                      "type": "string"
+                                                  }
+                                              }
+                                          }
+                                      }
+                                  }
+                              }
+                          }
+                      }
+                  },
+                  "401": {
+                      "description": "Unauthorized - Invalid or missing token"
+                  },
+                  "500": {
+                      "description": "Internal server error"
+                  }
+              }
+          }
+      },
+      "/recent-followed-galleries": {
+          "get": {
+              "tags": [
+                  "HomePage"
+              ],
+              "summary": "Get Recent Followed Users' Galleries",
+              "operationId": "getRecentFollowedGalleries",
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "parameters": [
+                  {
+                      "name": "Authorization",
+                      "in": "header",
+                      "required": true,
+                      "type": "string",
+                      "description": "Bearer token for authentication"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "List of recent galleries from followed users",
+                      "content": {
+                          "application/json": {
+                              "schema": {
+                                  "type": "array",
+                                  "items": {
+                                      "type": "object",
+                                      "properties": {
+                                          "id": {
+                                              "type": "integer"
+                                          },
+                                          "galleries_name": {
+                                              "type": "string"
+                                          },
+                                          "slug": {
+                                              "type": "string"
+                                          },
+                                          "galleries_description": {
+                                              "type": "string"
+                                          },
+                                          "total_likes": {
+                                              "type": "integer"
+                                          },
+                                          "created_at": {
+                                              "type": "string",
+                                              "format": "date-time"
+                                          },
+                                          "user": {
+                                              "type": "object",
+                                              "properties": {
+                                                  "id": {
+                                                      "type": "integer"
+                                                  },
+                                                  "name": {
+                                                      "type": "string"
+                                                  },
+                                                  "username": {
+                                                      "type": "string"
+                                                  },
+                                                  "profile_picture": {
+                                                      "type": "string"
+                                                  }
+                                              }
+                                          }
+                                      }
+                                  }
+                              }
+                          }
+                      }
+                  },
+                  "401": {
+                      "description": "Unauthorized - Invalid or missing token"
+                  },
+                  "500": {
+                      "description": "Internal server error"
+                  }
+              }
+          }
+      },
 
       "/getPhotoDetail/{token}": {
           "get": {

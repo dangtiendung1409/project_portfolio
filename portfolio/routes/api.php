@@ -30,14 +30,19 @@ Route::post('/refresh-token', [AuthUserController::class, 'refreshToken']);
 Route::post('/logout', [AuthUserController::class, 'logout']);
 
 // home page
+Route::get('/categories', [HomePageController::class, 'getAllCategories']);
+Route::get('/tags', [HomePageController::class, 'getAllTags']);
+
+// for you
 Route::get('/getPhotoData', [HomePageController::class, 'getImages']);
+// follow
 Route::get('/getFollowData', [HomePageController::class, 'getFollows']);
+
+// explore
 Route::get('/top-liked-photos', [HomePageController::class, 'topLikedPhotos']);
 Route::get('/top-users-with-photos', [HomePageController::class, 'getTopUsersWithPhotos']);
 Route::get('/top-categories', [HomePageController::class, 'getTopCategories']);
 Route::get('/top-liked-galleries', [HomePageController::class, 'getTopLikedGalleries']);
-Route::get('/categories', [HomePageController::class, 'getAllCategories']);
-Route::get('/tags', [HomePageController::class, 'getAllTags']);
 
 
 // photo details
@@ -65,6 +70,10 @@ Route::get('/categories/photos', [CategoryController::class, 'getPhotosByCategor
 Route::get('/search-photos', [SearchController::class, 'searchPhotos']);
 
 Route::middleware('auth:api')->group(function () {
+    // home page
+    Route::get('/recent-followed-photos', [HomePageController::class, 'getRecentFollowedPhotos']);
+    Route::get('/recent-followed-galleries', [HomePageController::class, 'getRecentFollowedGalleries']);
+
     // my photo user
     Route::get('/approved-photos', [AccountUserController::class, 'getApprovedPhotos']);
     Route::delete('/photos/{photo_id}', [AccountUserController::class, 'deletePhoto']);

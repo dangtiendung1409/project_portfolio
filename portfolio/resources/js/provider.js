@@ -9,6 +9,8 @@ const baseUrl = 'http://127.0.0.1:8000/api';
           getTopUsersWithPhotos: `${baseUrl}/top-users-with-photos`,
           getTopCategories: `${baseUrl}/top-categories`,
           getTopLikedGalleries: `${baseUrl}/top-liked-galleries`,
+          getRecentFollowedPhotos: `${baseUrl}/recent-followed-photos`,
+          getRecentFollowedGalleries: `${baseUrl}/recent-followed-galleries`,
 
           // like
           getLikedPhotos: `${baseUrl}/liked-photos`,

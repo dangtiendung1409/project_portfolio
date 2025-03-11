@@ -1,8 +1,11 @@
 <template>
     <div class="app-bar">
         <div class="app-bar-content">
-            <div class="app-bar-item" :class="{ active: activeItem === 'following', selected: activeItem === 'following' }"
-                @click="setActive('following')"> Following
+            <div v-if="isLoggedIn"
+                 class="app-bar-item"
+                 :class="{ active: activeItem === 'following', selected: activeItem === 'following' }"
+                 @click="setActive('following')">
+                Following
             </div>
             <div class="app-bar-item" :class="{ active: activeItem === 'forYou', selected: activeItem === 'forYou' }"
                 @click="setActive('forYou')"> For You
@@ -19,6 +22,7 @@ export default {
     props: {
         activeItem: String,
         setActive: Function,
+        isLoggedIn: Boolean,
     },
 
 };

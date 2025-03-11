@@ -3,9 +3,9 @@
         <template v-slot:content="slotProps">
             <div class="site-section site-portfolio">
                 <div class="container">
-                    <TabBar :activeItem="activeItem" :setActive="setActive" />
+                    <TabBar :activeItem="activeItem" :setActive="setActive" :isLoggedIn="isLoggedIn" />
                     <ForYou v-if="activeItem === 'forYou'" :photos="photos" />
-                    <Following v-else-if="activeItem === 'following'" :users="followingUsers"/>
+                    <Following v-else-if="activeItem === 'following' && isLoggedIn" :users="followingUsers"/>
                     <Explore v-else-if="activeItem === 'explore'" :users="followingUsers"/>
                 </div>
 
@@ -148,6 +148,7 @@ import ForYou from './components/ForYou.vue';
 import Following from './components/Following.vue';
 import Explore from './components/Explore.vue';
 import getUrlList from "../provider.js";
+import { useAuthStore } from '@/stores/authStore';
 export default {
     name: 'Index',
     components : {
@@ -162,6 +163,7 @@ export default {
             activeItem: 'forYou',
             photos: [],
             followingUsers: [],
+            isLoggedIn: false,
         }
     },
     watch: {
@@ -169,22 +171,33 @@ export default {
             if (newItem === 'forYou') {
                 this.getPhoto();
             }
-            if (newItem === 'following') {
+            if (newItem === 'following' && this.isLoggedIn) {
                 this.getFollow();
             }
         }
     },
-    mounted() {
+    async mounted() {
+        await this.checkLogin();
         if (this.activeItem === 'forYou') {
             this.getPhoto();
         }
-        if (this.activeItem === 'following'){
+        if (this.activeItem === 'following' && this.isLoggedIn) {
             this.getFollow();
         }
     },
     methods: {
         setActive(item) {
             this.activeItem = item;
+        },
+        async checkLogin() {
+            const authStore = useAuthStore();
+            await authStore.checkLoginStatus();
+            this.isLoggedIn = authStore.isLoggedIn;
+            if (!this.isLoggedIn && this.activeItem === 'following') {
+                this.activeItem = 'forYou';
+                this.$router.push({ name: 'Login' });
+            }
+            return this.isLoggedIn;
         },
         async getPhoto() {
             try {

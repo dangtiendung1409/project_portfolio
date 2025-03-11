@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Front;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Models\Follow;
 use App\Models\Gallery;
 use App\Models\Like;
 use App\Models\Notification;
@@ -329,6 +330,68 @@ class HomePageController extends Controller
             'data' => $galleries
         ]);
     }
+
+    public function getRecentFollowedPhotos()
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        // Lấy danh sách user mà người dùng đang follow
+        $followingUsers = Follow::where('follower_id', $user->id)->pluck('following_id');
+
+        if ($followingUsers->isEmpty()) {
+            return response()->json(['message' => 'No followed users found'], 200);
+        }
+
+        // Lấy tối đa 3 ảnh gần đây nhất của mỗi user đang follow, kèm thông tin user
+        $photos = Photo::whereIn('user_id', $followingUsers)
+            ->with('user:id,username,name,profile_picture') // Lấy thông tin user cần thiết
+            ->orderBy('upload_date', 'desc')
+            ->get()
+            ->groupBy('user_id') // Nhóm theo user_id
+            ->map(function ($photos) {
+                return $photos->take(2); // Mỗi user lấy tối đa 3 ảnh
+            })
+            ->flatten(); // Chuyển về một danh sách ảnh duy nhất
+
+        return response()->json($photos);
+    }
+    public function getRecentFollowedGalleries()
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        // Lấy danh sách user mà người dùng đang follow
+        $followingUsers = Follow::where('follower_id', $user->id)->pluck('following_id');
+
+        if ($followingUsers->isEmpty()) {
+            return response()->json(['message' => 'No followed users found'], 200);
+        }
+
+        // Lấy tối đa 3 gallery gần đây nhất của mỗi user đang follow, kèm thông tin user và ảnh
+        $galleries = Gallery::whereIn('user_id', $followingUsers)
+            ->with([
+                'user:id,username,name,profile_picture',
+                'photo:image_url'
+            ])
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->groupBy('user_id') // Nhóm theo user_id
+            ->map(function ($galleries) {
+                return $galleries->take(1); // Mỗi user lấy tối đa 3 gallery
+            })
+            ->flatten(); // Chuyển về một danh sách gallery duy nhất
+
+        return response()->json($galleries);
+    }
+
+
 
     public function unlikePhoto(Request $request)
     {
