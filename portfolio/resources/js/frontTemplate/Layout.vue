@@ -4,7 +4,7 @@
             <router-link class="navbar-brand" :to="'/'">MyPortfolio</router-link>
             <div class="nav-links">
                 <router-link :to="'/'" class="nav-link" style="color: #007bff">Discover</router-link>
-                <a href="#" class="nav-link">About us</a>
+                <router-link :to="'/contact'" class="nav-link">Contact</router-link>
                 <a href="#" class="nav-link">Blog</a>
                 <router-link :to="{ name: 'Category' }" class="nav-link">Category</router-link>
             </div>

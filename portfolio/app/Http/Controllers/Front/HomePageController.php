@@ -18,7 +18,9 @@ use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 use Tymon\JWTAuth\Facades\JWTAuth;
-
+use Illuminate\Support\Facades\Mail;
+use App\Models\Contact;
+use App\Mail\ContactMail;
 class HomePageController extends Controller
 {
     public function addPhotos(Request $request)
@@ -507,6 +509,32 @@ class HomePageController extends Controller
 
         return response()->json(['message' => 'Notification marked as read']);
     }
+    public function sendContact(Request $request)
+    {
+        // Validate dữ liệu đầu vào
+        $request->validate([
+            'name' => 'required',
+            'email' => 'required|email',
+            'subject' => 'required',
+            'message' => 'required',
+        ]);
 
+        // Lưu vào database
+        $contact = Contact::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'subject' => $request->subject,
+            'message' => $request->message,
+            'contact_date' => now(),
+        ]);
+
+        // Gửi email đến admin
+        Mail::to('dungprohn1409@gmail.com')->send(new ContactMail($request->all()));
+
+        return response()->json([
+            'message' => 'Contact form submitted successfully!',
+            'data' => $contact
+        ], 201);
+    }
 
 }

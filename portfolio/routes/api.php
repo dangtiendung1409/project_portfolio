@@ -62,6 +62,8 @@ Route::get('/total-likes/{username}', [ProfileController::class, 'getTotalLikesB
 Route::get('/getFollowingUser/{username}', [FollowController::class, 'followingUser']); // Danh sách người dùng mà user được chỉ định đang theo dõi
 Route::get('/getFollowersUser/{username}', [FollowController::class, 'followersUser']); // Danh sách những người theo dõi user được chỉ định
 
+// contact
+Route::post('/contact', [HomePageController::class, 'sendContact']);
 
 //Category
 Route::get('/categories/photos', [CategoryController::class, 'getPhotosByCategorySlugs']);

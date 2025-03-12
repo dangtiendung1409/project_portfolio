@@ -92,6 +92,9 @@ const baseUrl = 'http://127.0.0.1:8000/api';
 
           // report
           reportViolation: `${baseUrl}/report`,
+
+          // contact
+          sendContact: `${baseUrl}/contact`,
       }
 }
 export default getUrlList;
