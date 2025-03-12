@@ -13,15 +13,16 @@ return new class extends Migration
     {
         Schema::create('notifications', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('recipient_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade')->comment('sender');
+            $table->foreignId('recipient_id')->constrained('users')->onDelete('cascade')->comment('recipient');
             $table->foreignId('like_id')->nullable()->constrained('likes');
             $table->foreignId('comment_id')->nullable()->constrained('comments');
+            $table->foreignId('gallery_id')->nullable()->constrained('galleries');
             $table->foreignId('photo_id')->nullable()->constrained('photos');
             // type 0 = like photo, type 1 = comment , type 2 = follow , type 3 = like gallery
-            $table->unsignedTinyInteger('type');
+            $table->unsignedTinyInteger('type')->comment('0 = like photo, 1 = comment, 2 = follow, 3 = like gallery');
             $table->text('content');
-            $table->boolean('is_read')->default(false);
+            $table->boolean('is_read')->default(false)->comment('0 = unread, 1 = read');
             $table->dateTime('notification_date');
         });
     }

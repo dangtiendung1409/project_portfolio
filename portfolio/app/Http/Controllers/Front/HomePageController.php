@@ -484,7 +484,7 @@ class HomePageController extends Controller
         $user = Auth::user();
 
         $notifications = Notification::where('recipient_id', $user->id)
-        ->with(['user', 'like', 'comment', 'photo'])
+            ->with(['user', 'like', 'comment', 'photo', 'gallery'])
             ->orderBy('notification_date', 'desc')
             ->get();
 

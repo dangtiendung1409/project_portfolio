@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('galleries_name', 255);
             $table->string('galleries_description', 255)->nullable();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->boolean('visibility');
+            $table->boolean('visibility')->comment('0 = public , 1 = private');
             $table->uuid('galleries_code')->unique();
             $table->timestamps();
         });

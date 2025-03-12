@@ -19,6 +19,7 @@ export const useNotificationStore = defineStore('notificationStore', {
                         Authorization: `Bearer ${token}`,
                     },
                 });
+
                 console.log('API response:', response.data);
 
                 this.notifications = response.data.map(notification => ({
@@ -32,6 +33,8 @@ export const useNotificationStore = defineStore('notificationStore', {
                     read: notification.is_read === 1,
                     type: notification.type,
                     photoToken: notification.photo ? notification.photo.photo_token : null,
+                    galleryId: notification.gallery ? notification.gallery.id : null,
+                    galleriesCode: notification.gallery ? notification.gallery.galleries_code : null,
                 }));
 
                 this.unreadCount = this.notifications.filter(notification => !notification.read).length;

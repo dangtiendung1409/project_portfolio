@@ -15,6 +15,7 @@ class Notification extends Model
         'like_id',
         'comment_id',
         'photo_id',
+        'gallery_id',
         'type',
         'content',
         'is_read',
@@ -59,6 +60,10 @@ class Notification extends Model
     public function photo()
     {
         return $this->belongsTo(Photo::class);
+    }
+    public function gallery()
+    {
+        return $this->belongsTo(Gallery::class);
     }
     public $timestamps = false;
 }

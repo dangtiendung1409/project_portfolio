@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('description', 500)->nullable();
             $table->dateTime('upload_date');
             $table->string('location', 255)->nullable();
-            $table->boolean('privacy_status');
+            $table->boolean('privacy_status')->comment('0 = public , 1 = private');
             $table->string('photo_status', 50);
             $table->string('image_url', 255);
             $table->char('photo_token', 36)->unique();

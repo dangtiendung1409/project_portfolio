@@ -1,5 +1,5 @@
 <template>
-    <div class="photo-header">
+    <div v-if="recentPhotos.length > 0" class="photo-header">
         <h3>Photos of people you follow</h3>
         <p style="font-size: 16px">Recent photos of people you follow</p>
     </div>
@@ -47,13 +47,13 @@
             </div>
         </div>
     </div>
-    <div class="featured-galleries mb-4">
+    <div v-if="recentGalleries.length > 0" class="featured-galleries mb-4">
         <h3>Recent Followed Galleries</h3>
         <div class="top-gallery-header d-flex justify-content-between align-items-center">
             <p style="font-size: 16px">Galleries from people you follow</p>
         </div>
         <div class="galleries-grid">
-            <div v-for="gallery in recentGalleries" :key="gallery.id" class="gallery-card">
+            <div v-for="gallery in recentGalleries" :key="gallery.id" class="gallery-card" @click="goToGalleryDetails(gallery.galleries_code)">
                 <div class="gallery-info">
                     <h4>{{ gallery.galleries_name }}</h4>
                     <div class="image-count">
@@ -75,7 +75,7 @@
                             <i :class="[gallery.liked ? 'fas' : 'fa-regular', 'fa-heart', { liked: gallery.liked }]"></i>
                         </button>
                         <button class="btn-options" v-if="gallery.user && userStore.user && gallery.user.id !== userStore.user.id"
-                                @click="handleClick('reportGallery', gallery.id, gallery.user.id)">
+                                @click.stop="handleClick('reportGallery', gallery.id, gallery.user.id)">
                             <i class="fa-regular fa-flag"></i>
                         </button>
                     </div>
@@ -83,6 +83,7 @@
             </div>
         </div>
     </div>
+
     <div class="following-content">
         <h3>You’re not following anyone yet</h3>
         <p>Start following photographers and stay updated with their latest photos here.</p>
@@ -501,6 +502,9 @@ export default {
             this.selectedGalleryId = null;
             this.selectedViolatorId = null;
         },
+        goToGalleryDetails(galleries_code) {
+            this.$router.push({ name: 'GalleryDetailsUser', params: { galleries_code } });
+        }
     },
     watch: {
         recentPhotos: {

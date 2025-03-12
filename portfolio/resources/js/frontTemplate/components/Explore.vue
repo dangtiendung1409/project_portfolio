@@ -112,7 +112,7 @@
                 <p>Most popular photo collection by the community</p>
             </div>
             <div class="galleries-grid">
-                <div v-for="gallery in topLikedGalleries" :key="gallery.id" class="gallery-card">
+                <div v-for="gallery in topLikedGalleries" :key="gallery.id" class="gallery-card"  @click="goToGalleryDetails(gallery.galleries_code)">
                     <div class="gallery-info">
                         <h4>{{ gallery.galleries_name }}</h4>
                         <div class="image-count">
@@ -134,7 +134,7 @@
                                 <i :class="[gallery.liked ? 'fas' : 'fa-regular', 'fa-heart', { liked: gallery.liked }]"></i>
                             </button>
                             <button class="btn-options" v-if="gallery.user && userStore.user && gallery.user.id !== userStore.user.id"
-                                    @click="handleClick('reportGallery', gallery.id, gallery.user.id)">
+                                    @click.stop="handleClick('reportGallery', gallery.id, gallery.user.id)">
                                 <i class="fa-regular fa-flag"></i>
                             </button>
                         </div>
@@ -552,6 +552,9 @@ export default {
             this.selectedGalleryId = null;
             this.selectedViolatorId = null;
         },
+        goToGalleryDetails(galleries_code) {
+            this.$router.push({ name: 'GalleryDetailsUser', params: { galleries_code } });
+        }
     },
     watch: {
         topLikedPhotos: {

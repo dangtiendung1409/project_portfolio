@@ -60,7 +60,7 @@
                             <img :src="`${notification.image}`" alt="User" class="notification-image">
                             <div class="notification-content">
                                 <p class="notification-message"
-                                   @click="navigateToPhoto(notification.photoToken, notification.id, notification.type)">
+                                   @click="navigateToPhoto(notification)">
                                     {{ notification.message }}
                                 </p>
                                 <small class="notification-time">{{ notification.time }}</small>
@@ -153,22 +153,28 @@ export default {
         this.loadExternalScripts();
     },
     methods: {
-        async navigateToPhoto(photoToken, notificationId, type) {
-            if (notificationId) {
+        async navigateToPhoto(notification) {
+            if (notification.id) {
                 const notificationStore = useNotificationStore();
-                await notificationStore.markNotificationAsRead(notificationId);
+                await notificationStore.markNotificationAsRead(notification.id);
             }
 
             // Nếu type = 2 (follow), chỉ đánh dấu đã đọc, không chuyển trang
-            if (type === 2) {
+            if (notification.type === 2) {
+                return;
+            }
+
+            // Nếu type = 3 (Gallery), lấy galleries_code từ store và điều hướng
+            if (notification.type === 3 && notification.galleriesCode) {
+                this.$router.push({ name: 'GalleryDetailsUser', params: { galleries_code: notification.galleriesCode } });
                 return;
             }
 
             // Nếu có photoToken, chuyển hướng đến trang chi tiết ảnh
-            if (photoToken) {
-                this.$router.push({ name: 'PhotoDetail', params: { token: photoToken } });
+            if (notification.photoToken) {
+                this.$router.push({ name: 'PhotoDetail', params: { token: notification.photoToken } });
             } else {
-                alert('Photo token is missing or invalid.');
+                alert('Invalid notification data.');
             }
         },
         showAllNotifications() {
