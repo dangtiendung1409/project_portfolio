@@ -112,6 +112,12 @@
                     </li>
                 </ul>
             </li>
+            <li>
+                <a href="/admin/contact">
+                    <span class="icon"><i class="mdi mdi-email-outline"></i></span>
+                    <span class="menu-item-label">Contact management</span>
+                </a>
+            </li>
         </ul>
     </div>
 </aside>

@@ -526,6 +526,7 @@ class HomePageController extends Controller
             'subject' => $request->subject,
             'message' => $request->message,
             'contact_date' => now(),
+            'status' => 'pending',
         ]);
 
         // Gửi email đến admin

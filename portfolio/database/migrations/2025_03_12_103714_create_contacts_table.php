@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('email');
             $table->string('subject');
             $table->text('message');
+            $table->string('status');
             $table->timestamp('contact_date')->useCurrent();
             $table->timestamps();
         });

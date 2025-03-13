@@ -74,5 +74,10 @@ Route::get('/change-password', [\App\Http\Controllers\Admin\accountSettingContro
 Route::post('/update-password', [\App\Http\Controllers\Admin\accountSettingController::class, 'updatePassword'])
     ->name('admin.updatePassword');
 
+//category management
+Route::get('/contact', [\App\Http\Controllers\Admin\contactController::class, 'index'])->name('admin.contact.index');
 
+Route::get('/admin/contact/send/{id}', [\App\Http\Controllers\Admin\contactController::class, 'showSendForm'])
+    ->name('admin.contact.send');
+Route::post('/admin/contact/send/{id}', [\App\Http\Controllers\Admin\contactController::class, 'sendContact']);
 });
