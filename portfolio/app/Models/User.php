@@ -110,6 +110,11 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasMany(Block::class, 'blocked_id');
     }
+    public function blogs()
+    {
+        return $this->hasMany(Blog::class, 'author_id');
+    }
+
     /**
      * Kiểm tra xem người dùng hiện tại có bị một user khác chặn không
      */

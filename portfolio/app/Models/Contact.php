@@ -20,6 +20,6 @@ class Contact extends Model
         'contact_date',
     ];
 
-    public $timestamps = true;
+    public $timestamps = false;
 }
 

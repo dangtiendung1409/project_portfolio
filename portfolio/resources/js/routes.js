@@ -13,6 +13,8 @@ import EditGallery from "./frontTemplate/MyAccount/EditGallery.vue";
 import PhotoDetail from "./frontTemplate/PhotoDetail.vue";
 import MyProfile from "./frontTemplate/MyProfile.vue";
 import Contact from "./frontTemplate/Contact.vue";
+import Blog from "./frontTemplate/Blog.vue";
+import BlogDetails from "./frontTemplate/BlogDetails.vue";
 import GalleryDetailsUser from "./frontTemplate/GalleryDetailsUser.vue";
 import Category from "./frontTemplate/Category.vue";
 import Search from "./frontTemplate/Search.vue";
@@ -23,6 +25,8 @@ import jwt_decode from 'jwt-decode';
 const routes = [
     { name: 'Index', path: '/', component: Index },
     { name: 'Contact', path: '/contact', component: Contact },
+    { name: 'Blog', path: '/blog', component: Blog },
+    { name: 'BlogDetails', path: '/blog/:slug', component: BlogDetails },
     { name: 'PhotoDetail', path: '/photoDetail/:token', component: PhotoDetail },
     { name: 'DetailsCategory', path: '/detailsCategory', component: DetailsCategory },
     { name: 'GalleryDetailsUser',  path: '/galleryDetailsUser/:galleries_code', component: GalleryDetailsUser },

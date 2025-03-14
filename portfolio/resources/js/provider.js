@@ -95,6 +95,11 @@ const baseUrl = 'http://127.0.0.1:8000/api';
 
           // contact
           sendContact: `${baseUrl}/contact`,
+
+          // blogs
+          getLatestBlogs: `${baseUrl}/blogs/latest`, // Lấy 5 blog gần đây nhất
+          getOlderBlogs: `${baseUrl}/blogs/older`, // Lấy blog có thời gian sau 7 ngày
+          getBlogDetails: (slug) => `${baseUrl}/blog/details/${slug}`,
       }
 }
 export default getUrlList;

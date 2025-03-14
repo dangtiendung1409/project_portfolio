@@ -12,6 +12,7 @@ use App\Http\Controllers\Front\SearchController;
 use App\Http\Controllers\Front\FollowController;
 use App\Http\Controllers\Front\BlockController;
 use App\Http\Controllers\Front\ReportController;
+use App\Http\Controllers\Front\BlogController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -64,6 +65,12 @@ Route::get('/getFollowersUser/{username}', [FollowController::class, 'followersU
 
 // contact
 Route::post('/contact', [HomePageController::class, 'sendContact']);
+
+// blog
+Route::get('/blogs/latest', [BlogController::class, 'getLatestBlogs']);
+Route::get('/blogs/older', [BlogController::class, 'getOlderBlogs']);
+Route::get('/blog/details/{slug}', [BlogController::class, 'getBlogDetails']);
+
 
 //Category
 Route::get('/categories/photos', [CategoryController::class, 'getPhotosByCategorySlugs']);

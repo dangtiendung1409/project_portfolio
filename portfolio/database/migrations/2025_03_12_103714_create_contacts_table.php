@@ -19,7 +19,6 @@ return new class extends Migration
             $table->text('message');
             $table->string('status');
             $table->timestamp('contact_date')->useCurrent();
-            $table->timestamps();
         });
     }
 

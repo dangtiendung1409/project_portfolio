@@ -770,7 +770,6 @@
               }
           }
       },
-
       "/getPhotoDetail/{token}": {
           "get": {
               "tags": [
@@ -3739,7 +3738,175 @@
                   }
               }
           }
+      },
+      "/blogs/latest": {
+          "get": {
+              "tags": [
+                  "Blog"
+              ],
+              "summary": "Lấy danh sách 5 blog gần đây nhất",
+              "operationId": "getLatestBlogs",
+              "produces": [
+                  "application/json"
+              ],
+              "parameters": [],
+              "responses": {
+                  "200": {
+                      "description": "Danh sách 5 blog gần đây nhất",
+                      "schema": {
+                          "type": "object",
+                          "properties": {
+                              "status": {
+                                  "type": "string"
+                              },
+                              "blogs": {
+                                  "type": "array",
+                                  "items": {
+                                      "type": "object",
+                                      "properties": {
+                                          "id": {
+                                              "type": "integer"
+                                          },
+                                          "title": {
+                                              "type": "string"
+                                          },
+                                          "content": {
+                                              "type": "string"
+                                          },
+                                          "cover_image": {
+                                              "type": "string"
+                                          },
+                                          "created_at": {
+                                              "type": "string",
+                                              "format": "date-time"
+                                          }
+                                      }
+                                  }
+                              }
+                          }
+                      }
+                  },
+                  "500": {
+                      "description": "Lỗi server"
+                  }
+              }
+          }
+      },
+      "/blogs/older": {
+          "get": {
+              "tags": [
+                  "Blog"
+              ],
+              "summary": "Lấy danh sách blog có thời gian sau 7 ngày",
+              "operationId": "getOlderBlogs",
+              "produces": [
+                  "application/json"
+              ],
+              "parameters": [],
+              "responses": {
+                  "200": {
+                      "description": "Danh sách blog có thời gian sau 7 ngày",
+                      "schema": {
+                          "type": "object",
+                          "properties": {
+                              "status": {
+                                  "type": "string"
+                              },
+                              "blogs": {
+                                  "type": "array",
+                                  "items": {
+                                      "type": "object",
+                                      "properties": {
+                                          "id": {
+                                              "type": "integer"
+                                          },
+                                          "title": {
+                                              "type": "string"
+                                          },
+                                          "content": {
+                                              "type": "string"
+                                          },
+                                          "cover_image": {
+                                              "type": "string"
+                                          },
+                                          "created_at": {
+                                              "type": "string",
+                                              "format": "date-time"
+                                          }
+                                      }
+                                  }
+                              }
+                          }
+                      }
+                  },
+                  "500": {
+                      "description": "Lỗi server"
+                  }
+              }
+          }
+      },
+      "/blog/details/{slug}": {
+          "get": {
+              "tags": [
+                  "Blog"
+              ],
+              "summary": "Lấy thông tin chi tiết của blog theo slug",
+              "operationId": "getBlogDetails",
+              "produces": [
+                  "application/json"
+              ],
+              "parameters": [
+                  {
+                      "name": "slug",
+                      "in": "path",
+                      "required": true,
+                      "type": "string",
+                      "description": "Slug của blog cần lấy thông tin"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "Thông tin chi tiết của blog",
+                      "schema": {
+                          "type": "object",
+                          "properties": {
+                              "status": {
+                                  "type": "string"
+                              },
+                              "blog": {
+                                  "type": "object",
+                                  "properties": {
+                                      "id": {
+                                          "type": "integer"
+                                      },
+                                      "title": {
+                                          "type": "string"
+                                      },
+                                      "content": {
+                                          "type": "string"
+                                      },
+                                      "cover_image": {
+                                          "type": "string"
+                                      },
+                                      "created_at": {
+                                          "type": "string",
+                                          "format": "date-time"
+                                      }
+                                  }
+                              }
+                          }
+                      }
+                  },
+                  "404": {
+                      "description": "Blog không tồn tại"
+                  },
+                  "500": {
+                      "description": "Lỗi server"
+                  }
+              }
+          }
       }
+
   },
 
   "securityDefinitions": {
