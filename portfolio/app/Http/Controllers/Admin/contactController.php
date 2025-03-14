@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Contact;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Session;
 
 class contactController extends Controller
 {
@@ -17,6 +18,8 @@ class contactController extends Controller
     }
     public function showSendForm($id)
     {
+        $successMessage = Session::get('successMessage');
+        $errorMessage = Session::get('errorMessage');
         $contact = Contact::findOrFail($id);
         return view("admin.Contact.sendContact", compact('contact'));
     }
@@ -42,8 +45,8 @@ class contactController extends Controller
 
         // Cập nhật trạng thái thành 'processed'
         $contact->update(['status' => 'processed']);
-
-        return redirect()->route('admin.contact.index')->with('success', 'Email sent successfully!');
+        Session::flash('successMessage', 'contact sent successfully!');
+        return redirect()->route('admin.contact.index');
     }
 
 

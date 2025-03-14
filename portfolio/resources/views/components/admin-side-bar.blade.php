@@ -118,6 +118,12 @@
                     <span class="menu-item-label">Contact management</span>
                 </a>
             </li>
+            <li>
+                <a href="/admin/blogs">
+                    <span class="icon"><i class="mdi mdi-book-open-page-variant"></i></span>
+                    <span class="menu-item-label">Blog management</span>
+                </a>
+            </li>
         </ul>
     </div>
 </aside>

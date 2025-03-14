@@ -18,7 +18,7 @@
                     <div class="featured-content">
                         <h2>{{ blog.title }}</h2>
                         <p>Published by MyPortfolio Blog - {{ timeAgo(blog.created_at) }}</p>
-                        <p>{{ blog.content.slice(0, 100) }}...</p>
+                        <div v-html="blog.content"></div>
                         <button class="read-more" @click="goToBlog(blog.slug)">Keep reading</button>
                     </div>
                 </section>

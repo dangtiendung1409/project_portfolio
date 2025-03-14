@@ -80,4 +80,19 @@ Route::get('/contact', [\App\Http\Controllers\Admin\contactController::class, 'i
 Route::get('/admin/contact/send/{id}', [\App\Http\Controllers\Admin\contactController::class, 'showSendForm'])
     ->name('admin.contact.send');
 Route::post('/admin/contact/send/{id}', [\App\Http\Controllers\Admin\contactController::class, 'sendContact']);
+
+
+//blog management
+Route::get('/blogs', [\App\Http\Controllers\Admin\blogController::class, 'index'])
+    ->name('admin.blogs.index');
+Route::get('/blogs/create', [\App\Http\Controllers\Admin\blogController::class, 'create'])
+    ->name('admin.blogs.create');
+Route::post('/blogs/store', [\App\Http\Controllers\Admin\blogController::class, 'store'])
+    ->name('admin.blogs.store');
+Route::get('/blogs/edit/{id}', [\App\Http\Controllers\Admin\blogController::class, 'edit'])
+    ->name('admin.blogs.edit');
+Route::post('/blogs/update/{id}', [\App\Http\Controllers\Admin\blogController::class, 'update'])
+    ->name('admin.blogs.update');
+Route::post('/blogs/delete/{id}', [\App\Http\Controllers\Admin\blogController::class, 'destroy'])
+    ->name('admin.blogs.destroy');
 });

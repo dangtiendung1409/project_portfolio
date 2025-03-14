@@ -40,7 +40,7 @@ class BlogSeeder extends Seeder
                 'slug'        => Str::slug($title) . '-' . time(),
                 'content'     => fake()->paragraphs(rand(5, 10), true),
                 'cover_image' => 'images/covers/covers_' . rand(0, 19) . '.jpeg',
-                'images'      => 'images/photos/image-' . rand(1, 200) . '.jpeg',
+                'image'      => 'images/photos/image-' . rand(1, 200) . '.jpeg',
                 'created_at'  => Carbon::now(), // Thời gian hiện tại
                 'updated_at'  => Carbon::now(),
             ]);
@@ -54,7 +54,7 @@ class BlogSeeder extends Seeder
                 'slug'        => Str::slug($title) . '-' . time(),
                 'content'     => fake()->paragraphs(rand(5, 10), true),
                 'cover_image' => 'images/covers/covers_' . rand(0, 19) . '.jpeg',
-                'images'      => 'images/photos/image-' . rand(1, 200) . '.jpeg',
+                'image'      => 'images/photos/image-' . rand(1, 200) . '.jpeg',
                 'created_at'  => Carbon::now()->subDays(7), // 7 ngày trước
                 'updated_at'  => Carbon::now()->subDays(7),
             ]);

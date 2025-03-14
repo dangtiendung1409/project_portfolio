@@ -16,16 +16,9 @@ class Blog extends Model
         'slug',
         'content',
         'cover_image',
-        'images',
+        'image', // Sửa từ 'images' thành 'image' để khớp với controller
     ];
 
-    protected $casts = [
-        'images' => 'array', // Ép kiểu JSON thành array
-    ];
-
-    /**
-     * Tự động tạo slug từ title nếu chưa có
-     */
     protected static function boot()
     {
         parent::boot();
@@ -37,9 +30,6 @@ class Blog extends Model
         });
     }
 
-    /**
-     * Quan hệ với User (tác giả)
-     */
     public function author()
     {
         return $this->belongsTo(User::class, 'author_id');

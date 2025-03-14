@@ -17,12 +17,10 @@
                     <p class="blog-text">
                         Photography often emphasizes the rule of thirds as a foundational guideline for composition, helping photographers create balanced and aesthetically pleasing images. However, breaking this rule can lead to more dynamic, thought-provoking, and innovative photographs.
                     </p>
-                    <img :src="'/' + blogDetails.images" alt="Photography example" class="blog-image" />
+                    <img :src="'/' + blogDetails.image" alt="Photography example" class="blog-image" />
 
                     <h3 class="blog-subtitle">Understanding the rule of thirds</h3>
-                    <p class="blog-text">
-                        {{ blogDetails.content }}
-                    </p>
+                    <p class="blog-text" v-html="blogDetails.content"></p>
 
                     <h3 class="blog-subtitle">Why break the rule?</h3>
                     <p class="blog-text">
