@@ -1,0 +1,27 @@
+2024-11-25T10:26:19.016Z [intellij.services.AIInitializeManager.initializeAI] INFO AI state ENABLED
+2024-11-25T10:26:19.034Z [intellij.services.AIInitializeManager.initializeAI] INFO is toolwindow active false, is info toolwindow active false
+2024-11-25T10:26:25.092Z [intellij.services.AIInitializeManager.initializeAI] INFO AI state ENABLED
+2024-11-25T10:26:25.114Z [intellij.services.AIInitializeManager.initializeAI] INFO is toolwindow active true, is info toolwindow active true
+2024-11-25T10:26:25.121Z [ctureModificationListener$Companion.initForProject] INFO ProjectStructureModificationListener is init for project project_portfolio
+2024-11-25T10:26:25.123Z [ojectContextInitializer.createInfrastructureFacade] INFO Found port: 49725
+2024-11-25T10:26:25.172Z [itializeManager$initializeAnalyzer$1.invokeSuspend] WARN java.io.IOException: Cannot run program "/Library/Application-Inspector-Analyzer/infr": error=2, No such file or directory
+	at java.base/java.lang.ProcessBuilder.start(ProcessBuilder.java:1143)
+	at java.base/java.lang.ProcessBuilder.start(ProcessBuilder.java:1073)
+	at expect.ExpectProcessManager.run(ExpectProcessManager.kt:45)
+	at services.InfrastructureClientFacade.start(InfrastructureClientFacade.kt:72)
+	at com.ptsecurity.aiintellij.services.PluginInfrastructureInitializer.initializeInfrastructureInstance(PluginInfrastructureInitializer.kt:23)
+	at com.ptsecurity.aiintellij.services.ProjectContextInitializer.initializeProjectContext(ProjectContextInitializer.kt:44)
+	at com.ptsecurity.aiintellij.services.AIInitializeManager$initializeAnalyzer$1.invokeSuspend(AIInitializeManager.kt:154)
+	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:33)
+	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:106)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:571)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:750)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:678)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:665)
+Caused by: java.io.IOException: error=2, No such file or directory
+	at java.base/java.lang.ProcessImpl.forkAndExec(Native Method)
+	at java.base/java.lang.ProcessImpl.<init>(ProcessImpl.java:314)
+	at java.base/java.lang.ProcessImpl.start(ProcessImpl.java:244)
+	at java.base/java.lang.ProcessBuilder.start(ProcessBuilder.java:1110)
+	... 12 more
+
