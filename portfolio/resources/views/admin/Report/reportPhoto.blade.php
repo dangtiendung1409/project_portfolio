@@ -4,7 +4,7 @@
         <div class="flex flex-col md:flex-row items-center justify-between space-y-6 md:space-y-0">
             <ul>
                 <li>Admin</li>
-                <li>List of reports</li>
+                <li>List of report photo</li>
             </ul>
             <a href="https://justboil.me/"  target="_blank" class="button blue">
                 <span class="icon"><i class="mdi mdi-credit-card-outline"></i></span>
@@ -28,7 +28,7 @@
             @endif
         </div>
     @endif
-    <form style="display: flex; align-items: center; border-radius: 5px; margin-top: 10px; flex-wrap: wrap;" action="{{url('admin/reportPending')}}" method="get">
+    <form style="display: flex; align-items: center; border-radius: 5px; margin-top: 10px; flex-wrap: wrap;" action="{{url('admin/reports/photo')}}" method="get">
         <!-- Lọc theo name violator -->
         <div class="input-group input-group-sm" style="margin-right: 5px; margin-bottom: 10px;">
             <input class="form-control" type="text" name="violator_name" placeholder="Violator Name" style=" margin-left:22px; height: 45px; font-size: 0.765625rem; background-color: #F1F1F1; border-radius: 5px; width: 120px;" />
@@ -58,7 +58,6 @@
                 <option value="">Select Action</option>
                 <option value="none">None</option>
                 <option value="removed">Removed</option>
-                <option value="warning">Warning</option>
                 <option value="no violation">No Violation</option>
             </select>
         </div>
@@ -93,7 +92,7 @@
             <div class="card-content">
                 @if($reports->isEmpty())
                     <div class="notification is-warning" style="text-align: center; color: red; font-size: 20px;">
-                        There are no reports
+                        There are no reports photo
                     </div>
                 @else
                 <table>
@@ -105,7 +104,6 @@
                                 <span class="check"></span>
                             </label>
                         </th>
-                        <th>id</th>
                         <th>Photo id</th>
                         <th>Image</th>
                         <th>Reporter name</th>
@@ -125,9 +123,7 @@
                                     <span class="check"></span>
                                 </label>
                             </td>
-                            <td>{{ $report->id }}</td>
                             <td>{{ $report->photo_id }}</td>
-
                             <!-- Kiểm tra xem $report->photoImage có tồn tại hay không trước khi hiển thị -->
                             <td>
                                 @if($report->photo && $report->photo->image_url)
@@ -146,8 +142,6 @@
                                     <span style="color: black;">{{ $report->action_taken }}</span>
                                 @elseif ($report->action_taken == 'removed')
                                     <span style="color: red;">{{ $report->action_taken }}</span>
-                                @elseif($report->action_taken == 'warning')
-                                    <span style="color: orange;">{{ $report->action_taken }}</span>
                                 @elseif($report->action_taken == 'no violation')
                                     <span style="color: green;">{{ $report->action_taken }}</span>
                                 @else
@@ -165,14 +159,6 @@
                                                 Remove
                                             </button>
                                         </form>
-                                        <form action="{{ route('admin.report.updateStatus', ['id' => $report->id, 'action' => 'warning']) }}" method="POST" onsubmit="return confirm('Are you sure you want to warn this user?');">
-                                            @csrf
-                                            <button class="button small warning-button" type="submit">
-                                                <span class="icon"><i class="mdi mdi-alert-circle"></i></span>
-                                                Warning
-                                            </button>
-                                        </form>
-
                                         <!-- Nút No Violation -->
                                         <form action="{{ route('admin.report.updateStatus', ['id' => $report->id, 'action' => 'no violation']) }}" method="POST" onsubmit="return confirm('Are you sure this report has no violation?');">
                                             @csrf

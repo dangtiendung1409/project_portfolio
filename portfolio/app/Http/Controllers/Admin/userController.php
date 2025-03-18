@@ -68,22 +68,20 @@ class userController extends Controller
 
         return redirect()->back();  // Chuyển hướng về trang trước
     }
-    public function getUserPhotos($id,Request $request)
+    public function getUserPhotos($id, Request $request)
     {
         $size = $request->input('size', 10);
+
         $photos = Photo::where('user_id', $id)
-            ->whereHas('images', function ($query) {
-                $query->where('photo_status', 'approved');
-            })
-            ->with(['images' => function ($query) {
-                $query->where('photo_status', 'approved');
-            }])
+            ->where('photo_status', 'approved')
+            ->with('category') // Lấy thông tin category
             ->paginate($size);
 
         $user = User::findOrFail($id);
-        // Trả về view hiển thị ảnh
-        return view('admin/User.userPhotos', compact('photos','user'));
+
+        return view('admin.User.userPhotos', compact('photos', 'user'));
     }
+
     public function getUserGalleries($id,Request $request)
     {
         $size = $request->input('size', 10);
@@ -92,12 +90,17 @@ class userController extends Controller
         // Trả về view hiển thị ảnh
         return view('admin/User.galleries',compact('galleries','user'));
     }
-    public function getGalleryPhotos($id,Request $request)
+    public function getGalleryPhotos($id, Request $request)
     {
         $size = $request->input('size', 10);
-        $gallery = Gallery::with('photoImages')->findOrFail($id);
 
-        $photos = $gallery->photoImages()->paginate($size);
+        // Lấy thông tin gallery và load danh sách ảnh
+        $gallery = Gallery::with(['photo' => function ($query) {
+            $query->where('photo_status', 'approved'); // Lấy ảnh đã được duyệt
+        }])->findOrFail($id);
+
+        // Phân trang ảnh trong gallery
+        $photos = $gallery->photo()->where('photo_status', 'approved')->paginate($size);
 
         return view('admin/User.galleryPhotos', compact('gallery', 'photos'));
     }

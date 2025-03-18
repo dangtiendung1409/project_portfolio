@@ -49,6 +49,7 @@
                         <th>galleries name</th>
                         <th>galleries description</th>
                         <th>creation date</th>
+                        <th>visibility</th>
                         <th></th>
                     </tr>
                     </thead>
@@ -64,6 +65,9 @@
                         <td>{{$galleriesUser->galleries_name}}</td>
                         <td>{{$galleriesUser->galleries_description}}</td>
                         <td>{{ date('d-m-Y', strtotime($galleriesUser->creation_date)) }}</td>
+                        <td class="{{ $galleriesUser->visibility == 1 ? 'text-red-500' : 'text-green-500' }}">
+                            {{ $galleriesUser->visibility == 1 ? 'Private' : 'Public' }}
+                        </td>
                         <td class="actions-cell">
                             <div class="buttons right nowrap">
                                 <a href="{{ url('/admin/users/galleries/'. 'photos/' .$galleriesUser->id) }}" class="button small green">

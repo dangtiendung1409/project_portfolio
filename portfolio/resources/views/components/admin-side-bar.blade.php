@@ -78,17 +78,24 @@
                 </a>
                 <ul>
                     <li>
-                        <a href="/admin/reportPending">
-                            <span class="icon"><i class="mdi mdi-alert"></i></span>
-                            <span>Report pending</span>
+                        <a href="/admin/reports/photo">
+                            <span class="icon"><i class="mdi mdi-image-broken"></i></span>
+                            <span>Report photo</span>
                         </a>
                     </li>
                     <li>
-                        <a href="/admin/reportResolved">
-                            <span class="icon"><i class="mdi mdi-check-circle"></i></span>
-                            <span>Report resolved</span>
+                        <a href="/admin/reports/comment">
+                            <span class="icon"><i class="mdi mdi-comment-alert"></i></span>
+                            <span>Report comment</span>
                         </a>
                     </li>
+                    <li>
+                        <a href="/admin/reports/gallery">
+                            <span class="icon"><i class="mdi mdi-folder-alert"></i></span>
+                            <span>Report gallery</span>
+                        </a>
+                    </li>
+
                 </ul>
             </li>
             <li>

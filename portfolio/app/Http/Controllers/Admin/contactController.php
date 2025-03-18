@@ -21,7 +21,7 @@ class contactController extends Controller
         $successMessage = Session::get('successMessage');
         $errorMessage = Session::get('errorMessage');
         $contact = Contact::findOrFail($id);
-        return view("admin.Contact.sendContact", compact('contact'));
+        return view("admin.Contact.sendContact", compact('contact','errorMessage','successMessage'));
     }
 
     // Xử lý gửi mail và cập nhật trạng thái

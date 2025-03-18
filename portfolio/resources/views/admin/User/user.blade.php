@@ -84,7 +84,6 @@
                         <th>Profile Picture</th>
                         <th>Bio</th>
                         <th>Join Date</th>
-                        <th>Status</th>
                         <th>Followers</th>
                         <th>Total Photos</th>
                         <th>Violation count</th>
@@ -113,13 +112,6 @@
                         </td>
                         <td>{{ $user->bio ?? 'No Bio' }}</td>
                         <td>{{ date('d-m-Y', strtotime($user->join_date)) }}</td>
-                        <td>
-                            @if($user->is_active)
-                                <span style="color: green;">Active</span>
-                            @else
-                                <span style="color: red;">Inactive</span>
-                            @endif
-                        </td>
                        <td> {{ $user->followers()->count() }}</td>
                         <td>{{ $user->photos_count }}</td>
                         <td>{{$user->violation_count}}</td>
@@ -141,12 +133,52 @@
                     <div class="table-pagination">
                         <div class="flex items-center justify-between">
                             <div class="buttons">
-                                @foreach ($users->getUrlRange(1, $users->lastPage()) as $page => $url)
-                                    <a href="{{ $url }}" class="button {{ $users->currentPage() == $page ? 'active' : '' }}">
-                                        {{ $page }}
-                                    </a>
-                                @endforeach
+                                <!-- Link tới trang đầu tiên -->
+                                <a href="{{ $users->url(1) }}" class="button {{ ($users->currentPage() == 1 && $users->lastPage() > 1) ? ' disabled' : '' }}">
+                                    <i class="mdi mdi-arrow-left-bold"></i>
+                                </a>
+
+                                <!-- Link tới trang trước -->
+                                <a href="{{ $users->previousPageUrl() }}" class="button {{ ($users->currentPage() == 1) ? ' disabled' : '' }}">
+                                    <i class="mdi mdi-chevron-left"></i>
+                                </a>
+
+                                @if ($users->lastPage() > 1)
+                                    <!-- Hiển thị trang đầu tiên -->
+                                    <a href="{{ $users->url(1) }}" class="button {{ ($users->currentPage() == 1) ? ' active' : '' }}">1</a>
+
+                                    @if ($users->currentPage() > 3)
+                                        <span class="button disabled">...</span>
+                                    @endif
+
+                                    <!-- Hiển thị các liên kết trang -->
+                                    @for ($i = max(2, $users->currentPage() - 1); $i <= min($users->currentPage() + 1, $users->lastPage() - 1); $i++)
+                                        <a href="{{ $users->url($i) }}" class="button {{ ($users->currentPage() == $i) ? ' active' : '' }}">{{ $i }}</a>
+                                    @endfor
+
+                                    @if ($users->currentPage() < $users->lastPage() - 2)
+                                        <span class="button disabled">...</span>
+                                    @endif
+
+                                    <!-- Hiển thị trang cuối cùng -->
+                                    <a href="{{ $users->url($users->lastPage()) }}" class="button {{ ($users->currentPage() == $users->lastPage()) ? ' active' : '' }}">{{ $users->lastPage() }}</a>
+                                @else
+                                    <!-- Nếu chỉ có 1 trang thì hiển thị trang đầu tiên -->
+                                    <a href="{{ $users->url(1) }}" class="button active">1</a>
+                                @endif
+
+                                <!-- Link tới trang kế tiếp -->
+                                <a href="{{ $users->nextPageUrl() }}" class="button {{ ($users->currentPage() == $users->lastPage()) ? ' disabled' : '' }}">
+                                    <i class="mdi mdi-chevron-right"></i>
+                                </a>
+
+                                <!-- Link tới trang cuối cùng -->
+                                <a href="{{ $users->url($users->lastPage()) }}" class="button {{ ($users->currentPage() == $users->lastPage()) ? ' disabled' : '' }}">
+                                    <i class="mdi mdi-arrow-right-bold"></i>
+                                </a>
                             </div>
+
+                            <!-- Hiển thị thông tin phân trang -->
                             <small>Page {{ $users->currentPage() }} of {{ $users->lastPage() }}</small>
                         </div>
                     </div>
