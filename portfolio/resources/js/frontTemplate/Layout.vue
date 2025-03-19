@@ -159,8 +159,8 @@ export default {
                 await notificationStore.markNotificationAsRead(notification.id);
             }
 
-            // Nếu type = 2 (follow), chỉ đánh dấu đã đọc, không chuyển trang
-            if (notification.type === 2) {
+            // Nếu type = 2 (follow) hoặc type = 4, chỉ đánh dấu đã đọc, không chuyển trang
+            if (notification.type === 2 || notification.type === 4) {
                 return;
             }
 
