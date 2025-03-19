@@ -22,7 +22,7 @@ class blogController extends Controller
     {
         $successMessage = Session::get('successMessage');
         $errorMessage = Session::get('errorMessage');
-        return view('admin.BLog.addBlog',compact('successMessage', 'errorMessage'));
+        return view('admin.Blog.addBlog',compact('successMessage', 'errorMessage'));
     }
 
     public function store(Request $request)
