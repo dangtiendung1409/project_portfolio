@@ -41,11 +41,11 @@ Route::post('/category/update/{id}', [\App\Http\Controllers\Admin\categoryContro
 Route::post('/category/delete/{id}', [\App\Http\Controllers\Admin\categoryController::class, 'destroy'])->name('category.destroy');
 
 //report management
-Route::get('/reports/photo', [\App\Http\Controllers\Admin\ReportController::class, 'getPhotoReports']);
-Route::get('/reports/comment', [\App\Http\Controllers\Admin\ReportController::class, 'getCommentReports']);
-Route::get('/reports/gallery', [\App\Http\Controllers\Admin\ReportController::class, 'getGalleryReports']);
+Route::get('/reports/photo', [\App\Http\Controllers\Admin\reportController::class, 'getPhotoReports']);
+Route::get('/reports/comment', [\App\Http\Controllers\Admin\reportController::class, 'getCommentReports']);
+Route::get('/reports/gallery', [\App\Http\Controllers\Admin\reportController::class, 'getGalleryReports']);
 
-Route::post('/report/updateStatus/{id}/{action}', [\App\Http\Controllers\Admin\ReportController::class, 'updateStatus'])
+Route::post('/report/updateStatus/{id}/{action}', [\App\Http\Controllers\Admin\reportController::class, 'updateStatus'])
      ->name('admin.report.updateStatus');
 
 // user management
