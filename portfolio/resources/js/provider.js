@@ -14,6 +14,7 @@ const baseUrl = 'http://127.0.0.1:8000/api';
 
           // like
           getLikedPhotos: `${baseUrl}/liked-photos`,
+          getLikedGalleries: `${baseUrl}/liked-galleries`,
           likePhoto: `${baseUrl}/like-photo`,
           deleteLike: (like_id) => `${baseUrl}/like/${like_id}`,
           unlikePhoto: `${baseUrl}/unlike-photo`,

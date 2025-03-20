@@ -426,6 +426,7 @@ export default {
             if (tokenFromLocalStorage) {
                 const likeStore = useLikeStore();
                 await likeStore.fetchLikedPhotos();
+                await likeStore.fetchLikedGalleries();
                 this.updateLikedState();
 
                 // Fetch danh sách người dùng đã follow nếu đã đăng nhập
@@ -436,6 +437,8 @@ export default {
             await this.fetchPhotoLikes(token);
             await this.fetchSimilarPhotos(token);
             await this.fetchRelatedGalleries(token);
+
+            this.updateLikedGalleriesState();
 
             // 2. Fetch danh sách user bị block
             const blockStore = useBlockStore();
@@ -502,26 +505,21 @@ export default {
         },
         async fetchRelatedGalleries(token) {
             try {
-                const authToken = localStorage.getItem("token"); // Lấy token nếu có
-
+                const authToken = localStorage.getItem("token");
                 let headers = {};
                 if (authToken) {
-                    headers = {
-                        Authorization: `Bearer ${authToken}`,
-                    };
+                    headers = { Authorization: `Bearer ${authToken}` };
                 }
 
                 const response = await axios.get(getUrlList().getRelatedGalleries(token), { headers });
 
                 if (response.data && Array.isArray(response.data)) {
-                    const likeStore = useLikeStore();
-                    this.relatedGalleries = response.data.map(gallery => ({
-                        ...gallery,
-                        liked: likeStore.likedGalleries.includes(gallery.id)
-                    }));
+                    this.relatedGalleries = response.data;
+                    this.updateLikedGalleriesState(); // Cập nhật trạng thái liked sau khi gán dữ liệu
+                    console.log('Related Galleries:', this.relatedGalleries); // Debug
                 } else {
                     this.relatedGalleries = [];
-                    console.error("No related galleries found or invalid data:", response.data.message);
+                    console.error("No related galleries found or invalid data:", response.data?.message);
                 }
             } catch (error) {
                 console.error("Error fetching related galleries:", error);
@@ -533,7 +531,7 @@ export default {
 
             const likeStore = useLikeStore();
             const galleryId = gallery.id;
-            const galleryUserId = gallery.user.id;
+            const galleryUserId = gallery.user?.id;
 
             try {
                 if (gallery.liked) {
@@ -543,8 +541,13 @@ export default {
                     await likeStore.likeGallery(galleryId, galleryUserId);
                     gallery.liked = true;
                 }
+                this.updateLikedGalleriesState(); // Cập nhật lại trạng thái cho tất cả galleries
             } catch (error) {
                 console.error('Failed to toggle like for gallery:', error);
+                notification.error({
+                    message: 'Error',
+                    description: 'Failed to toggle like. Please try again.',
+                });
             }
         },
         closeLikesPopup() {
@@ -711,6 +714,14 @@ export default {
             if (this.similarPhotos.length > 0) {
                 this.similarPhotos.forEach(photo => {
                     photo.liked = likeStore.likedPhotos.includes(photo.id);
+                });
+            }
+        },
+        updateLikedGalleriesState() {
+            const likeStore = useLikeStore();
+            if (this.relatedGalleries.length > 0) {
+                this.relatedGalleries.forEach(gallery => {
+                    gallery.liked = likeStore.likedGalleries.includes(gallery.id);
                 });
             }
         },
@@ -1006,7 +1017,9 @@ export default {
     transform: translateY(10px);
     transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out, transform 0.3s ease-in-out;
 }
-
+.galleries-grid{
+    gap:0px;
+}
 /* Khi hover vào photo-card, hiển thị photo-info */
 .photo-card:hover .photo-info {
     opacity: 1;

@@ -101,12 +101,14 @@ export default {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
     gap: 1rem;
+    max-height: 900px; /* Giới hạn chiều cao */
+    overflow-y: auto; /* Cho phép cuộn dọc */
 }
 
 .gallery-card {
     display: flex;
     flex-direction: column;
-    height: 100%;
+    height: 400px;
     box-sizing: border-box;
     width: 100%;
     padding: 15px;

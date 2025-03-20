@@ -56,7 +56,6 @@ export default {
 }
 
 .user-name2 {
-    margin-left: -45px;
     max-width: 120px;
     overflow: hidden;
     white-space: nowrap;

@@ -210,7 +210,7 @@ export default {
         await userStore.fetchUserData();
 
         const likeStore = useLikeStore();
-        await likeStore.fetchLikedPhotos();
+        await likeStore.fetchLikedGalleries();
         this.updateLikedState();
         this.updateLikedGalleriesState();
         this.updateFollowingStateForTopUsers();

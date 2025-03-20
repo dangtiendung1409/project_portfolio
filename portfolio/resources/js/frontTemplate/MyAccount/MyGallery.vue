@@ -25,10 +25,9 @@
                             </div>
                             <div class="sort-options">
                                 <label for="sort-select">Sort by:</label>
-                                <select id="sort-select">
+                                <select id="sort-select" v-model="sortBy" @change="sortGalleries">
                                     <option value="date">Date</option>
                                     <option value="name">Name</option>
-                                    <option value="size">Size</option>
                                 </select>
                             </div>
                         </div>
@@ -90,6 +89,7 @@ export default {
             galleryToDelete: null,
             activeTab: 'all',
             searchQuery: '',
+            sortBy: 'date',
         };
     },
     computed: {
@@ -110,6 +110,12 @@ export default {
                     gallery.galleries_name.toLowerCase().includes(searchQueryLower) ||
                     gallery.galleries_description.toLowerCase().includes(searchQueryLower)
                 );
+            }
+            // Sắp xếp theo tiêu chí được chọn
+            if (this.sortBy === 'date') {
+                filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)); // Mới nhất trước
+            } else if (this.sortBy === 'name') {
+                filtered.sort((a, b) => a.galleries_name.localeCompare(b.galleries_name)); // Sắp xếp theo tên
             }
             return filtered;
         },
@@ -192,6 +198,8 @@ export default {
             }
         },
         searchGalleries() {
+        },
+        sortGalleries() {
         }
     }
 };

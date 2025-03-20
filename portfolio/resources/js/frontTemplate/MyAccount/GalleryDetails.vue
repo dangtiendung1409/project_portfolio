@@ -371,12 +371,11 @@ main {
     color: white;
     display: flex;
     align-items: center;
-    padding: 10px;
+    padding: 5px;
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s, visibility 0.3s;
 }
-
 .photo-details .user-avatar {
     width: 30px;
     height: 30px;

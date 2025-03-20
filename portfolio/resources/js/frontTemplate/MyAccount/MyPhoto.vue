@@ -25,10 +25,9 @@
                             </div>
                             <div class="sort-options">
                                 <label for="sort-select">Sort by:</label>
-                                <select id="sort-select">
+                                <select id="sort-select" v-model="sortBy" @change="sortPhotos">
                                     <option value="date">Date</option>
                                     <option value="name">Name</option>
-                                    <option value="size">Size</option>
                                 </select>
                             </div>
                         </div>
@@ -105,6 +104,7 @@ export default {
             selectedPhotoId: null,
             activeTab: 'all',
             searchQuery: '',
+            sortBy: 'date',
         };
     },
     mounted() {
@@ -127,6 +127,12 @@ export default {
                     photo.category.category_name.toLowerCase().includes(searchQueryLower) ||
                     photo.tags.some(tag => tag.tag_name.toLowerCase().includes(searchQueryLower))
                 );
+            }
+            // Sắp xếp theo tiêu chí được chọn
+            if (this.sortBy === 'date') {
+                filtered.sort((a, b) => new Date(b.upload_date) - new Date(a.upload_date)); // Mới nhất trước
+            } else if (this.sortBy === 'name') {
+                filtered.sort((a, b) => a.title.localeCompare(b.title)); // Theo bảng chữ cái
             }
             return filtered;
         },
@@ -222,6 +228,8 @@ export default {
             this.$router.push({ name: 'AddPhotos' });
         },
         searchPhotos() {
+        },
+        sortPhotos() {
         }
     }
 }

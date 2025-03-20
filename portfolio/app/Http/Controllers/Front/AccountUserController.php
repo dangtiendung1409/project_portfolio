@@ -157,46 +157,106 @@ class AccountUserController extends Controller
         return response()->json(['message' => 'Photo updated successfully'], 200);
     }
 
-    // like photo
+    // lấy dữ liệu like photo
     public function getLikedPhotos(Request $request)
     {
         $user = Auth::user();
+
+        // Kiểm tra nếu người dùng chưa đăng nhập
+        if (!$user) {
+            return response()->json(['message' => 'User not authenticated'], 401);
+        }
 
         // Lấy danh sách ID của những người bị chặn bởi người dùng hiện tại
         $blockedUserIds = Block::where('blocker_id', $user->id)
             ->pluck('blocked_id')
             ->toArray();
 
-        // Lấy tất cả lượt thích của người dùng hiện tại
-        $likedItems = Like::where('user_id', $user->id)
-            ->with([
-                'photo.user',
-                'gallery.user',
-                'gallery.photo'
-            ])
+        // Lấy danh sách ảnh đã thích, có kiểm tra user bị chặn
+        $likedPhotos = Like::where('user_id', $user->id)
+            ->whereNotNull('photo_id')
+            ->with(['photo.user'])
             ->orderBy('like_date', 'desc')
-            ->get();
-
-        // Lọc các lượt thích để loại bỏ những lượt thích liên quan đến người bị chặn
-        $filteredLikedItems = $likedItems->filter(function ($like) use ($blockedUserIds) {
-            // Nếu là lượt thích ảnh (photo_id không null)
-            if ($like->photo_id) {
-                // Kiểm tra xem người sở hữu ảnh có bị chặn không
-                return !in_array($like->photo->user_id, $blockedUserIds);
-            }
-            // Nếu là lượt thích gallery (gallery_id không null)
-            if ($like->gallery_id) {
-                // Kiểm tra xem người sở hữu gallery có bị chặn không
-                return !in_array($like->gallery->user_id, $blockedUserIds);
-            }
-            // Nếu không phải ảnh hoặc gallery (trường hợp không hợp lệ), loại bỏ
-            return false;
-        });
+            ->get()
+            ->filter(function ($like) use ($blockedUserIds) {
+                return $like->photo && $like->photo->user && !in_array($like->photo->user->id, $blockedUserIds);
+            });
 
         return response()->json([
-            'data' => $filteredLikedItems->values() // Sử dụng values() để reset lại key của mảng sau khi lọc
+            'data' => $likedPhotos
         ]);
     }
+
+    // lấy dữ liệu like gallery
+    public function getLikedGalleries(Request $request)
+    {
+        $user = Auth::user();
+
+        // Kiểm tra nếu người dùng chưa đăng nhập
+        if (!$user) {
+            return response()->json(['message' => 'User not authenticated'], 401);
+        }
+
+        // Lấy danh sách ID của những người bị chặn bởi người dùng hiện tại
+        $blockedUserIds = Block::where('blocker_id', $user->id)
+            ->pluck('blocked_id')
+            ->toArray();
+
+        // Lấy danh sách gallery đã thích, có kiểm tra user bị chặn
+        $likedGalleries = Like::where('user_id', $user->id)
+            ->whereNotNull('gallery_id')
+            ->with(['gallery.photo', 'gallery.user'])
+            ->orderBy('like_date', 'desc')
+            ->get()
+            ->filter(function ($like) use ($blockedUserIds) {
+                return $like->gallery && $like->gallery->user && !in_array($like->gallery->user->id, $blockedUserIds);
+            })
+            ->values(); // Chuyển Collection thành mảng với chỉ số liên tục
+
+        return response()->json([
+            'data' => $likedGalleries
+        ]);
+    }
+
+
+//     lấy dữ liệu những ảnh và gallery đã like
+//    public function getLikedUser(Request $request)
+//    {
+//        $user = Auth::user();
+//
+//        // Kiểm tra nếu người dùng chưa đăng nhập
+//        if (!$user) {
+//            return response()->json(['message' => 'User not authenticated'], 401);
+//        }
+//
+//        // Lấy danh sách ID của những người bị chặn bởi người dùng hiện tại
+//        $blockedUserIds = Block::where('blocker_id', $user->id)
+//            ->pluck('blocked_id')
+//            ->toArray();
+//
+//        // Lấy tất cả lượt thích của người dùng hiện tại
+//        $likedItems = Like::where('user_id', $user->id)
+//            ->with([
+//                'photo.user',
+//                'gallery.user',
+//                'gallery.photo'
+//            ])
+//            ->orderBy('like_date', 'desc')
+//            ->get();
+//
+//        // Lọc các lượt thích để loại bỏ những lượt thích liên quan đến người bị chặn
+//        $filteredLikedItems = $likedItems->filter(function ($like) use ($blockedUserIds) {
+//            if ($like->photo_id && $like->photo && $like->photo->user) {
+//                return !in_array($like->photo->user->id, $blockedUserIds);
+//            }
+//            if ($like->gallery_id && $like->gallery && $like->gallery->user) {
+//                return !in_array($like->gallery->user->id, $blockedUserIds);
+//            }
+//            return false;
+//        });
+//
+//        return response()->json(['data' => $filteredLikedItems], 200);
+//    }
     public function deleteLike(Request $request, $like_id)
     {
         $user = Auth::user();

@@ -1,4 +1,4 @@
-
+// src/stores/likeStore.js
 import { defineStore } from 'pinia';
 import axios from 'axios';
 import getUrlList from '../provider';
@@ -16,19 +16,22 @@ export const useLikeStore = defineStore('likeStore', {
                         Authorization: `Bearer ${localStorage.getItem('token')}`
                     }
                 });
-                // Reset mảng likedPhotos và likedGalleries
-                this.likedPhotos = [];
-                this.likedGalleries = [];
-                response.data.data.forEach(like => {
-                    if (like.photo_id) {
-                        this.likedPhotos.push(like.photo_id);
-                    }
-                    if (like.gallery_id) {
-                        this.likedGalleries.push(like.gallery_id);
-                    }
-                });
+                this.likedPhotos = response.data.data.map(like => like.photo_id);
             } catch (error) {
                 console.error('Failed to fetch liked photos:', error.response.data);
+                throw error;
+            }
+        },
+        async fetchLikedGalleries() {
+            try {
+                const response = await axios.get(getUrlList().getLikedGalleries, {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                this.likedGalleries = response.data.data.map(like => like.gallery_id);
+            } catch (error) {
+                console.error('Failed to fetch liked galleries:', error.response?.data || error.message);
                 throw error;
             }
         },

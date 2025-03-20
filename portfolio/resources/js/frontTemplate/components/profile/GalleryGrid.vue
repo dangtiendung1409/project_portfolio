@@ -95,7 +95,8 @@ export default {
         },
 
     },
-    mounted() {
+    async mounted() {
+        await this.likeStore.fetchLikedGalleries();
         this.updateLikedState();
     },
     watch: {
@@ -112,27 +113,22 @@ export default {
             this.$router.push({ name: 'GalleryDetailsUser', params: { galleries_code } });
         },
         async toggleLikeGallery(gallery) {
-            // Kiểm tra đăng nhập
             if (!this.authStore.isLoggedIn) {
                 this.$router.push({ name: 'Login' });
                 return;
             }
             try {
                 if (gallery.liked) {
-                    // Nếu đã like, gọi API unlike gallery
                     await this.likeStore.unlikeGallery(gallery.id);
-                    gallery.liked = false;
                 } else {
-                    // Nếu chưa like, gọi API like gallery
                     await this.likeStore.likeGallery(gallery.id, gallery.user ? gallery.user.id : null);
-                    gallery.liked = true;
                 }
+                this.updateLikedState();
             } catch (error) {
                 console.error('Failed to toggle like on gallery:', error);
             }
         },
         updateLikedState() {
-            // Cập nhật trạng thái liked cho từng gallery dựa vào store.likedGalleries
             this.galleries.forEach(gallery => {
                 gallery.liked = this.likeStore.likedGalleries.includes(gallery.id);
             });
@@ -326,6 +322,9 @@ export default {
 .dropdown-content li:hover i {
     color: whitesmoke;
     background-color: #1890ff;
+}
+.fa-heart {
+    color: #aaa; /* Màu xám mặc định khi chưa like */
 }
 .icon-heart2 .fa-heart.liked {
     color: #ff5a5f; /* Màu khi đã like */

@@ -27,32 +27,24 @@
                             </div>
                         </header>
                         <div class="sort-select">
-                            <div class="show-options">
-                                <label for="show-select">Show:</label>
-                                <select id="show-select">
-                                    <option value="all">All</option>
-                                    <option value="favorites">Favorites</option>
-                                </select>
-                            </div>
                             <div class="sort-options">
                                 <label for="sort-select">Sort by:</label>
-                                <select id="sort-select">
+                                <select id="sort-select" v-model="sortBy">
                                     <option value="date">Date</option>
                                     <option value="name">Name</option>
-                                    <option value="size">Size</option>
                                 </select>
                             </div>
                         </div>
+
                         <PhotoLikeGrid
                             v-if="activeTab === 'photo'"
-                            :likedPhotos="likedPhotos"
+                            :likedPhotos="sortedLikedPhotos"
                             @delete-like="deleteLikePhoto"
                         />
 
-                        <!-- Nếu tab Gallery đang active -->
                         <GalleryLikeGrid
                             v-else-if="activeTab === 'gallery'"
-                            :likedGalleries="likedGalleries"
+                            :likedGalleries="sortedLikedGalleries"
                             @delete-like="deleteLikeGallery"
                         />
                     </main>
@@ -71,6 +63,7 @@ import Sidebar from './components/Sidebar.vue';
 import PhotoLikeGrid from './components/like/PhotoLikeGrid.vue';
 import GalleryLikeGrid from './components/like/GalleryLikeGrid.vue';
 import '@assets/css/account.css';
+import { useLikeStore } from "@/stores/likeStore";
 import { Modal, notification } from 'ant-design-vue';
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue';
 import { h } from 'vue';
@@ -85,35 +78,47 @@ export default {
     },
     data() {
         return {
+            activeTab: 'photo',
             likedPhotos: [],
             likedGalleries: [],
-            activeDropdown: null,
-            activeTab: 'photo',
-
+            sortBy: 'date',
         };
     },
     mounted() {
-        this.fetchLikedData();
+        this.fetchLikedPhotos();
+        this.fetchLikedGalleries();
     },
     computed: {
         headerSubtitle() {
-            if (this.activeTab === 'gallery') {
-                return `${this.likedGalleries.length} galleries`;
-            } else if (this.activeTab === 'photo') {
-                return `${this.likedPhotos.length} photos`;
-            } else {
-                if (this.likedGalleries.length > 0) {
-                    return `${this.likedGalleries.length} galleries`;
-                } else if (this.likedPhotos.length > 0) {
-                    return `${this.likedPhotos.length} photos`;
-                } else {
-                    return '';
-                }
+            return this.activeTab === 'gallery'
+                ? `${this.likedGalleries.length} galleries`
+                : `${this.likedPhotos.length} photos`;
+        },
+        sortedLikedPhotos() {
+            let sorted = [...this.likedPhotos];
+
+            if (this.sortBy === 'date') {
+                sorted.sort((a, b) => new Date(b.photoDate) - new Date(a.photoDate)); // Mới nhất trước
+            } else if (this.sortBy === 'name') {
+                sorted.sort((a, b) => a.userName.localeCompare(b.userName));
             }
+
+            return sorted;
+        },
+        sortedLikedGalleries() {
+            let sorted = [...this.likedGalleries];
+
+            if (this.sortBy === 'date') {
+                sorted.sort((a, b) => new Date(b.galleryDate) - new Date(a.galleryDate));
+            } else if (this.sortBy === 'name') {
+                sorted.sort((a, b) => a.galleriesName.localeCompare(b.galleriesName));
+            }
+
+            return sorted;
         }
     },
     methods: {
-        async fetchLikedData() {
+        async fetchLikedPhotos() {
             const token = localStorage.getItem('token');
             if (!token) {
                 console.error('Không tìm thấy token');
@@ -124,37 +129,67 @@ export default {
                     headers: { Authorization: `Bearer ${token}` },
                 });
 
-                this.likedPhotos = [];
-                this.likedGalleries = [];
-
-                response.data.data.forEach((like) => {
-                    if (like.photo_id) {
-                        this.likedPhotos.push({
-                            id: like.id,
-                            photoId: like.photo?.id || null,
-                            photoToken: like.photo?.photo_token || null,
-                            imageUrl: like.photo?.image_url || '/images/default-photo.png',
-                            userName: like.photo?.user?.username || 'abc',
-                            name: like.photo?.user?.name || 'Người dùng không xác định',
-                            userAvatar: like.photo?.user?.profile_picture ? `http://127.0.0.1:8000${like.photo?.user?.profile_picture}` : '/images/imageUserDefault.png',
-                        });
-                    } else if (like.gallery_id) {
-                        this.likedGalleries.push({
-                            id: like.id,
-                            galleryId: like.gallery?.id || null,
-                            galleriesName: like.gallery?.galleries_name || 'Không có tên',
-                            galleriesCode: like.gallery?.galleries_code || null,
-                            galleriesPhoto: like.gallery?.photo || [],
-                            username: like.gallery?.user?.username || 'Unknown',
-                            name: like.gallery?.user?.name || 'Unknown',
-                            userAvatar: like.gallery?.user?.profile_picture ? `http://127.0.0.1:8000${like.gallery?.user?.profile_picture}` : '/images/imageUserDefault.png',
-                        });
-                    }
+                this.likedPhotos = response.data.data.map(like => ({
+                    id: like.id,
+                    photoId: like.photo?.id || null,
+                    photoDate: like.photo?.upload_date || null,
+                    photoToken: like.photo?.photo_token || null,
+                    imageUrl: like.photo?.image_url || '/images/default-photo.png',
+                    userName: like.photo?.user?.username || 'abc',
+                    name: like.photo?.user?.name || 'Người dùng không xác định',
+                    userAvatar: like.photo?.user?.profile_picture
+                        ? `http://127.0.0.1:8000${like.photo?.user?.profile_picture}`
+                        : '/images/imageUserDefault.png',
+                }));
+            } catch (error) {
+                console.error('Lỗi khi lấy ảnh đã thích:', error);
+            }
+        },
+        async fetchLikedGalleries() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                console.error('Không tìm thấy token');
+                notification.error({
+                    message: 'Error',
+                    description: 'Token not found, please log in.',
+                });
+                return;
+            }
+            try {
+                const response = await axios.get(getUrlList().getLikedGalleries, {
+                    headers: { Authorization: `Bearer ${token}` },
                 });
 
-                console.log('Dữ liệu Liked Galleries:', this.likedGalleries);
+                // Kiểm tra nếu không phải mảng hoặc rỗng
+                if (!Array.isArray(response.data.data) || response.data.data.length === 0) {
+                    console.warn('Không có dữ liệu gallery hợp lệ:', response.data.data);
+                    this.likedGalleries = [];
+                    notification.warning({
+                        message: 'No Data',
+                        description: 'No liked galleries found.',
+                    });
+                    return;
+                }
+
+                this.likedGalleries = response.data.data.map(like => ({
+                    id: like.id,
+                    galleryId: like.gallery?.id || null,
+                    galleryDate: like.gallery?.created_at || null,
+                    galleriesName: like.gallery?.galleries_name || 'Không có tên',
+                    galleriesCode: like.gallery?.galleries_code || null,
+                    galleriesPhoto: like.gallery?.photo || [],
+                    username: like.gallery?.user?.username || 'Unknown',
+                    name: like.gallery?.user?.name || 'Unknown',
+                    userAvatar: like.gallery?.user?.profile_picture
+                        ? `http://127.0.0.1:8000${like.gallery?.user?.profile_picture}`
+                        : '/images/imageUserDefault.png',
+                }));
             } catch (error) {
-                console.error('Lỗi khi lấy dữ liệu liked:', error);
+                console.error('Lỗi khi lấy gallery đã thích:', error.response?.data || error);
+                notification.error({
+                    message: 'Error',
+                    description: 'Unable to load liked galleries. Please try again.',
+                });
             }
         },
         async deleteLikePhoto(like) {
@@ -193,7 +228,6 @@ export default {
             });
         },
         async deleteLikeGallery(like) {
-            // Sử dụng Modal.confirm để hỏi lại người dùng trước khi xoá
             Modal.confirm({
                 title: 'Are you sure you want to delete this like?',
                 icon: h(ExclamationCircleOutlined),
@@ -231,6 +265,7 @@ export default {
     },
 };
 </script>
+
 
 <style scoped>
 main {

@@ -42,26 +42,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <div class="sort-dropdown">
-                        <span @click="toggleSortDropdown">
-                            <strong>Sort ({{ selectedSort }})</strong>
-                            <i :class="['fas', showSortDropdown ? 'fa-chevron-up' : 'fa-chevron-down']"></i>
-                        </span>
-                        <div v-if="showSortDropdown" class="sort-dropdown-menu">
-                            <ul>
-                                <li @click="selectSort({ id: 1, name: 'Pulse' })">
-                                    <i class="fas fa-sort-amount-up"></i> Pulse
-                                </li>
-                                <li @click="selectSort({ id: 2, name: 'Latest' })">
-                                    <i class="fas fa-clock"></i> Latest
-                                </li>
-                                <li @click="selectSort({ id: 3, name: 'Popular' })">
-                                    <i class="fas fa-star"></i> Popular
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
                 </div>
 
                 <div v-if="images.length === 0" class="no-data">
@@ -355,10 +335,6 @@ export default {
                 this.fetchPhotos();
             });
             this.showFilterDropdown = false;
-        },
-        selectSort(sort) {
-            this.selectedSort = sort.name;
-            this.showSortDropdown = false;
         },
         toggleDropdown(id) {
             if (this.activeDropdown === id) {

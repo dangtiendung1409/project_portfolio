@@ -95,7 +95,8 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/change-password', [AccountUserController::class, 'changePassword']);
 
     // like
-    Route::get('/liked-photos', [AccountUserController::class, 'getLikedPhotos']);
+    Route::get('/liked-photos', [AccountUserController::class, 'getLikedPhotos']); // lấy dữ liệu like photo
+    Route::get('/liked-galleries', [AccountUserController::class, 'getLikedGalleries']); // lấy dữ liệu like gallery
     Route::delete('/like/{like_id}', [AccountUserController::class, 'deleteLike']);
     Route::post('/like-photo', [HomePageController::class, 'likePhoto']);
     Route::post('/unlike-photo', [HomePageController::class, 'unlikePhoto']);
