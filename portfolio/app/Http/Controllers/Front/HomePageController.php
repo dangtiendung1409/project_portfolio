@@ -98,18 +98,47 @@ class HomePageController extends Controller
             // Lấy danh sách user bị chặn
             $blockedUserIds = $currentUser->blockedUsers()->pluck('blocked_id');
 
-            // Lọc ảnh: loại bỏ ảnh của user bị chặn
-            $images = Photo::with(['category', 'user'])
+            // Lọc ảnh: loại bỏ ảnh của user bị chặn, chỉ lấy ảnh approved và public, sắp xếp theo upload_date mới nhất
+            $images = Photo::with(['user' => function ($query) {
+                $query->select('id', 'username', 'name', 'profile_picture');
+            }])
                 ->whereNotIn('user_id', $blockedUserIds)
+                ->where('photo_status', 'approved')
+                ->where('privacy_status', 0)
+                ->select('id', 'upload_date', 'image_url', 'photo_token', 'user_id')
+                ->orderBy('upload_date', 'desc')
                 ->get();
         } catch (\Exception $e) {
-            // Nếu không có token, lấy tất cả ảnh
-            $images = Photo::with(['category', 'user'])->get();
+            // Nếu không có token, lấy tất cả ảnh approved và public, sắp xếp theo upload_date mới nhất
+            $images = Photo::with(['user' => function ($query) {
+                $query->select('id', 'username', 'name', 'profile_picture');
+            }])
+                ->where('photo_status', 'approved')
+                ->where('privacy_status', 0)
+                ->select('id', 'upload_date', 'image_url', 'photo_token', 'user_id')
+                ->orderBy('upload_date', 'desc')
+                ->get();
         }
 
-        return response()->json($images);
-    }
+        // Map qua collection để định dạng response
+        $filteredImages = $images->map(function ($image) {
+            return [
+                'id' => $image->id,
+                'upload_date' => $image->upload_date,
+                'image_url' => $image->image_url,
+                'photo_token' => $image->photo_token,
+                'user_id' => $image->user_id,
+                'user' => [
+                    'id' => $image->user->id,
+                    'username' => $image->user->username,
+                    'name' => $image->user->name,
+                    'profile_picture' => $image->user->profile_picture,
+                ],
+            ];
+        });
 
+        return response()->json($filteredImages);
+    }
     public function getFollows(Request $request)
     {
         try {
