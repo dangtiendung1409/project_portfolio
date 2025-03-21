@@ -34,7 +34,7 @@ class HomePageController extends Controller
             'photos.*.image' => 'required|file|mimes:jpeg,png,jpg,gif|max:5120', // Validate file ảnh
             'photos.*.category_id' => 'required|exists:categories,id',
             'photos.*.privacy_status' => 'required|string',
-            'photos.*.tags' => 'nullable|string', // Thêm tags vào validation
+            'photos.*.tags' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -43,35 +43,38 @@ class HomePageController extends Controller
 
         $user = Auth::user();
         $photosData = $request->input('photos');
-        $currentDate = Carbon::now(); // Lấy ngày hiện tại
+        $currentDate = Carbon::now();
 
         foreach ($photosData as $index => $photoData) {
             $photoData['user_id'] = $user->id;
-            $photoData['upload_date'] = $currentDate; // Đặt ngày hiện tại cho upload_date
-            $photoData['photo_status'] = 'pending'; // Đặt giá trị mặc định là pending
-            $photoData['photo_token'] = Str::uuid(); // Tạo photo_token tự động
+            $photoData['upload_date'] = $currentDate;
+            $photoData['photo_status'] = 'pending';
+            $photoData['photo_token'] = Str::uuid();
 
             // Xử lý ảnh
             if ($request->hasFile("photos.$index.image")) {
                 $image = $request->file("photos.$index.image");
-                $imageName = time() . '_' . uniqid() . '.' . $image->extension();
-                $image->move(public_path('images/photos'), $imageName);
-                $photoData['image_url'] = 'images/photos/' . $imageName; // Lưu đường dẫn ảnh
+
+                // **Lấy tên file gốc**
+                $imageName = $image->getClientOriginalName();
+                $imagePath = '/images/photos/' . $imageName;
+
+                // **Lưu ảnh**
+                $image->move(public_path('/images/photos'), $imageName);
+
+                // **Lưu đường dẫn vào database**
+                $photoData['image_url'] = $imagePath;
             }
 
-            // Tạo ảnh trong database
+            // **Tạo bản ghi ảnh trong database**
             $photo = Photo::create($photoData);
 
             // **Xử lý tags**
             if (!empty($photoData['tags'])) {
-                $tags = explode(',', $photoData['tags']); // Lấy danh sách tag
+                $tags = explode(',', $photoData['tags']);
                 foreach ($tags as $tagName) {
-                    $tagName = trim($tagName); // Loại bỏ khoảng trắng
-
-                    // Kiểm tra tag đã tồn tại chưa
+                    $tagName = trim($tagName);
                     $tag = Tag::firstOrCreate(['tag_name' => $tagName]);
-
-                    // Attach tag vào bảng trung gian
                     $photo->tags()->attach($tag->id);
                 }
             }
