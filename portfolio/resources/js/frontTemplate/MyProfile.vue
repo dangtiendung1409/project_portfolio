@@ -99,7 +99,7 @@
                         <span class="popup-username">{{ follower.name }}</span>
                         <span class="popup-followers">{{ follower.followers_count || 0 }} Followers</span>
                     </div>
-                    <button @click.stop="toggleFollowUser(follower.username)" class="popup-follow-button">
+                    <button v-if="follower.id !== userStore.user.id" @click.stop="toggleFollowUser(follower.username)" class="popup-follow-button">
                         {{ followStore.followingList.includes(follower.id) ? 'Unfollow' : 'Follow' }}
                     </button>
                 </div>
@@ -123,7 +123,7 @@
                         <span class="popup-username">{{ following.name }}</span>
                         <span class="popup-followers">{{ following.followers_count || 0 }} Followers</span>
                     </div>
-                    <button @click.stop="toggleFollowUser(following.username)" class="popup-follow-button">
+                    <button v-if="following.id !== userStore.user.id" @click.stop="toggleFollowUser(following.username)" class="popup-follow-button">
                         {{ followStore.followingList.includes(following.id) ? 'Unfollow' : 'Follow' }}
                     </button>
                 </div>
