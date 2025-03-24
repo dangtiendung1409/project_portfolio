@@ -161,6 +161,7 @@ export default {
 
         const likeStore = useLikeStore();
         await likeStore.fetchLikedPhotos();
+        await likeStore.fetchLikedGalleries();
         this.updateLikedState();
 
         const followStore = useFollowStore();
@@ -214,7 +215,7 @@ export default {
             const authStore = useAuthStore();
             await authStore.checkLoginStatus();
             if (!authStore.isLoggedIn) {
-                this.$router.push({ name: 'Login' });
+                this.$router.push({name: 'Login'});
                 return false;
             }
             return true;

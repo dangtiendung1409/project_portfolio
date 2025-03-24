@@ -183,7 +183,7 @@ class AccountUserController extends Controller
             });
 
         return response()->json([
-            'data' => $likedPhotos
+            'data' => $likedPhotos->values()
         ]);
     }
 
