@@ -1,7 +1,7 @@
 export default {
     mounted(el, binding) {
-        el.src = '/images/loading-image.gif';
-        el.classList.add('lazy-loading');
+        el.style.filter = 'blur(20px)';
+        el.style.transition = 'filter 0.3s ease';
 
         const options = {
             root: null,
@@ -11,10 +11,15 @@ export default {
         const observer = new IntersectionObserver((entries, observer) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
-                    el.src = binding.value;
-                    el.classList.remove('lazy-loading');
-                    el.classList.add('lazy-loaded');
-                    observer.unobserve(el);
+                    const tempImg = new Image();
+                    tempImg.src = binding.value;
+
+                    tempImg.onload = () => {
+                        el.src = binding.value;
+                        el.style.filter = 'blur(0px)';
+                        el.classList.add('lazy-loaded');
+                        observer.unobserve(el);
+                    };
                 }
             });
         }, options);

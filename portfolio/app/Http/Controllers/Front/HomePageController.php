@@ -101,29 +101,27 @@ class HomePageController extends Controller
             // Lấy danh sách user bị chặn
             $blockedUserIds = $currentUser->blockedUsers()->pluck('blocked_id');
 
-            // Lọc ảnh: loại bỏ ảnh của user bị chặn, chỉ lấy ảnh approved và public, sắp xếp theo upload_date mới nhất
-            $images = Photo::with(['user' => function ($query) {
-                $query->select('id', 'username', 'name', 'profile_picture');
-            }])
+            // Lọc ảnh: loại bỏ ảnh của user bị chặn, chỉ lấy ảnh approved và public, sắp xếp theo total_views giảm dần
+            $images = Photo::with(['user:id,username,name,profile_picture'])
                 ->whereNotIn('user_id', $blockedUserIds)
                 ->where('photo_status', 'approved')
                 ->where('privacy_status', 0)
-                ->select('id', 'upload_date', 'image_url', 'photo_token', 'user_id')
-                ->orderBy('upload_date', 'desc')
+                ->select('id', 'upload_date', 'image_url', 'photo_token', 'user_id', 'total_views')
+                ->orderByDesc('total_views')
+                ->limit(100)
                 ->get();
         } catch (\Exception $e) {
-            // Nếu không có token, lấy tất cả ảnh approved và public, sắp xếp theo upload_date mới nhất
-            $images = Photo::with(['user' => function ($query) {
-                $query->select('id', 'username', 'name', 'profile_picture');
-            }])
+            // Nếu không có token, lấy tất cả ảnh approved và public, sắp xếp theo lượt xem
+            $images = Photo::with(['user:id,username,name,profile_picture'])
                 ->where('photo_status', 'approved')
                 ->where('privacy_status', 0)
-                ->select('id', 'upload_date', 'image_url', 'photo_token', 'user_id')
-                ->orderBy('upload_date', 'desc')
+                ->select('id', 'upload_date', 'image_url', 'photo_token', 'user_id', 'total_views')
+                ->orderByDesc('total_views')
+                ->limit(100)
                 ->get();
         }
 
-        // Map qua collection để định dạng response
+        // Định dạng lại dữ liệu trước khi trả về
         $filteredImages = $images->map(function ($image) {
             return [
                 'id' => $image->id,
@@ -131,6 +129,7 @@ class HomePageController extends Controller
                 'image_url' => $image->image_url,
                 'photo_token' => $image->photo_token,
                 'user_id' => $image->user_id,
+                'total_views' => $image->total_views,
                 'user' => [
                     'id' => $image->user->id,
                     'username' => $image->user->username,

@@ -178,7 +178,7 @@
                                 <!-- Kiểm tra xem $report->photoImage có tồn tại hay không trước khi hiển thị -->
                                 <td>
                                     @if($report->photo && $report->photo->image_url)
-                                        <img src="{{ asset('' . $report->photo->image_url) }}" width="450" height="450" style="cursor: pointer;" onclick="showModal(this)">
+                                        <img src="{{ asset('' . $report->photo->image_url) }}" width="350" height="350" style="cursor: pointer;" onclick="showModal(this)">
                                     @else
                                         <span style="color: red;">Photo not available</span>
                                     @endif
