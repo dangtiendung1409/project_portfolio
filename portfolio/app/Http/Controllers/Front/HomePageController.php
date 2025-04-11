@@ -94,6 +94,11 @@ class HomePageController extends Controller
     }
     public function getImages(Request $request)
     {
+        // Số lượng ảnh mỗi trang, mặc định là 20
+        $perPage = $request->input('per_page', 20);
+        // Trang hiện tại, mặc định là 1
+        $page = $request->input('page', 1);
+
         try {
             // Lấy user hiện tại từ token
             $currentUser = JWTAuth::parseToken()->authenticate();
@@ -108,17 +113,15 @@ class HomePageController extends Controller
                 ->where('privacy_status', 0)
                 ->select('id', 'upload_date', 'image_url', 'photo_token', 'user_id', 'total_views')
                 ->orderByDesc('total_views')
-                ->limit(100)
-                ->get();
+                ->paginate($perPage, ['*'], 'page', $page);
         } catch (\Exception $e) {
-            // Nếu không có token, lấy tất cả ảnh approved và public, sắp xếp theo lượt xem
+            // Nếu không có token, lấy tất cả ảnh approved và public
             $images = Photo::with(['user:id,username,name,profile_picture'])
                 ->where('photo_status', 'approved')
                 ->where('privacy_status', 0)
                 ->select('id', 'upload_date', 'image_url', 'photo_token', 'user_id', 'total_views')
                 ->orderByDesc('total_views')
-                ->limit(100)
-                ->get();
+                ->paginate($perPage, ['*'], 'page', $page);
         }
 
         // Định dạng lại dữ liệu trước khi trả về
@@ -139,7 +142,14 @@ class HomePageController extends Controller
             ];
         });
 
-        return response()->json($filteredImages);
+        // Trả về dữ liệu phân trang
+        return response()->json([
+            'data' => $filteredImages,
+            'current_page' => $images->currentPage(),
+            'last_page' => $images->lastPage(),
+            'total' => $images->total(),
+            'per_page' => $images->perPage(),
+        ]);
     }
     public function getFollows(Request $request)
     {
