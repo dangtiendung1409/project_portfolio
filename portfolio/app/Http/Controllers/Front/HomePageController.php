@@ -522,16 +522,41 @@ class HomePageController extends Controller
         return response()->json(['message' => 'Gallery unliked successfully'], 200);
     }
 
-    public function getUserNotifications()
+    public function getUserNotifications(Request $request)
     {
         $user = Auth::user();
 
-        $notifications = Notification::where('recipient_id', $user->id)
-            ->with(['user', 'like', 'comment', 'photo', 'gallery'])
-            ->orderBy('notification_date', 'desc')
-            ->get();
+        // Số lượng thông báo mỗi trang, mặc định là 7
+        $perPage = $request->input('per_page', 7);
+        // Trang hiện tại, mặc định là 1
+        $page = $request->input('page', 1);
 
-        return response()->json($notifications);
+        $notifications = Notification::where('recipient_id', $user->id)
+            ->with([
+                'user:id,profile_picture',
+                'photo:id,photo_token',
+                'gallery:id,galleries_code',
+            ])
+            ->orderBy('notification_date', 'desc')
+            ->select([
+                'id',
+                'content',
+                'type',
+                'is_read',
+                'notification_date',
+                'user_id',
+                'photo_id',
+                'gallery_id'
+            ])
+            ->paginate($perPage, ['*'], 'page', $page);
+
+        return response()->json([
+            'data' => $notifications->items(),
+            'current_page' => $notifications->currentPage(),
+            'last_page' => $notifications->lastPage(),
+            'total' => $notifications->total(),
+            'per_page' => $notifications->perPage(),
+        ]);
     }
     public function markNotificationAsRead(Request $request)
     {

@@ -50,24 +50,22 @@
                 </router-link>
                 <div class="notification-wrapper">
                     <i v-if="isLoggedIn" class="fa-regular fa-bell" style="font-size: 24px;" @click="toggleDropdown('notificationDropdown')">
-                        <!-- Badge for unread notifications -->
                         <span v-if="unreadCount > 0" class="notification-dot"></span>
                     </i>
                     <div id="notificationDropdown" class="notification-dropdown">
                         <div class="notification-header">Notifications</div>
-                        <div v-for="(notification, index) in displayedNotifications" :key="notification.id"
+                        <div v-for="notification in notifications" :key="notification.id"
                              :class="['notification-item', { 'unread': !notification.read }]">
-                            <img :src="`${notification.image}`" alt="User" class="notification-image">
+                            <img :src="notification.image" alt="User" class="notification-image">
                             <div class="notification-content">
-                                <p class="notification-message"
-                                   @click="navigateToPhoto(notification)">
+                                <p class="notification-message" @click="navigateToPhoto(notification)">
                                     {{ notification.message }}
                                 </p>
                                 <small class="notification-time">{{ notification.time }}</small>
                             </div>
                         </div>
-                        <div v-if="showSeeMore" class="see-more" @click="showAllNotifications">
-                            View all notifications
+                        <div v-if="hasMoreNotifications" class="see-more" @click="loadMoreNotifications">
+                            View more
                         </div>
                     </div>
                 </div>
@@ -103,27 +101,21 @@ export default {
     name: 'Layout',
     data() {
         return {
-            showAll: false,
             searchQuery: '',
         };
     },
     computed: {
         ...mapState(useAuthStore, ['isLoggedIn']),
         ...mapState(useUserStore, ['user']),
-        ...mapState(useNotificationStore, ['notifications', 'unreadCount']),
+        ...mapState(useNotificationStore, ['notifications', 'unreadCount', 'currentPage', 'lastPage']),
         userProfilePicture() {
             return this.user ? this.user.profile_picture : '';
         },
         userName() {
             return this.user ? this.user.username : '';
         },
-        displayedNotifications() {
-            // Hiển thị 7 thông báo đầu tiên hoặc tất cả thông báo nếu showAll là true
-            return this.showAll ? this.notifications : this.notifications.slice(0, 7);
-        },
-        showSeeMore() {
-            // Hiển thị nút "Xem thêm" nếu có nhiều hơn 7 thông báo và chưa hiển thị tất cả
-            return this.notifications.length > 7 && !this.showAll;
+        hasMoreNotifications() {
+            return this.currentPage < this.lastPage; // Còn trang để tải
         },
     },
     async mounted() {
@@ -131,9 +123,9 @@ export default {
         await authStore.checkLoginStatus();
         if (authStore.isLoggedIn) {
             const userStore = useUserStore();
-            await userStore.fetchUserData(); // Fetch user data
+            await userStore.fetchUserData();
             const notificationStore = useNotificationStore();
-            await notificationStore.fetchNotifications();
+            await notificationStore.fetchNotifications(1); // Tải trang đầu tiên
         }
         this.loadExternalScripts();
     },
@@ -162,8 +154,9 @@ export default {
                 alert('Invalid notification data.');
             }
         },
-        showAllNotifications() {
-            this.showAll = true;
+        async loadMoreNotifications() {
+            const notificationStore = useNotificationStore();
+            await notificationStore.fetchNotifications(this.currentPage + 1); // Tải trang tiếp theo
         },
         toggleDropdown(dropdownId) {
             const dropdown = document.getElementById(dropdownId);

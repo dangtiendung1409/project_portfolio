@@ -5,11 +5,17 @@ import { formatDistanceToNow } from 'date-fns';
 
 export const useNotificationStore = defineStore('notificationStore', {
     state: () => ({
-        notifications: [],
+        notifications: [], // Danh sách thông báo đã tải
         unreadCount: 0,
+        currentPage: 1, // Trang hiện tại
+        lastPage: 1, // Trang cuối cùng
+        loading: false, // Trạng thái đang tải
     }),
     actions: {
-        async fetchNotifications() {
+        async fetchNotifications(page = 1) {
+            if (this.loading) return;
+            this.loading = true;
+
             try {
                 const token = localStorage.getItem('token');
                 if (!token) return;
@@ -18,11 +24,16 @@ export const useNotificationStore = defineStore('notificationStore', {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
+                    params: {
+                        page: page,
+                        per_page: 7,
+                    },
                 });
 
-                console.log('API response:', response.data);
+                const { data, current_page, last_page } = response.data;
 
-                this.notifications = response.data.map(notification => ({
+                // Định dạng dữ liệu thô từ API
+                const formattedNotifications = data.map(notification => ({
                     id: notification.id,
                     image: notification.user?.profile_picture || '/images/imageUserDefault.png',
                     message: notification.content,
@@ -37,9 +48,18 @@ export const useNotificationStore = defineStore('notificationStore', {
                     galleriesCode: notification.gallery ? notification.gallery.galleries_code : null,
                 }));
 
+                // Nối hoặc thay thế thông báo
+                this.notifications = page === 1
+                    ? formattedNotifications
+                    : [...this.notifications, ...formattedNotifications];
+
+                this.currentPage = current_page;
+                this.lastPage = last_page;
                 this.unreadCount = this.notifications.filter(notification => !notification.read).length;
             } catch (error) {
                 console.error('Failed to fetch notifications:', error);
+            } finally {
+                this.loading = false;
             }
         },
         markAsRead(notificationId) {
@@ -58,7 +78,6 @@ export const useNotificationStore = defineStore('notificationStore', {
                     headers: { Authorization: `Bearer ${token}` },
                 });
 
-                // Update state
                 this.markAsRead(notificationId);
             } catch (error) {
                 console.error('Failed to mark notification as read:', error);
