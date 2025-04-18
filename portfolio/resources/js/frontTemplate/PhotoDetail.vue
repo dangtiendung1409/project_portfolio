@@ -190,8 +190,8 @@
 
                                     <!-- Hiển thị comment nếu có -->
                                     <div v-else>
-                                        <h5 class="comments-header">{{ comments.length }} Comments</h5>
-                                        <div v-for="(comment, index) in displayedComments" :key="comment.id" class="comment">
+                                        <h5 class="comments-header">{{ total }} Comments</h5>
+                                        <div v-for="comment in comments" :key="comment.id" class="comment">
                                             <img :src="comment?.user?.profile_picture ? 'http://127.0.0.1:8000' + comment.user.profile_picture : '/images/imageUserDefault.png'"
                                                  alt="User Avatar"
                                                  class="comment-avatar" />
@@ -199,8 +199,8 @@
                                                 <div class="comment-header">
                                                     <span class="comment-author">{{ comment?.user?.name || 'Unknown User' }}</span>
                                                     <i class="fa-solid fa-ellipsis comment-options"
-                                                       @click.stop="toggleDropdown('dropdown-' + comment.id, $event)"
-                                                       :class="{'active': activeDropdown === 'dropdown-' + comment.id}"></i>
+                                                       @click.stop="toggleDropdown('dropdown-' + comment.id)"
+                                                       :class="{ 'active': activeDropdown === 'dropdown-' + comment.id }"></i>
                                                 </div>
                                                 <div v-if="activeDropdown === 'dropdown-' + comment.id" class="dropdown-content show" @click.stop>
                                                     <ul>
@@ -219,9 +219,14 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <button v-if="comments.length > 3" @click="toggleComments" class="read-more-button">
-                                            {{ showAllComments ? "Read Less" : "Read More" }}
-                                        </button>
+                                        <div class="comment-actions" v-if="total > 0">
+                                            <button v-if="currentPage < lastPage" @click="loadMoreComments" class="read-more-button">
+                                                Read More
+                                            </button>
+                                            <button v-if="currentPage >= lastPage && total > 3" @click="readLessComments" class="read-more-button">
+                                                Read Less
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                                 <!-- Categories Section -->
@@ -265,7 +270,7 @@
                 @close="closeReportGalleryModal"
             />
             <div v-if="likesPopupVisible" class="popup-overlay" @click.self="closeLikesPopup">
-                <div class="popup-content">
+                <div class="popup-content" ref="popupContent">
                     <div class="popup-header">
                         <h3>Liked by</h3>
                         <button @click="closeLikesPopup" class="popup-close">×</button>
@@ -273,7 +278,9 @@
                     <div v-if="likedUsers.length > 0" class="popup-list">
                         <div v-for="user in likedUsers" :key="user.id" class="popup-item">
                             <router-link :to="{ name: 'MyProfile', params: { username: user.username } }">
-                                <img :src="user.profile_picture ? `http://127.0.0.1:8000/images/avatars/${user.profile_picture.split('/').pop()}` : '/images/imageUserDefault.png'" alt="Avatar" class="popup-avatar" />
+                                <img :src="user.profile_picture ? `http://127.0.0.1:8000/images/avatars/${user.profile_picture.split('/').pop()}` : '/images/imageUserDefault.png'"
+                                     alt="Avatar"
+                                     class="popup-avatar" />
                             </router-link>
                             <div class="popup-user-info">
                                 <span class="popup-username">{{ user.username }}</span>
@@ -327,8 +334,8 @@ export default {
                 title: "",
                 description: "",
                 location: "",
-                upload_date:"",
-                total_views:"",
+                upload_date: "",
+                total_views: "",
                 image_url: "",
                 liked: false,
                 user: {
@@ -341,9 +348,8 @@ export default {
                 },
             },
             newComment: '',
-            isPosting: false, // Ngăn chặn spam comment
+            isPosting: false,
             showButtons: false,
-            showAllComments: false,
             activeDropdown: null,
             categories: [],
             showAddToGallery: false,
@@ -352,6 +358,10 @@ export default {
             photoLikesCount: 0,
             likesPopupVisible: false,
             likedUsers: [],
+            currentPage: 1,
+            lastPage: 1,
+            totalLikes: 0,
+            loading: false,
             showReportModal: false,
             selectedCommentId: null,
             showReportCommentModal: false,
@@ -368,11 +378,33 @@ export default {
             async handler(newToken) {
                 // Gọi các phương thức fetch khi token thay đổi
                 await this.fetchPhotoDetail(newToken);
+                await this.fetchPhotoLikes(newToken);
+
                 await this.fetchSimilarPhotos(newToken);
                 await this.fetchRelatedGalleries(newToken);
                 const commentStore = useCommentStore();
-                await commentStore.fetchComments(newToken); // Làm mới danh sách bình luận
+                await commentStore.fetchComments(newToken, 1);
             },
+        },
+        likesPopupVisible(newVal) {
+            if (newVal) {
+                this.$nextTick(() => {
+                    const popupContent = this.$refs.popupContent;
+                    if (popupContent) {
+                        popupContent.addEventListener('scroll', this.handleScroll);
+                    }
+                });
+            } else {
+                const popupContent = this.$refs.popupContent;
+                if (popupContent) {
+                    popupContent.removeEventListener('scroll', this.handleScroll);
+                }
+                // Reset pagination
+                this.likedUsers = [];
+                this.currentPage = 1;
+                this.lastPage = 1;
+                this.totalLikes = 0;
+            }
         },
     },
     computed: {
@@ -384,8 +416,17 @@ export default {
             const commentStore = useCommentStore();
             return commentStore.comments;
         },
-        displayedComments() {
-            return this.showAllComments ? this.comments : this.comments.slice(0, 3);
+        currentPage() {
+            const commentStore = useCommentStore();
+            return commentStore.currentPage;
+        },
+        lastPage() {
+            const commentStore = useCommentStore();
+            return commentStore.lastPage;
+        },
+        total() {
+            const commentStore = useCommentStore();
+            return commentStore.total;
         },
         formattedViews() {
             const views = this.photoDetail.total_views;
@@ -418,7 +459,7 @@ export default {
 
             // Fetch comments và categories không cần auth
             const commentStore = useCommentStore();
-            await commentStore.fetchComments(token);
+            await commentStore.fetchComments(token, 1);
             await this.fetchCategories();
 
             // Những operation cần auth
@@ -450,6 +491,12 @@ export default {
             console.error("Error in mounted:", error);
         }
     },
+    beforeUnmount() {
+        const popupContent = this.$refs.popupContent;
+        if (popupContent) {
+            popupContent.removeEventListener('scroll', this.handleScroll);
+        }
+    },
     methods: {
         async fetchPhotoDetail(token) {
             try {
@@ -467,19 +514,65 @@ export default {
                 console.error("Error fetching photo details:", error);
             }
         },
-        async fetchPhotoLikes(token) {
+        async fetchPhotoLikes(token, page = 1) {
+            if (this.loading) return;
+            this.loading = true;
+
             try {
-                const response = await axios.get(getUrlList().getPhotoLikes(token));
+                const response = await axios.get(getUrlList().getPhotoLikes(token), {
+                    params: {
+                        page: page,
+                        per_page: 8,
+                    },
+                });
+
                 if (response.data.success) {
-                    this.photoLikesCount = response.data.data.total_likes;
+                    const { total_likes, liked_users, current_page, last_page, total } = response.data.data;
+                    this.photoLikesCount = total_likes;
+                    this.likedUsers = page === 1 ? liked_users : [...this.likedUsers, ...liked_users];
+                    this.currentPage = current_page;
+                    this.lastPage = last_page;
+                    this.totalLikes = total;
                 } else {
                     console.error(response.data.message);
+                    notification.error({
+                        message: 'Error',
+                        description: response.data.message || 'Failed to fetch likes.',
+                        placement: 'topRight',
+                        duration: 3,
+                    });
                     this.photoLikesCount = 0;
+                    this.likedUsers = [];
                 }
             } catch (error) {
                 console.error("Error fetching photo likes:", error);
+                notification.error({
+                    message: 'Error',
+                    description: 'An error occurred while fetching likes. Please try again.',
+                    placement: 'topRight',
+                    duration: 3,
+                });
                 this.photoLikesCount = 0;
+                this.likedUsers = [];
+            } finally {
+                this.loading = false;
             }
+        },
+        async showLikesPopup() {
+            this.likesPopupVisible = true;
+            await this.fetchPhotoLikes(this.$route.params.token, 1);
+        },
+        async handleScroll() {
+            const popupContent = this.$refs.popupContent;
+            if (!popupContent || this.loading || this.currentPage >= this.lastPage) return;
+
+            const { scrollTop, scrollHeight, clientHeight } = popupContent;
+            if (scrollTop + clientHeight >= scrollHeight - 50) {
+                await this.fetchPhotoLikes(this.$route.params.token, this.currentPage + 1);
+            }
+        },
+        closeLikesPopup() {
+            this.likesPopupVisible = false;
         },
         async fetchSimilarPhotos(token) {
             try {
@@ -549,9 +642,6 @@ export default {
                     description: 'Failed to toggle like. Please try again.',
                 });
             }
-        },
-        closeLikesPopup() {
-            this.likesPopupVisible = false;
         },
         //Dùng trong các danh sách như popup hiển thị danh sách liked users
         async toggleFollowUser(username) {
@@ -676,32 +766,27 @@ export default {
             }
         },
         // like ảnh chi tiết
-        async showLikesPopup() {
-            try {
-                const token = this.$route.params.token;
-                const response = await axios.get(getUrlList().getPhotoLikes(token));
-                if (response.data.success) {
-                    this.likedUsers = response.data.data.liked_users;
-                    this.likesPopupVisible = true;
-                } else {
-                    console.error(response.data.message);
-                }
-            } catch (error) {
-                console.error("Error fetching liked users:", error);
-            }
-        },
         async toggleLike(item) {
-            const photo_id = item.id; // ID của ảnh
-            const photo_user_id = item.user.id; // ID của người sở hữu ảnh
+            const photo_id = item.id;
+            const photo_user_id = item.user.id;
             const likeStore = useLikeStore();
 
             try {
                 if (item.liked) {
                     await likeStore.unlikePhoto(photo_id);
+                    item.liked = false;
+                    // Trừ 1 like nếu đang ở ảnh chi tiết
+                    if (this.photoDetail.id === photo_id) {
+                        this.photoLikesCount = Math.max(0, this.photoLikesCount - 1);
+                    }
                 } else {
-                    await likeStore.likePhoto(photo_id, photo_user_id); // Gửi thêm photo_user_id
+                    await likeStore.likePhoto(photo_id, photo_user_id);
+                    item.liked = true;
+                    // Cộng 1 like nếu đang ở ảnh chi tiết
+                    if (this.photoDetail.id === photo_id) {
+                        this.photoLikesCount += 1;
+                    }
                 }
-                item.liked = !item.liked; // Đảo ngược trạng thái liked
             } catch (error) {
                 console.error('Failed to toggle like:', error);
             }
@@ -792,8 +877,13 @@ export default {
             this.newComment = ''; // Xóa nội dung
             this.showButtons = false; // Ẩn nút
         },
-        toggleComments() {
-            this.showAllComments = !this.showAllComments;
+        async loadMoreComments() {
+            const commentStore = useCommentStore();
+            await commentStore.fetchComments(this.$route.params.token, this.currentPage + 1);
+        },
+        async readLessComments() {
+            const commentStore = useCommentStore();
+            await commentStore.fetchComments(this.$route.params.token, 1);
         },
 
         // category
