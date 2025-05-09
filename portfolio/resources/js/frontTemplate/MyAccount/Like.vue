@@ -162,12 +162,6 @@ export default {
 
                 // Kiểm tra nếu không phải mảng hoặc rỗng
                 if (!Array.isArray(response.data.data) || response.data.data.length === 0) {
-                    console.warn('Không có dữ liệu gallery hợp lệ:', response.data.data);
-                    this.likedGalleries = [];
-                    notification.warning({
-                        message: 'No Data',
-                        description: 'No liked galleries found.',
-                    });
                     return;
                 }
 
@@ -185,7 +179,6 @@ export default {
                         : '/images/imageUserDefault.png',
                 }));
             } catch (error) {
-                console.error('Lỗi khi lấy gallery đã thích:', error.response?.data || error);
                 notification.error({
                     message: 'Error',
                     description: 'Unable to load liked galleries. Please try again.',

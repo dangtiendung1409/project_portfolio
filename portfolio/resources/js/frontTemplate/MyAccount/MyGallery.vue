@@ -162,16 +162,11 @@ export default {
             });
         },
         deleteGallery() {
-            console.log('Gallery to delete:', this.galleryToDelete); // Xem đối tượng gallery
-
             if (this.galleryToDelete && this.galleryToDelete.galleries_code) {
-                const url = getUrlList().deleteGallery; // Lấy URL từ getUrlList()
+                const url = getUrlList().deleteGallery;
                 const galleriesCode = this.galleryToDelete.galleries_code;
 
-                console.log('Deleting gallery with code:', galleriesCode); // Kiểm tra giá trị galleries_code
-
-                axios
-                    .delete(`${url}/${galleriesCode}`, {
+                axios.delete(`${url}/${galleriesCode}`, {
                         headers: {
                             'Authorization': `Bearer ${localStorage.getItem('token')}`
                         }

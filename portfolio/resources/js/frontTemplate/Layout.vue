@@ -17,7 +17,7 @@
             <div class="icon-container">
                 <div v-if="isLoggedIn" class="user-dropdown">
                     <img v-if="userProfilePicture"
-                         :src="'http://127.0.0.1:8000' + userProfilePicture"
+                         :src="'http://127.0.0.1:8000/' + userProfilePicture"
                          alt="User"
                          style="width: 30px; height: 30px; border-radius: 50%;"
                          @click="toggleDropdown('dropdownMenu')" />

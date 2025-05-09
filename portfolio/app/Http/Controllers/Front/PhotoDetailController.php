@@ -171,7 +171,7 @@ class PhotoDetailController extends Controller
 
             // Lấy comments với user (giới hạn field)
             $comments = $photo->comments()
-                ->with(['user:id,name,profile_picture'])
+                ->with(['user:id,name,username,profile_picture'])
                 ->select('id', 'comment_text', 'created_at', 'user_id', 'photo_id')
                 ->orderBy('created_at', 'desc')
                 ->paginate($perPage, ['*'], 'page', $page);

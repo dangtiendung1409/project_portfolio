@@ -197,7 +197,10 @@
                                                  class="comment-avatar" />
                                             <div class="comment-content">
                                                 <div class="comment-header">
-                                                    <span class="comment-author">{{ comment?.user?.name || 'Unknown User' }}</span>
+                                                  <span class="comment-author">
+                                                    {{ comment?.user?.name || comment?.user?.username || 'Unknown User' }}
+                                                    </span>
+
                                                     <i class="fa-solid fa-ellipsis comment-options"
                                                        @click.stop="toggleDropdown('dropdown-' + comment.id)"
                                                        :class="{ 'active': activeDropdown === 'dropdown-' + comment.id }"></i>

@@ -27,9 +27,6 @@
                             <li v-if="!isMyProfile" @click="toggleBlockUser">
                                 <i class="fa-solid fa-user-large-slash"></i> {{ isBlocked ? 'Unblock user' : 'Block user' }}
                             </li>
-                            <li v-if="!isMyProfile">
-                                <i class="fa-regular fa-flag"></i> Report this profile
-                            </li>
                         </ul>
                     </div>
                     <div class="profile-details">

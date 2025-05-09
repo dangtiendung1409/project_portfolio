@@ -61,7 +61,7 @@
             <div class="gallery-footer" @click.stop>
                 <img
                     class="user-avatar"
-                    :src="gallery.user?.profile_picture || '/default-avatar.jpg'"
+                    :src="gallery.user?.profile_picture || '/images/imageUserDefault.png'"
                     alt="User Avatar"
                 />
                 <h4>{{ gallery.user?.username || 'Anonymous' }}</h4>
